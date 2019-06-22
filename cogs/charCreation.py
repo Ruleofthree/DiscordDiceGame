@@ -57,7 +57,7 @@ class Character(commands.Cog):
             characterFile["feats taken"] = hasTaken
             characterFile["wins"] = 0
             characterFile["losses"] = 0
-            characterFile["reset"] = 0
+            characterFile["reset"] = 1
             file = open(charFolder + player + ".txt", "w", encoding="utf-8")
             json.dump(characterFile, file, ensure_ascii=False, indent=2)
             await ctx.send("PM me with '!stats <str> <dex> <con>' to set your abilities. Wouldn't want everyone "
@@ -73,7 +73,7 @@ class Character(commands.Cog):
     @commands.command()
     @commands.dm_only()
     async def stats(self, ctx, strength, dexterity, constitution):
-        private = ctx.author.send
+        private = ctx.send
         player = str(ctx.message.author)
         path = os.getcwd()
         charFolder = os.path.join(path + "/characters/")
@@ -82,7 +82,6 @@ class Character(commands.Cog):
         charData = json.load(file)
         file.close()
         reset = charData['reset']
-        print(reset)
         if not charFile.is_file():
             await private("You don't even have a character created yet. Type !name <name> in the room. "
                                    "Where <name> is your character's actual name. (Example: !name Joe")
@@ -93,13 +92,11 @@ class Character(commands.Cog):
             strMod = int(int(strength) / 2)
             dexMod = int(int(dexterity) / 2)
             conMod = int(int(constitution) * 5)
-            print(strMod, dexMod, conMod)
             await private("Allocating the following: \n\n"
                           "Strength: " + strength + "   (+" + str(strMod) + " bonus to hit and damage.)\n"
                           "Dexterity: " + dexterity + "   (+" + str(dexMod) + " bonus to armor class.)\n"
-                          "Constitution: " + constitution + "   (+" + str(conMod) + " bonus to armor class.)\n")
+                          "Constitution: " + constitution + "   (+" + str(conMod) + " bonus to hit points.)\n")
             with open(charFolder + player + ".txt", "r+", encoding="utf-8") as file:
-                print("Am I here?")
                 charData = json.load(file)
                 charData["strength"] = int(strength)
                 charData["dexterity"] = int(dexterity)
