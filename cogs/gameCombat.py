@@ -177,265 +177,253 @@ class Combat(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def usefeat(self, ctx, *, answer):
-            if self.pOneUsername == ctx.message.author and self.token == 1:
+        if self.pOneUsername == ctx.message.author and self.token == 1:
 
-                featDictionary = featDict()[0]
-                if answer != "none":
-                    pOneLastFeat = answer
-                else:
-                    pOneLastFeat = None
-
-                while pOneLastFeat is None:
-
-                    if pOneLastFeat == 'none':
-                        pOneLastFeat = None
-                        self.pOneFeatInfo = pOneLastFeat
-                        return pOneLastFeat
-
-                    elif pOneLastFeat in ('power attack', 'combat expertise', 'async defensive fighting', 'masochist', 'hurt me', 'improved hurt me',
-                    'greater hurt me', 'hurt me more', 'evasion', 'improved evasion', 'greater evasion'):
-                        await ctx.send(pOneLastFeat + " will be determined after this phase.")
-                        pOneLastFeat = None
-
-                    elif pOneLastFeat in self.pOneSpentFeat:
-                        await ctx.send("You have already used this feat. Please select another or type 'none.': ")
-                        pOneLastFeat = None
-
-                    elif pOneLastFeat in self.pOneInfo['feats taken']:
-                        self.pOneSpentFeat.append(pOneLastFeat)
-                        self.pOneFeatInfo = [pOneLastFeat, featDictionary[0][pOneLastFeat]['action']]
-                        return self.pOneFeatInfo
-
-                    elif pOneLastFeat not in self.pOneInfo['feats taken']:
-                        await ctx.send("Either you do not have that feat, or you did not type it correctly")
-                        pOneLastFeat = None
-            elif self.pTwoUsername == ctx.message.author and self.token == 2:
-
-                featDictionary = featDict()[0]
-                pTwoLastFeat = None
-                while pTwoLastFeat is None:
-                    pTwoLastFeat = await ctx.send(self.pTwoInfo['name'] + " Do you wish to use a feat? (type full name of feat here, or 'none'): ")
-                    if pTwoLastFeat == 'none':
-                        pTwoLastFeat = None
-                        self.pTwoFeatInfo = pTwoLastFeat
-                        return pTwoLastFeat
-                    elif pTwoLastFeat in (
-                            'power attack', 'combat expertise', 'async defensive fighting', 'masochist', 'hurt me',
-                            'improved hurt me',
-                            'greater hurt me', 'hurt me more', 'evasion', 'improved evasion', 'greater evasion'):
-                        await ctx.send(pTwoLastFeat + " will be determined after this phase.")
-                        pTwoLastFeat = None
-                    elif pTwoLastFeat in self.pTwoSpentFeat:
-                        await ctx.send("You have already used this feat. Please select another or type 'none.': ")
-                        pTwoLastFeat = None
-                    elif pTwoLastFeat in self.pTwoInfo['feats taken']:
-                        self.pTwoSpentFeat.append(pTwoLastFeat)
-                        self.pTwoFeatInfo = [pTwoLastFeat, featDictionary[0][pTwoLastFeat]['action']]
-                        return self.pTwoFeatInfo
-                    elif pTwoLastFeat not in self.pTwoInfo['feats taken']:
-                        await ctx.send("Either you do not have that feat, or you did not type it correctly")
-                        pTwoLastFeat = None
+            featDictionary = featDict()[0]
+            if answer != "none":
+                pOneLastFeat = answer
             else:
-                ctx.send("Either it is not your turn to select a feat, or you aren't even fighting. Either way, Stop.")
+                pOneLastFeat = None
+
+                if pOneLastFeat == 'none':
+                    pOneLastFeat = None
+                    self.pOneFeatInfo = pOneLastFeat
+
+                elif pOneLastFeat in ('power attack', 'combat expertise', 'async defensive fighting', 'masochist', 'hurt me', 'improved hurt me',
+                'greater hurt me', 'hurt me more', 'evasion', 'improved evasion', 'greater evasion'):
+                    await ctx.send(pOneLastFeat + " will be determined after this phase.")
+
+                elif pOneLastFeat in self.pOneSpentFeat:
+                    await ctx.send("You have already used this feat. Please select another or type 'none.': ")
+
+                elif pOneLastFeat in self.pOneInfo['feats taken']:
+                    self.pOneSpentFeat.append(pOneLastFeat)
+                    self.pOneFeatInfo = [pOneLastFeat, featDictionary[0][pOneLastFeat]['action']]
+
+                elif pOneLastFeat not in self.pOneInfo['feats taken']:
+                    await ctx.send("Either you do not have that feat, or you did not type it correctly")
+
+        elif self.pTwoUsername == ctx.message.author and self.token == 2:
+
+            featDictionary = featDict()[0]
+            pTwoLastFeat = None
+
+            if pTwoLastFeat == 'none':
+                    pTwoLastFeat = None
+                    self.pTwoFeatInfo = pTwoLastFeat
+
+            elif pTwoLastFeat in (
+                    'power attack', 'combat expertise', 'async defensive fighting', 'masochist', 'hurt me',
+                    'improved hurt me',
+                    'greater hurt me', 'hurt me more', 'evasion', 'improved evasion', 'greater evasion'):
+                await ctx.send(pTwoLastFeat + " will be determined after this phase.")
+
+            elif pTwoLastFeat in self.pTwoSpentFeat:
+                await ctx.send("You have already used this feat. Please select another or type 'none.': ")
+
+            elif pTwoLastFeat in self.pTwoInfo['feats taken']:
+                self.pTwoSpentFeat.append(pTwoLastFeat)
+                self.pTwoFeatInfo = [pTwoLastFeat, featDictionary[0][pTwoLastFeat]['action']]
+
+            elif pTwoLastFeat not in self.pTwoInfo['feats taken']:
+                await ctx.send("Either you do not have that feat, or you did not type it correctly")
+
+        else:
+            ctx.send("Either it is not your turn to select a feat, or you aren't even fighting. Either way, Stop.")
 
     # Next two methods are created to see if a character hit the other character or not. Simulates rolling 1d20 (1-20)
     # then adding any modifiers to the result. If the total either meets or exceeds the other players AC, notify the
     # players that the hit was successful, then move on to the damage methods. If the total does not, notify player
     # that it was a miss, and move on to other player's turn.
     # Note: I want to add in a result that will double damage if the ROLL is a 20, not the total.
-'''
-    async def determineHitPOne(self, ctx):
 
-        # assign both player's feat selections to variables
-        pOneFeatUsed = self.pOneFeatInfo
-        pTwoFeatUsed = self.pTwoFeatInfo
+    @commands.command()
+    @commands.guild_only()
+    async def roll(self, ctx):
+        print(str(ctx.message.author))
+        print(self.pOneUsername)
+        if self.pOneUsername == ctx.message.author and self.token == 1:
 
-        # If a feat wasn't used by a player, assign it async default values.
-        if pOneFeatUsed is None:
-            pOneFeatUsed = ["none", 0]
-        if pTwoFeatUsed is None:
-            pTwoFeatUsed = ["none", 0]
-
-        # If the feat used was 'true strike' forgo rolling to see if player hit opponent, and go straight to damage.
-        if pOneFeatUsed[0] == "true strike":
-            await ctx.send(
-                self.pOneInfo['name'] + " used the feat 'True Strike.' And forgoes the need to determine if hit was success.")
-            self.determineDamagePOne()
-
-        # Otherwise, continue on with the bulk of this method
-        else:
-            pOneToHit = self.pOneInfo['hit']
-            pTwoAC = self.pTwoInfo['ac']
-
-            # If Player One has power attack, combat expertise, async defensive fighting, or masochist, go to those methods first
-            # before continuing.
-            for word in self.pOneInfo["feats taken"]:
-                if word == "power attack":
-                    self.pOnepMod = self.pOnePowerAttack()
-                if word == "combat expertise":
-                    self.pOnecMod = self.pOneCombatExpertise()
-                if word == "async defensive fighting":
-                    self.pOnedMod = self.pOneasync defensiveFighting()
-                if word == "masochist":
-                    self.pOnemMod = self.pOneMasochist()
-            pMod = self.pOnepMod
-            cMod = self.pOnecMod
-            dMod = self.pOnedMod
-            mMod = self.pOnemMod
-            pTwodMod = self.pTwodMod
-            pTwomMod = self.pTwomMod
-
-            # determine the roll of the 1d20.
-            hit = random.randint(1, 20)
-
-            # if the raw result is equal to 20, count the critical counter up to 1.
-            if hit == 20:
-                self.critical = 1
-                await ctx.send(self.pOneInfo['name'] + " has critically hit.")
-
-            # Notify that Player One is getting the hit benefit from 'riposte'
-            if self.pOneRiposte == 5:
-                await ctx.send(self.pOneInfo['name'] + " benefits from +5 hit bonus effect from riposte.")
-
-            # calculate the total after modifiers
-            total = int(hit + pOneToHit - pMod + cMod - dMod + mMod + self.pOneRiposte)
-
-            # Ensures Player One benefits from hit bonus of Riposte only once.
-            self.pOneRiposte = 0
-
-            # if any version of crippling blow was used, tack on the penalty to the above total
-            if pTwoFeatUsed[0] == "crippling blow" or pTwoFeatUsed[0] == "improved crippling blow" or pTwoFeatUsed[
-                0] == "greater crippling blow":
-                await ctx.send(self.playerTwo + " Used " + pTwoFeatUsed[0] + ", Giving " + self.playerOne + " a " + str(
-                    pTwoFeatUsed[1]) + " To their attack.")
-                total = total + pTwoFeatUsed[1]
-
-            # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-            await ctx.send("Roll: " + str(hit) + " Base: " + str(pOneToHit) + " PA: " + str(pMod) + " CE: " + str(
-                cMod) + " DF: " + str(dMod) + " MC: " + str(mMod))
-
-            # find Player One's total AC
-            totalAC = pTwoAC + pTwodMod - pTwomMod
-
-            # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-            await ctx.send("P2 AC: " + str(pTwoAC) + " DF: " + str(pTwodMod) + " MC: " + str(pTwomMod))
-
-            # determine if the total roll, after all modifiers have been included, is a successful hit or not. then
-            # head to the appropriate method
-            if total >= totalAC:
-                await ctx.send(self.playerOne + " rolled a " + str(total) + " to hit an AC " + str(
-                    totalAC) + " and was successful.")
-                self.pTwodMod = 0
-                self.pTwomMod = 0
-                self.pTwoRiposte = 0
-                self.determineDamagePOne()
+            # assign both player's feat selections to variables
+            pOneFeatUsed = self.pOneFeatInfo
+            pTwoFeatUsed = self.pTwoFeatInfo
+    
+            # If a feat wasn't used by a player, assign it default values.
+            if pOneFeatUsed is None:
+                pOneFeatUsed = ["none", 0]
+            if pTwoFeatUsed is None:
+                pTwoFeatUsed = ["none", 0]
+    
+            # If the feat used was 'true strike' forgo rolling to see if player hit opponent, and go straight to damage.
+            if pOneFeatUsed[0] == "true strike":
+                await ctx.send(
+                    self.pOneInfo['name'] + " used the feat 'True Strike.' And forgoes the need to determine if hit was success.")
+    
+            # Otherwise, continue on with the bulk of this method
             else:
-                await ctx.send(self.playerOne + " rolled a " + str(total) + " to hit an AC " + str(totalAC) + " and missed.")
-                self.pTwodMod = 0
-                self.pTwomMod = 0
-                if pTwoFeatUsed[0] == "riposte":
-                    self.pTwoRiposte = 5
-                self.scoreboard()
-
-    async def determineHitPTwo(self, ctx):
-        # assign both player's feat selections to variables
-        pOneFeatUsed = self.pOneFeatInfo
-        pTwoFeatUsed = self.pTwoFeatInfo
-
-        # If a feat wasn't used by a player, assign it async default values.
-        if pOneFeatUsed is None:
-            pOneFeatUsed = ["none", 0]
-        if pTwoFeatUsed is None:
-            pTwoFeatUsed = ["none", 0]
-
-        # If the feat used was 'true strike' forgo rolling to see if player hit opponent, and go straight to damage.
-        if pTwoFeatUsed[0] == "true strike":
-            await ctx.send(
-                self.pTwoInfo['name'] + " used the feat 'True Strike.' And forgoes the need to determine if hit was success.")
-            self.determineDamagePTwo()
-
-        # Otherwise, continue on with the bulk of this method
-        else:
-            pTwoToHit = self.pTwoInfo['hit']
-            pOneAC = self.pOneInfo['ac']
-
-            # If Player Two has power attack, combat expertise, async defensive fighting, or masochist, go to those methods first
-            # before continuing.
-            for word in self.pTwoInfo["feats taken"]:
-                if word == "power attack":
-                    self.pTwopMod = self.pTwoPowerAttack()
-                if word == "combat expertise":
-                    self.pTwocMod = self.pTwoCombatExpertise()
-                if word == "async defensive fighting":
-                    self.pTwodMod = self.pTwoasync defensiveFighting()
-                if word == "masochist":
-                    self.pTwomMod = self.pTwoMasochist()
-            pMod = self.pTwopMod
-            cMod = self.pTwocMod
-            dMod = self.pTwodMod
-            mMod = self.pTwomMod
-            pOnedMod = self.pOnedMod
-            pOnemMod = self.pOnemMod
-
-            # determine the roll of the 1d20.
-            hit = random.randint(1, 20)
-
-            # if the raw result is equal to 20, count the critical counter up to 1.
-            if hit == 20:
-                self.critical = 1
-                await ctx.send(self.pTwoInfo['name'] + " has critically hit.")
-
-            if self.pTwoRiposte == 5:
-                await ctx.send(self.pTwoInfo['name'] + "Benefits from +5 hit bonus effect from riposte.")
-
-            # calculate the total after modifiers
-            total = int(hit + pTwoToHit - pMod + cMod - dMod + mMod + self.pTwoRiposte)
-
-            # Ensures Player Two benefits from hit bonus of Riposte only once.
-            self.pTwoRiposte = 0
-
-            # if Player Two used riposte, and
-            # if any version of crippling blow was used, tack on the penalty to the above total
-            if pOneFeatUsed[0] == "crippling blow" or pOneFeatUsed[0] == "improved crippling blow" or pOneFeatUsed[
-                0] == "greater crippling blow":
-                await ctx.send(self.pOneInfo['name'] + " Used " + pOneFeatUsed[
-                    0] + ", Giving " + self.pTwoInfo['name'] + " a " + str(
-                    pOneFeatUsed[1]) + " To their attack.")
-                total = total + pOneFeatUsed[1]
-
-            # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-            await ctx.send("Roll: " + str(hit) + " Base: " + str(pTwoToHit) + " PA: " + str(pMod) + " CE: " + str(
-                cMod) + " DF: " + str(dMod) + " MC: " + str(mMod))
-
-            # find Player One's total AC
-            totalAC = int(pOneAC + pOnedMod - pOnemMod)
-
-            # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-            await ctx.send(" P1 AC: " + str(pOneAC) + " DF: " + str(pOnedMod) + " MC: " + str(pOnemMod))
-
-            # determine if the total roll, after all modifiers have been included, is a successful hit or not. then
-            # head to the appropriate method
-            if total >= pOneAC:
-                await ctx.send(self.pTwoInfo['name'] + " rolled a " + str(total) + " to hit an AC " + str(
-                    totalAC) + " and was successful.")
-                self.pOnedMod = 0
-                self.pOnemMod = 0
+                pOneToHit = self.pOneInfo['hit']
+                pTwoAC = self.pTwoInfo['ac']
+    
+                # If Player One has power attack, combat expertise, async defensive fighting, or masochist, go to those methods first
+                # before continuing.
+                # for word in self.pOneInfo["feats taken"]:
+                #     if word == "power attack":
+                #         #self.pOnepMod = self.pOnePowerAttack()
+                #     if word == "combat expertise":
+                #         #self.pOnecMod = self.pOneCombatExpertise()
+                #     if word == "async defensive fighting":
+                #         #self.pOnedMod = self.pOneDefensiveFighting()
+                #     if word == "masochist":
+                #         #self.pOnemMod = self.pOneMasochist()
+                pMod = self.pOnepMod
+                cMod = self.pOnecMod
+                dMod = self.pOnedMod
+                mMod = self.pOnemMod
+                pTwodMod = self.pTwodMod
+                pTwomMod = self.pTwomMod
+    
+                # determine the roll of the 1d20.
+                hit = random.randint(1, 20)
+    
+                # if the raw result is equal to 20, count the critical counter up to 1.
+                if hit == 20:
+                    self.critical = 1
+                    await ctx.send(self.pOneInfo['name'] + " has critically hit.")
+    
+                # Notify that Player One is getting the hit benefit from 'riposte'
+                if self.pOneRiposte == 5:
+                    await ctx.send(self.pOneInfo['name'] + " benefits from +5 hit bonus effect from riposte.")
+    
+                # calculate the total after modifiers
+                total = int(hit + pOneToHit - pMod + cMod - dMod + mMod + self.pOneRiposte)
+    
+                # Ensures Player One benefits from hit bonus of Riposte only once.
                 self.pOneRiposte = 0
-                self.determineDamagePTwo()
+    
+                # if any version of crippling blow was used, tack on the penalty to the above total
+                if pTwoFeatUsed[0] == "crippling blow" or pTwoFeatUsed[0] == "improved crippling blow" or pTwoFeatUsed[
+                    0] == "greater crippling blow":
+                    await ctx.send(self.playerTwo + " Used " + pTwoFeatUsed[0] + ", Giving " + self.playerOne + " a " + str(
+                        pTwoFeatUsed[1]) + " To their attack.")
+                    total = total + pTwoFeatUsed[1]
+    
+                # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
+                await ctx.send("Roll: " + str(hit) + " Base: " + str(pOneToHit) + " PA: " + str(pMod) + " CE: " + str(
+                    cMod) + " DF: " + str(dMod) + " MC: " + str(mMod))
+    
+                # find Player One's total AC
+                totalAC = pTwoAC + pTwodMod - pTwomMod
+    
+                # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
+                await ctx.send("P2 AC: " + str(pTwoAC) + " DF: " + str(pTwodMod) + " MC: " + str(pTwomMod))
+    
+                # determine if the total roll, after all modifiers have been included, is a successful hit or not. then
+                # head to the appropriate method
+                if total >= totalAC:
+                    await ctx.send(self.playerOne + " rolled a " + str(total) + " to hit an AC " + str(
+                        totalAC) + " and was successful.")
+                    self.pTwodMod = 0
+                    self.pTwomMod = 0
+                    self.pTwoRiposte = 0
+                else:
+                    await ctx.send(self.playerOne + " rolled a " + str(total) + " to hit an AC " + str(totalAC) + " and missed.")
+                    self.pTwodMod = 0
+                    self.pTwomMod = 0
+                    if pTwoFeatUsed[0] == "riposte":
+                        self.pTwoRiposte = 5
+        
+        elif self.pTwoUsername == ctx.message.author and self.token == 2:        
+            pOneFeatUsed = self.pOneFeatInfo
+            pTwoFeatUsed = self.pTwoFeatInfo
+    
+            # If a feat wasn't used by a player, assign it async default values.
+            if pOneFeatUsed is None:
+                pOneFeatUsed = ["none", 0]
+            if pTwoFeatUsed is None:
+                pTwoFeatUsed = ["none", 0]
+    
+            # If the feat used was 'true strike' forgo rolling to see if player hit opponent, and go straight to damage.
+            if pTwoFeatUsed[0] == "true strike":
+                await ctx.send(
+                    self.pTwoInfo['name'] + " used the feat 'True Strike.' And forgoes the need to determine if hit was success.")
+    
+            # Otherwise, continue on with the bulk of this method
             else:
-                await ctx.send(self.pTwoInfo['name'] + " rolled a " + str(total) + " to hit an AC " + str(
-                    totalAC) + " and missed.")
-                self.pOnedMod = 0
-                self.pOnemMod = 0
-                if pOneFeatUsed[0] == "riposte":
-                    self.pOneRiposte = 5
-                self.scoreboard()
+                pTwoToHit = self.pTwoInfo['hit']
+                pOneAC = self.pOneInfo['ac']
+    
+                # If Player Two has power attack, combat expertise, async defensive fighting, or masochist, go to those methods first
+                # before continuing.
+                # for word in self.pTwoInfo["feats taken"]:
+                #     if word == "power attack":
+                #         #self.pTwopMod = self.pTwoPowerAttack()
+                #     if word == "combat expertise":
+                #         #self.pTwocMod = self.pTwoCombatExpertise()
+                #     if word == "async defensive fighting":
+                #         #self.pTwodMod = self.pTwoDefensiveFighting()
+                #     if word == "masochist":
+                #         #self.pTwomMod = self.pTwoMasochist()
+                pMod = self.pTwopMod
+                cMod = self.pTwocMod
+                dMod = self.pTwodMod
+                mMod = self.pTwomMod
+                pOnedMod = self.pOnedMod
+                pOnemMod = self.pOnemMod
+    
+                # determine the roll of the 1d20.
+                hit = random.randint(1, 20)
+    
+                # if the raw result is equal to 20, count the critical counter up to 1.
+                if hit == 20:
+                    self.critical = 1
+                    await ctx.send(self.pTwoInfo['name'] + " has critically hit.")
+    
+                if self.pTwoRiposte == 5:
+                    await ctx.send(self.pTwoInfo['name'] + "Benefits from +5 hit bonus effect from riposte.")
+    
+                # calculate the total after modifiers
+                total = int(hit + pTwoToHit - pMod + cMod - dMod + mMod + self.pTwoRiposte)
+    
+                # Ensures Player Two benefits from hit bonus of Riposte only once.
+                self.pTwoRiposte = 0
+    
+                # if Player Two used riposte, and
+                # if any version of crippling blow was used, tack on the penalty to the above total
+                if pOneFeatUsed[0] == "crippling blow" or pOneFeatUsed[0] == "improved crippling blow" or pOneFeatUsed[0] == "greater crippling blow":
+                    await ctx.send(self.pOneInfo['name'] + " Used " + pOneFeatUsed[0] + ", Giving " + self.pTwoInfo['name'] + " a " + str(OneFeatUsed[1]) + " To their attack.")
+                    total = total + pOneFeatUsed[1]
+    
+                # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
+                await ctx.send("Roll: " + str(hit) + " Base: " + str(pTwoToHit) + " PA: " + str(pMod) + " CE: " + str(
+                    cMod) + " DF: " + str(dMod) + " MC: " + str(mMod))
+    
+                # find Player One's total AC
+                totalAC = int(pOneAC + pOnedMod - pOnemMod)
+    
+                # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
+                await ctx.send(" P1 AC: " + str(pOneAC) + " DF: " + str(pOnedMod) + " MC: " + str(pOnemMod))
+    
+                # determine if the total roll, after all modifiers have been included, is a successful hit or not. then
+                # head to the appropriate method
+                if total >= pOneAC:
+                    await ctx.send(self.pTwoInfo['name'] + " rolled a " + str(total) + " to hit an AC " + str(
+                        totalAC) + " and was successful.")
+                    self.pOnedMod = 0
+                    self.pOnemMod = 0
+                    self.pOneRiposte = 0
+                else:
+                    await ctx.send(self.pTwoInfo['name'] + " rolled a " + str(total) + " to hit an AC " + str(
+                        totalAC) + " and missed.")
+                    self.pOnedMod = 0
+                    self.pOnemMod = 0
+                    if pOneFeatUsed[0] == "riposte":
+                        self.pOneRiposte = 5
 
     # Next two methods will determine how much damage is done after a successful hit. It finds the value placed in the
     # 'base damage' key of the character's json, Parses it out to remove the 'd', and uses the first number as the
     # minimum range, and second for the maximum. After determining the random value, then adds any modifiers to the roll
     # and displays that as the damage.
-
+'''
     async def determineDamagePOne(self, ctx):
 
         # assign both player's feat selections to variables.
