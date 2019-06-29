@@ -57,7 +57,7 @@ class Character(commands.Cog):
             characterFile["feats taken"] = hasTaken
             characterFile["wins"] = 0
             characterFile["losses"] = 0
-            characterFile["reset"] = 1
+            characterFile["reset"] = 3
             file = open(charFolder + player + ".txt", "w", encoding="utf-8")
             json.dump(characterFile, file, ensure_ascii=False, indent=2)
             await ctx.send("PM me with '!stats <str> <dex> <con>' to set your abilities. Wouldn't want everyone "

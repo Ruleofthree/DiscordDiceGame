@@ -108,93 +108,96 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def accept(self, ctx):
         if self.game == 0:
-            self.game = 1
-            player = str(ctx.message.author)
-            self.pTwoUsername = ctx.message.author
-            path = os.getcwd()
-            charFolder = os.path.join(path + "/characters/")
-            charFile = Path(charFolder + player + ".txt")
-            file = open(charFolder + player + ".txt", "r", encoding="utf-8")
-            charStats = json.load(file)
-            file.close()
+            if ctx.message.author == self.pOneUsername:
+                await ctx.send("You can't fight yourself. This isn't Street Fighter.")
+            else:
+                self.game = 1
+                player = str(ctx.message.author)
+                self.pTwoUsername = ctx.message.author
+                path = os.getcwd()
+                charFolder = os.path.join(path + "/characters/")
+                charFile = Path(charFolder + player + ".txt")
+                file = open(charFolder + player + ".txt", "r", encoding="utf-8")
+                charStats = json.load(file)
+                file.close()
 
-            self.pTwoInfo = charStats
+                self.pTwoInfo = charStats
 
-            self.pOneTotalHP = self.pOneInfo['hp']
-            self.pTwoTotalHP = self.pTwoInfo['hp']
-            self.pOneCurrentHP = self.pOneInfo['hp']
-            self.pTwoCurrentHP = self.pTwoInfo['hp']
-            self.pOneLevel = self.pOneInfo['level']
-            self.pTwoLevel = self.pTwoInfo['level']
+                self.pOneTotalHP = self.pOneInfo['hp']
+                self.pTwoTotalHP = self.pTwoInfo['hp']
+                self.pOneCurrentHP = self.pOneInfo['hp']
+                self.pTwoCurrentHP = self.pTwoInfo['hp']
+                self.pOneLevel = self.pOneInfo['level']
+                self.pTwoLevel = self.pTwoInfo['level']
 
-            await ctx.send("Rolling for Initiative (1d20 + (dexterity / 2). In result of tie, highest dex goes first. Should "
-                           "that tie as well, coin toss. Player One has value of One.")
+                await ctx.send("Rolling for Initiative (1d20 + (dexterity / 2). In result of tie, highest dex goes first. Should "
+                               "that tie as well, coin toss. Player One has value of One.")
 
-            playerOneInit = random.randint(1, 20)
-            playerOneMod = int(self.pOneInfo['dexterity'] / 2)
-            totalOne = playerOneInit + playerOneMod
-            await ctx.send(self.pOneInfo['name'] + " rolled: " + str(playerOneInit) + " + " + str(
-                playerOneMod) + " and got " + str(totalOne))
+                playerOneInit = random.randint(1, 20)
+                playerOneMod = int(self.pOneInfo['dexterity'] / 2)
+                totalOne = playerOneInit + playerOneMod
+                await ctx.send(self.pOneInfo['name'] + " rolled: " + str(playerOneInit) + " + " + str(
+                    playerOneMod) + " and got " + str(totalOne))
 
-            playerTwoInit = random.randint(1, 20)
-            playerTwoMod = int(self.pTwoInfo['dexterity'] / 2)
-            totalTwo = playerTwoInit + playerTwoMod
-            await ctx.send(self.pTwoInfo['name'] + " rolled: " + str(playerTwoInit) + " + " + str(
-                playerTwoMod) + " and got " + str(totalTwo))
+                playerTwoInit = random.randint(1, 20)
+                playerTwoMod = int(self.pTwoInfo['dexterity'] / 2)
+                totalTwo = playerTwoInit + playerTwoMod
+                await ctx.send(self.pTwoInfo['name'] + " rolled: " + str(playerTwoInit) + " + " + str(
+                    playerTwoMod) + " and got " + str(totalTwo))
 
-            if totalOne > totalTwo:
-                await ctx.send(self.pOneInfo['name'] + " Goes first")
-                token = 1
-                self.token = token
-                await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. Otherwise type '!usefeat none'")
-
-            elif totalTwo > totalOne:
-                await ctx.send(self.pTwoInfo['name'] + " Goes first")
-                token = 2
-                self.token = token
-                await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. Otherwise type '!usefeat none'")
-
-            elif totalOne == totalTwo:
-                await ctx.send("In result of tie, person with highest dexterity modifier goes first:")
-                await ctx.send(self.pOneInfo['name'] + "'s dexterity: " + str(playerOneMod))
-                await ctx.send(self.pTwoInfo['name'] + "'s dexterity: " + str(playerTwoMod))
-
-                if playerOneMod > playerTwoMod:
+                if totalOne > totalTwo:
                     await ctx.send(self.pOneInfo['name'] + " Goes first")
                     token = 1
                     self.token = token
                     await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. Otherwise type '!usefeat none'")
 
-                elif playerOneMod < playerTwoMod:
+                elif totalTwo > totalOne:
                     await ctx.send(self.pTwoInfo['name'] + " Goes first")
                     token = 2
                     self.token = token
                     await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. Otherwise type '!usefeat none'")
 
-                else:
-                    await ctx.send("As both dexterity values are equal as well. A coin flip. Value of one means " + self.pOneInfo['name'] + " goes first")
-                    value = random.randint(1, 2)
-                    await ctx.send(value)
+                elif totalOne == totalTwo:
+                    await ctx.send("In result of tie, person with highest dexterity modifier goes first:")
+                    await ctx.send(self.pOneInfo['name'] + "'s dexterity: " + str(playerOneMod))
+                    await ctx.send(self.pTwoInfo['name'] + "'s dexterity: " + str(playerTwoMod))
 
-                    if value == 1:
-                        await ctx.send(self.pTwoInfo['name'] + " Goes first")
+                    if playerOneMod > playerTwoMod:
+                        await ctx.send(self.pOneInfo['name'] + " Goes first")
                         token = 1
                         self.token = token
                         await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. Otherwise type '!usefeat none'")
 
-                    else:
-                        await ctx.send(self.playerTwo + " Goes first")
+                    elif playerOneMod < playerTwoMod:
+                        await ctx.send(self.pTwoInfo['name'] + " Goes first")
                         token = 2
                         self.token = token
                         await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. Otherwise type '!usefeat none'")
+
+                    else:
+                        await ctx.send("As both dexterity values are equal as well. A coin flip. Value of one means " + self.pOneInfo['name'] + " goes first")
+                        value = random.randint(1, 2)
+                        await ctx.send(value)
+
+                        if value == 1:
+                            await ctx.send(self.pTwoInfo['name'] + " Goes first")
+                            token = 1
+                            self.token = token
+                            await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. Otherwise type '!usefeat none'")
+
+                        else:
+                            await ctx.send(self.playerTwo + " Goes first")
+                            token = 2
+                            self.token = token
+                            await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. Otherwise type '!usefeat none'")
         else:
                 await ctx.send("A Fight is already taking place. Wait your turn")
-    @accept.error
-    async def name_accept(self, ctx, error):
-        if isinstance(error, commands.NoPrivateMessage):
-            await ctx.send("The command !accept may not be used in PMs!")
-        else:
-            raise error
+        @accept.error
+        async def name_accept(self, ctx, error):
+            if isinstance(error, commands.NoPrivateMessage):
+                await ctx.send("The command !accept may not be used in PMs!")
+            else:
+                raise error
 
     @commands.command()
     @commands.guild_only()
@@ -274,9 +277,10 @@ class Combat(commands.Cog):
         if self.game == 1:
             # ensures the command can only be used by player one, when it is their turn. To prevent trolls from
             # spamming commands.
-            print(character)
-            print(self.pOneUsername)
-            print(self.token)
+            # print(character)
+            # print(self.pOneUsername)
+            # print(self.pTwoUsername)
+            # print(self.token)
             if character == self.pOneUsername and self.token == 1:
 
                 # assign both player's feat selections to variables
@@ -389,20 +393,22 @@ class Combat(commands.Cog):
                                         self.pTwoQuickDamage) + "hp of damage.")
                         self.pTwoRiposte = 1
                     # # If Player Two has Evasion, Improved Evasion, or Greater Evasion, give them the option to use it.
-                    # for word in self.pTwoInfo['feats taken']:
-                    #     answer = ""
-                    #     if self.pTwoEvade == 1 and word == "evasion":
-                    #         while answer != "yes" and answer != "no":
-                    #             answer = await ctx.send(
-                    #                 self.pTwoInfo['name'] + ", do you wish to evade? ").lower()
-                    #             if answer == "yes":
-                    #                 total = int(total * 0.75)
-                    #                 self.totalDamage = total
-                    #                 self.pTwoEvade = 0
-                    #             elif answer == "no":
-                    #                 pass
-                    #             else:
-                    #                 await ctx.send("Answer 'yes' or 'no'")
+                    print(self.pTwoInfo['feats taken'])
+                    for word in self.pTwoInfo['feats taken']:
+                        print("Am I here?")
+                        answer = ""
+                        if self.pTwoEvade == 1 and word == "evasion":
+                            while answer != "yes" and answer != "no":
+                                answer = await ctx.send(
+                                    self.pTwoInfo['name'] + ", do you wish to evade? ").lower()
+                                if answer == "yes" and character == self.pTwoUsername:
+                                    total = int(total * 0.75)
+                                    self.totalDamage = total
+                                    self.pTwoEvade = 0
+                                elif answer == "no" and character == self.pTwoUsername:
+                                    pass
+                                else:
+                                    await ctx.send("You aren't " + self.pTwoUsername )
                     #     elif self.pTwoEvade == 1 and word == "improved evasion":
                     #         while answer != "yes" and answer != "no":
                     #             answer = await ctx.send(
@@ -600,20 +606,22 @@ class Combat(commands.Cog):
                                             'name'] + " used 'quick strike,' managing to do an additional " + str(
                                             self.pTwoQuickDamage) + "hp of damage.")
                         # # If Player Two has Evasion, Improved Evasion, or Greater Evasion, give them the option to use it.
-                        # for word in self.pTwoInfo['feats taken']:
-                        #     answer = ""
-                        #     if self.pTwoEvade == 1 and word == "evasion":
-                        #         while answer != "yes" and answer != "no":
-                        #             answer = await ctx.send(
-                        #                 self.pTwoInfo['name'] + ", do you wish to evade? ").lower()
-                        #             if answer == "yes":
-                        #                 total = int(total * 0.75)
-                        #                 self.totalDamage = total
-                        #                 self.pTwoEvade = 0
-                        #             elif answer == "no":
-                        #                 pass
-                        #             else:
-                        #                 await ctx.send("Answer 'yes' or 'no'")
+                        print(self.pTwoInfo['feats taken'])
+                        for word in self.pTwoInfo['feats taken']:
+                            print("Am I here?")
+                            answer = ""
+                            if self.pTwoEvade == 1 and word == "evasion":
+                                while answer != "yes" and answer != "no":
+                                    answer = await ctx.send(
+                                        self.pTwoInfo['name'] + ", do you wish to evade? ").lower()
+                                    if answer == "yes" and character == self.pTwoUsername:
+                                        total = int(total * 0.75)
+                                        self.totalDamage = total
+                                        self.pTwoEvade = 0
+                                    elif answer == "no" and character == self.pTwoUsername:
+                                        pass
+                                    else:
+                                        await ctx.send("You aren't " + self.pTwoUsername)
                         #     elif self.pTwoEvade == 1 and word == "improved evasion":
                         #         while answer != "yes" and answer != "no":
                         #             answer = await ctx.send(
@@ -640,13 +648,13 @@ class Combat(commands.Cog):
                         #                 await ctx.send("Answer 'yes' or 'no'")
                         # If Player Two used 'async deflect', 'improved async deflect', or 'greater async deflect', apply damage mitigation here
                         if pTwoFeatUsed[0] == "deflect":
-                            await ctx.send( self.pTwoInfo['name'] + " used async deflect to lessen the blow.")
+                            await ctx.send( self.pTwoInfo['name'] + " used deflect to lessen the blow.")
                             total = int(total * float(pTwoFeatUsed[1]))
                         elif pTwoFeatUsed[0] == "improved deflect":
-                            await ctx.send( self.pTwoInfo['name'] + " used async deflect to lessen the blow")
+                            await ctx.send( self.pTwoInfo['name'] + " used deflect to lessen the blow")
                             total = int(total * float(pTwoFeatUsed[1]))
                         elif pTwoFeatUsed[0] == "greater deflect":
-                            await ctx.send( self.pTwoInfo['name'] + " used async deflect to lessen the blow")
+                            await ctx.send( self.pTwoInfo['name'] + " used deflect to lessen the blow")
                             total = int(total * float(pTwoFeatUsed[1]))
                         self.totalDamage = total
                         # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
@@ -969,14 +977,14 @@ class Combat(commands.Cog):
 
                     # find Player One's total AC
                     totalAC = int(pOneAC + pOnedMod - pOnemMod)
-                    print("Am I here?")
+
                     # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
                     await ctx.send( " P1 AC: " + str(pOneAC) + " DF: " + str(pOnedMod) + " MC: " + str(pOnemMod))
 
                     # determine if the total roll, after all modifiers have been included, is a successful hit or not. then
                     # head to the appropriate method
                     if total >= pOneAC:
-                        print("Am I here?")
+
                         await ctx.send(
                                     self.pTwoInfo['name'] + " rolled a " + str(total) + " to hit an AC " + str(
                                         totalAC) + " and was successful.")
