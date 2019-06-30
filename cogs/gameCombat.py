@@ -77,7 +77,25 @@ class Combat(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def score(self, ctx, player):
-        pass
+
+        path = os.getcwd()
+        charFolder = os.path.join(path + "/characters/")
+        with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file:
+            playerDatabase = json.loads(file.read())
+        character = playerDatabase[player]
+        with open(charFolder + character + ".txt", "r", encoding="utf-8") as file2:
+            score = json.loads(file2.read())
+            wins = str(score['wins'])
+            losses = str(score['losses'])
+        total = int(wins) + int(losses)
+
+        if total == 0:
+            await ctx.send(player + " has 100% win ratio. Or 0%. However you want to rationalize not having a single "
+                                    "fight under their belt.")
+        else:
+            ratio = int(wins) / total
+            await ctx.send(player + " has " + wins + " wins, and " + losses + "losses. (" + str(int(ratio)) + "%)")
+
     @commands.command()
     @commands.guild_only()
     async def challenge(self, ctx):
@@ -754,7 +772,7 @@ class Combat(commands.Cog):
                         charData = json.load(file)
                         charData['losses'] += 1
                         file.seek(0)
-                        file.write(jason.dumps(charData, ensure_ascii=False, indent=2))
+                        file.write(json.dumps(charData, ensure_ascii=False, indent=2))
                         file.truncate()
                         file.close()
                     if self.currentPlayerXP >= self.nextLevel:

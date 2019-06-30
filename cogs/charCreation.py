@@ -58,19 +58,16 @@ class Character(commands.Cog):
             characterFile["losses"] = 0
             characterFile["reset"] = 3
 
-            playerDatabase = {}
+
             file = open(charFolder + player + ".txt", "w", encoding="utf-8")
             json.dump(characterFile, file, ensure_ascii=False, indent=2)
             file.close()
-            print(playerDatabase)
-            with open(charFolder + "playerDatabase.txt", 'r+', encoding="utf-8") as file2:
-                json.load(file2)
-                add = {name : player}
-                add.update(playerDatabase)
-                file2.seek(0)
-                file2.write(json.dumps(playerDatabase, ensure_ascii=False, indent=2))
-                file2.truncate()
-                file2.close()
+
+            with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
+                playerDatabase = json.loads(file2.read())
+            playerDatabase[name] = player
+            with open(charFolder + "playerDatabase.txt", 'w') as file2:
+                file2.write(json.dumps(playerDatabase, sort_keys=True, indent=2))
             await ctx.send("PM me with '!stats <str> <dex> <con>' to set your abilities. Wouldn't want everyone "
                      "to see your secrets, would we?")
 
@@ -143,6 +140,34 @@ class Character(commands.Cog):
                            "second for dexterity, and the third for constitution. Ex: !stats 10 5 0")
         else:
             raise error
+
+    @commands.command()
+    @commands.guild_only()
+    async def erase(self, ctx):
+        player = str(ctx.message.author)
+        path = os.getcwd()
+        charFolder = os.path.join(path + "/characters/")
+        charFile = Path(charFolder + player + ".txt")
+
+        with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file:
+            playerDatabase = json.loads(file.read())
+
+        name = ""
+
+        for item in playerDatabase.items():
+
+            if item[1] == player:
+                name = item[0]
+
+        playerDatabase.pop(name, None)
+        print(name)
+
+        with open(charFolder + "playerDatabase.txt", "w", encoding="utf-8") as file:
+            json.dump(playerDatabase, file, sort_keys=True, indent=2)
+
+        os.remove(charFile)
+        await ctx.send(name + " was successfully deleted.")
+
 
 def setup(client):
     client.add_cog(Character(client))
