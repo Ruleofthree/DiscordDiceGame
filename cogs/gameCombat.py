@@ -30,6 +30,7 @@ class Combat(commands.Cog):
         self.playerOne = ""
         self.playerTwo = ""
         self.winner = ""
+        self.loser = ""
         self.pOneUsername = None
         self.pTwoUsername = None
         # PLAYER INFO
@@ -75,24 +76,32 @@ class Combat(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
+    async def score(self, ctx, player):
+        pass
+    @commands.command()
+    @commands.guild_only()
     async def challenge(self, ctx):
         # opens and loads in player one's character sheet. This is done in this method solely because I'm unsure if
         # loading json files in __init__ is actually a good idea. If I understand things correctly, things in a class's
         # __init__ is ran EVERY TIME a method is called within it. If so, then the json files would be opened, loaded,
         # and closed multiple times in a single run. Seems inefficient, and bad coding.
-        player = str(ctx.message.author)
         if self.game == 0:
-            self.pOneUsername = ctx.message.author
+            player = str(ctx.message.author)
             path = os.getcwd()
             charFolder = os.path.join(path + "/characters/")
             charFile = Path(charFolder + player + ".txt")
-            file = open(charFolder + player + ".txt", "r", encoding="utf-8")
-            charStats = json.load(file)
-            file.close()
+            if not charFile.is_file():
+                await ctx.send("You don't even have a character made to fight. What are you planning to do? Emoji the"
+                               "opponent to death? Make a character, first.")
+            else:
+                self.pOneUsername = ctx.message.author
+                file = open(charFolder + player + ".txt", "r", encoding="utf-8")
+                charStats = json.load(file)
+                file.close()
 
-            self.pOneInfo = charStats
+                self.pOneInfo = charStats
 
-            await ctx.send(self.pOneInfo['name'] + " has issued a challenge. Who accepts? (type !accept)")
+                await ctx.send(self.pOneInfo['name'] + " has issued a challenge. Who accepts? (type !accept)")
 
         else:
             await ctx.send("A Fight is already taking place. Wait your turn")
@@ -108,15 +117,18 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def accept(self, ctx):
         if self.game == 0:
-            if ctx.message.author == self.pOneUsername:
+            player = str(ctx.message.author)
+            path = os.getcwd()
+            charFolder = os.path.join(path + "/characters/")
+            charFile = Path(charFolder + player + ".txt")
+            if not charFile.is_file():
+                await ctx.send("You don't even have a character made to fight. What are you planning to do? Emoji the "
+                               "opponent to death? Make a character, first.")
+            elif ctx.message.author == self.pOneUsername:
                 await ctx.send("You can't fight yourself. This isn't Street Fighter.")
             else:
                 self.game = 1
-                player = str(ctx.message.author)
                 self.pTwoUsername = ctx.message.author
-                path = os.getcwd()
-                charFolder = os.path.join(path + "/characters/")
-                charFile = Path(charFolder + player + ".txt")
                 file = open(charFolder + player + ".txt", "r", encoding="utf-8")
                 charStats = json.load(file)
                 file.close()
@@ -149,13 +161,13 @@ class Combat(commands.Cog):
                     await ctx.send(self.pOneInfo['name'] + " Goes first")
                     token = 1
                     self.token = token
-                    await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. Otherwise type '!usefeat none'")
+                    await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. ")
 
                 elif totalTwo > totalOne:
                     await ctx.send(self.pTwoInfo['name'] + " Goes first")
                     token = 2
                     self.token = token
-                    await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. Otherwise type '!usefeat none'")
+                    await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. ")
 
                 elif totalOne == totalTwo:
                     await ctx.send("In result of tie, person with highest dexterity modifier goes first:")
@@ -166,13 +178,13 @@ class Combat(commands.Cog):
                         await ctx.send(self.pOneInfo['name'] + " Goes first")
                         token = 1
                         self.token = token
-                        await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. Otherwise type '!usefeat none'")
+                        await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. ")
 
                     elif playerOneMod < playerTwoMod:
                         await ctx.send(self.pTwoInfo['name'] + " Goes first")
                         token = 2
                         self.token = token
-                        await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. Otherwise type '!usefeat none'")
+                        await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. ")
 
                     else:
                         await ctx.send("As both dexterity values are equal as well. A coin flip. Value of one means " + self.pOneInfo['name'] + " goes first")
@@ -183,21 +195,22 @@ class Combat(commands.Cog):
                             await ctx.send(self.pTwoInfo['name'] + " Goes first")
                             token = 1
                             self.token = token
-                            await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. Otherwise type '!usefeat none'")
+                            await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. ")
 
                         else:
                             await ctx.send(self.playerTwo + " Goes first")
                             token = 2
                             self.token = token
-                            await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. Otherwise type '!usefeat none'")
+                            await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. ")
         else:
                 await ctx.send("A Fight is already taking place. Wait your turn")
-        @accept.error
-        async def name_accept(self, ctx, error):
-            if isinstance(error, commands.NoPrivateMessage):
-                await ctx.send("The command !accept may not be used in PMs!")
-            else:
-                raise error
+            
+    @accept.error
+    async def name_accept(self, ctx, error):
+        if isinstance(error, commands.NoPrivateMessage):
+            await ctx.send("The command !accept may not be used in PMs!")
+        else:
+            raise error
 
     @commands.command()
     @commands.guild_only()
@@ -722,15 +735,26 @@ class Combat(commands.Cog):
                     await ctx.send( self.pOneInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
                     self.currentPlayerXP = self.pOneInfo['currentxp'] + self.xp
                     self.nextLevel = self.pOneInfo['nextlevel']
-                    self.winner = self.playerOne
+                    self.winner = self.pOneUsername
+                    self.loser = self.pTwoUsername
                     self.levelUp = self.pOneInfo['level']
+                    path = os.getcwd()
+                    charFolder = os.path.join(path + "/characters/")
 
-                    with open(self.winner + '.txt', 'r+') as file:
+                    with open(charFolder + self.winner + '.txt', 'r+') as file:
                         charData = json.load(file)
                         charData['currentxp'] = self.currentPlayerXP
                         charData['wins'] += 1
                         file.seek(0)
                         file.write(json.dumps(charData, ensure_ascii=False, indent=2))
+                        file.truncate()
+                        file.close()
+
+                    with open(charFolder + self.loser + '.txt', 'r+') as file:
+                        charData = json.load(file)
+                        charData['losses'] += 1
+                        file.seek(0)
+                        file.write(jason.dumps(charData, ensure_ascii=False, indent=2))
                         file.truncate()
                         file.close()
                     if self.currentPlayerXP >= self.nextLevel:
@@ -740,7 +764,7 @@ class Combat(commands.Cog):
                         levelFile = open("levelchart.txt", "r", encoding="utf-8")
                         levelDict = json.load(levelFile)
                         levelFile.close()
-                        with open(self.winner + '.txt', 'r+') as file:
+                        with open(charFolder + self.winner + '.txt', 'r+') as file:
                             charData = json.load(file)
                             charData['level'] = int(newLevel)
                             charData['hitpoints'] = int(levelDict[newLevel][0])
@@ -1194,10 +1218,13 @@ class Combat(commands.Cog):
                     await ctx.send( self.pTwoInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
                     self.currentPlayerXP = self.pTwoInfo['currentxp'] + self.xp
                     self.nextLevel = self.pTwoInfo['nextlevel']
-                    self.winner = self.playerTwo
+                    self.winner = self.pTwoUsername
+                    self.loser = self.pOneUsername
                     self.levelUp = self.pTwoInfo['level']
+                    path = os.getcwd()
+                    charFolder = os.path.join(path + "/characters/")
 
-                    with open(self.winner + '.txt', 'r+') as file:
+                    with open(charFolder + self.winner + '.txt', 'r+') as file:
                         charData = json.load(file)
                         charData['currentxp'] = self.currentPlayerXP
                         charData['wins'] += 1
@@ -1205,6 +1232,15 @@ class Combat(commands.Cog):
                         file.write(json.dumps(charData, ensure_ascii=False, indent=2))
                         file.truncate()
                         file.close()
+
+                    with open(charFolder + self.loser + '.txt', 'r+') as file:
+                        charData = json.load(file)
+                        charData['losses'] += 1
+                        file.seek(0)
+                        file.write(json.dumps(charData, ensure_ascii=False, indent=2))
+                        file.truncate()
+                        file.close()
+
                     if self.currentPlayerXP >= self.nextLevel:
                         newLevel = self.levelUp + 1
                         newLevel = str(newLevel)
@@ -1212,7 +1248,7 @@ class Combat(commands.Cog):
                         levelFile = open("levelchart.txt", "r", encoding="utf-8")
                         levelDict = json.load(levelFile)
                         levelFile.close()
-                        with open(self.winner + '.txt', 'r+') as file:
+                        with open(charFolder + self.winner + '.txt', 'r+') as file:
                             charData = json.load(file)
                             charData['level'] = int(newLevel)
                             charData['hitpoints'] = int(levelDict[newLevel][0])

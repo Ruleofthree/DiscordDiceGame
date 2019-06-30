@@ -23,7 +23,7 @@ class Character(commands.Cog):
 
         # Get the name of character being created
         if charFile.is_file():
-            await ctx.send("You've already created a character, dumbass.")
+            await ctx.send("You've already created a character. This isn't AOL RP, you don't get multi-character SNs")
         else:
             await ctx.send("Your character name is: " + name)
             await ctx.send("Your character sheet has been created.")
@@ -57,8 +57,20 @@ class Character(commands.Cog):
             characterFile["wins"] = 0
             characterFile["losses"] = 0
             characterFile["reset"] = 3
+
+            playerDatabase = {}
             file = open(charFolder + player + ".txt", "w", encoding="utf-8")
             json.dump(characterFile, file, ensure_ascii=False, indent=2)
+            file.close()
+            print(playerDatabase)
+            with open(charFolder + "playerDatabase.txt", 'r+', encoding="utf-8") as file2:
+                json.load(file2)
+                add = {name : player}
+                add.update(playerDatabase)
+                file2.seek(0)
+                file2.write(json.dumps(playerDatabase, ensure_ascii=False, indent=2))
+                file2.truncate()
+                file2.close()
             await ctx.send("PM me with '!stats <str> <dex> <con>' to set your abilities. Wouldn't want everyone "
                      "to see your secrets, would we?")
 
@@ -66,6 +78,11 @@ class Character(commands.Cog):
     async def name_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !name may not be used in PMs!")
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("Give your character a name. You can't just be "". Do you have any idea how hard that "
+                           "be to keep track of? Watch: ")
+            await ctx.send("     hit      for 9 points of damage.")
+            await ctx.send("What? No. Type !name <name> (Example: !name joe)")
         else:
             raise error
 
@@ -119,6 +136,11 @@ class Character(commands.Cog):
     async def stats_error(self, ctx, error):
         if isinstance(error, commands.PrivateMessageOnly):
             await ctx.send("You're an idiot, now everyone knows. You need to PM me with '!stats <str> <dex> <con>.")
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("So...you don't want stats? You want infinite stats? Only even numbers? Odd? Prime? What "
+                           "I'm getting at here, is that I don't know what you want, because ***you won't tell me!*** "
+                           "please type !stats <str> <dex> <con>. Where <str> is the number you want in strength, the "
+                           "second for dexterity, and the third for constitution. Ex: !stats 10 5 0")
         else:
             raise error
 
