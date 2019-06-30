@@ -46,11 +46,12 @@ class Feats(commands.Cog):
     @commands.command()
     @commands.dm_only()
     async def feathelp(self, ctx, *, answer):
-        
+
+
         featDictionary = featDict()[0]
         featList = featDict()[1]
         private = ctx.author.send
-        
+        answer = str(answer.lower())
         reqStat = featDictionary[0][answer]['stat']
         featStatus = featDictionary[0][answer]['status']
         level = featDictionary[0][answer]['requirements'][0]
@@ -58,7 +59,7 @@ class Feats(commands.Cog):
         reqDex = featDictionary[0][answer]['requirements'][2]
         reqCon = featDictionary[0][answer]['requirements'][3]
         reqFeats = featDictionary[0][answer]['requirements'][4]
-        await private("```" + answer + " (" + reqStat + ") (" + featStatus + "):\n" +
+        await private("```" + answer.capitalize() + " (" + reqStat + ") (" + featStatus + "):\n" +
                     featDictionary[0][answer]['desc'] +
                     "\nPrerequisites: " + "\nLevel: " + str(level) +
                     "\nStrength: " + str(reqStr) +
@@ -70,8 +71,11 @@ class Feats(commands.Cog):
     async def name_feathelp(self, ctx, error):
         if isinstance(error, commands.PrivateMessageOnly):
             await ctx.send("I'm not gonna spam the arena with this list, man. PM me with !feathelp <feat> for assistance.")
-        else:
-            raise error
+
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("I need the name of the feat you want help on. I can't read minds.")
+
+        raise error
 
     @commands.command()
     @commands.dm_only()

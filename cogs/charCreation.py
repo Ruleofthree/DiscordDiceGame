@@ -25,7 +25,6 @@ class Character(commands.Cog):
         if charFile.is_file():
             await ctx.send("You've already created a character, dumbass.")
         else:
-            await ctx.send("I did it!")
             await ctx.send("Your character name is: " + name)
             await ctx.send("Your character sheet has been created.")
             levelDict = {1: [25, 1, 6, 15, 2, 1, 5, 75]}
@@ -73,6 +72,7 @@ class Character(commands.Cog):
     @commands.command()
     @commands.dm_only()
     async def stats(self, ctx, strength, dexterity, constitution):
+        total = int(strength) + int(dexterity) + int(constitution)
         private = ctx.send
         player = str(ctx.message.author)
         path = os.getcwd()
@@ -88,10 +88,15 @@ class Character(commands.Cog):
         elif reset == 0:
             await private("You do not have a reset point with which to redo your ability points. If you feel this is "
                           "in error, please contact management.")
+
+        elif total > 15:
+            await private("You can not have more than 15 total points distributed between stats.")
         else:
             strMod = int(int(strength) / 2)
             dexMod = int(int(dexterity) / 2)
             conMod = int(int(constitution) * 5)
+            reset = charData['reset']
+            reset -= 1
             await private("Allocating the following: \n\n"
                           "Strength: " + strength + "   (+" + str(strMod) + " bonus to hit and damage.)\n"
                           "Dexterity: " + dexterity + "   (+" + str(dexMod) + " bonus to armor class.)\n"
