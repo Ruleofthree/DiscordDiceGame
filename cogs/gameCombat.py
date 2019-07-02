@@ -3,6 +3,7 @@ from discord.ext import commands
 import os
 import json
 import random
+import time
 from pathlib import Path
 
 # a simple function designed to open up the feats json, and parse out all the keys into a separate list. Intended for
@@ -25,6 +26,7 @@ def featDict():
 class Combat(commands.Cog):
 
     def __init__(self, client):
+
         self.client = client
         # STRINGS
         self.playerOne = ""
@@ -76,7 +78,170 @@ class Combat(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
+    @commands.has_role("Admin")
+    async def reset(self, ctx):
+
+        if self.token == 1:
+
+            self.winner = self.pOneInfo["name"]
+            self.loser = self.pTwoInfo["name"]
+            ctx.send("Fight is being reset due to inactivity. ")
+            ctx.send(self.winner + " wins by default.")
+            self.xp = 50
+            self.currentPlayerXP = self.pOneInfo['currentxp'] + self.xp
+            self.nextLevel = self.pOneInfo['nextlevel']
+            self.winner = self.pOneUsername
+            self.loser = self.pTwoUsername
+            self.levelUp = self.pOneInfo['level']
+            path = os.getcwd()
+            charFolder = os.path.join(path + "/characters/")
+
+            with open(charFolder + self.winner + '.txt', 'r+') as file:
+                charData = json.load(file)
+                charData['currentxp'] = self.currentPlayerXP
+                charData['wins'] += 1
+                file.seek(0)
+                file.write(json.dumps(charData, ensure_ascii=False, indent=2))
+                file.truncate()
+                file.close()
+
+            with open(charFolder + self.loser + '.txt', 'r+') as file:
+                charData = json.load(file)
+                charData['losses'] += 1
+                file.seek(0)
+                file.write(json.dumps(charData, ensure_ascii=False, indent=2))
+                file.truncate()
+                file.close()
+            if self.currentPlayerXP >= self.nextLevel:
+                newLevel = self.levelUp + 1
+                newLevel = str(newLevel)
+                await ctx.send(self.winner.capitalize() + " has reached level " + newLevel + "!")
+                levelFile = open("levelchart.txt", "r", encoding="utf-8")
+                levelDict = json.load(levelFile)
+                levelFile.close()
+                with open(charFolder + self.winner + '.txt', 'r+') as file:
+                    charData = json.load(file)
+                    charData['level'] = int(newLevel)
+                    charData['hitpoints'] = int(levelDict[newLevel][0])
+                    charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(
+                        levelDict[newLevel][2])
+                    charData['total feats'] = levelDict[newLevel][4]
+                    charData['hit'] = int(levelDict[newLevel][5])
+                    charData['damage modifier'] = int(levelDict[newLevel][5])
+                    charData['ac'] = int(levelDict[newLevel][6])
+                    charData['currentxp'] = int(self.currentPlayerXP)
+                    charData['nextlevel'] = int(levelDict[newLevel][7])
+                    file.seek(0)
+                    file.write(json.dumps(charData, ensure_ascii=False, indent=2))
+                    file.truncate()
+                    file.close()
+        elif self.token == 0:
+            self.winner = self.pOneInfo["name"]
+            self.loser = self.pTwoInfo["name"]
+            ctx.send("Fight is being reset due to inactivity. ")
+            ctx.send(self.winner + " wins by default.")
+            self.xp = 50
+            self.currentPlayerXP = self.pTwoInfo['currentxp'] + self.xp
+            self.nextLevel = self.pTwoInfo['nextlevel']
+            self.winner = self.pTwoUsername
+            self.loser = self.pOneUsername
+            self.levelUp = self.pTwoInfo['level']
+            path = os.getcwd()
+            charFolder = os.path.join(path + "/characters/")
+
+            with open(charFolder + self.winner + '.txt', 'r+') as file:
+                charData = json.load(file)
+                charData['currentxp'] = self.currentPlayerXP
+                charData['wins'] += 1
+                file.seek(0)
+                file.write(json.dumps(charData, ensure_ascii=False, indent=2))
+                file.truncate()
+                file.close()
+
+            with open(charFolder + self.loser + '.txt', 'r+') as file:
+                charData = json.load(file)
+                charData['losses'] += 1
+                file.seek(0)
+                file.write(json.dumps(charData, ensure_ascii=False, indent=2))
+                file.truncate()
+                file.close()
+
+            if self.currentPlayerXP >= self.nextLevel:
+                newLevel = self.levelUp + 1
+                newLevel = str(newLevel)
+                await ctx.send(self.winner.capitalize() + " has reached level " + newLevel + "!")
+                levelFile = open("levelchart.txt", "r", encoding="utf-8")
+                levelDict = json.load(levelFile)
+                levelFile.close()
+                with open(charFolder + self.winner + '.txt', 'r+') as file:
+                    charData = json.load(file)
+                    charData['level'] = int(newLevel)
+                    charData['hitpoints'] = int(levelDict[newLevel][0])
+                    charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(levelDict[newLevel][2])
+                    charData['total feats'] = levelDict[newLevel][4]
+                    charData['hit'] = int(levelDict[newLevel][5])
+                    charData['damage modifier'] = int(levelDict[newLevel][5])
+                    charData['ac'] = int(levelDict[newLevel][6])
+                    charData['currentxp'] = int(self.currentPlayerXP)
+                    charData['nextlevel'] = int(levelDict[newLevel][7])
+                    file.seek(0)
+                    file.write(json.dumps(charData, ensure_ascii=False, indent=2))
+                    file.truncate()
+                    file.close()
+        else:
+            self.playerOne = ""
+            self.playerTwo = ""
+            self.winner = ""
+            self.loser = ""
+            self.pOneUsername = None
+            self.pTwoUsername = None
+            # PLAYER INFO
+            self.pOneInfo = {}
+            self.pTwoInfo = {}
+            # HP AND TURN COUNTERS
+            self.count = 0
+            self.token = 0
+            self.game = 0
+            self.critical = 0
+            self.totalDamage = 0
+            self.pOneTotalHP = 0
+            self.pTwoTotalHP = 0
+            self.pOneCurrentHP = 0
+            self.pTwoCurrentHP = 0
+            # PLAYER ONE FEAT COUNTERS
+            self.pOnepMod = 0
+            self.pOnecMod = 0
+            self.pOnedMod = 0
+            self.pOnemMod = 0
+            self.pOneEvade = 1
+            self.pOneRiposte = 0
+            self.pOneQuickDamage = 0
+            self.pOneFeatInfo = None
+            self.pOneSpentFeat = []
+            # PLAYER TWO FEAT COUNTERS
+            self.pTwopMod = 0
+            self.pTwocMod = 0
+            self.pTwodMod = 0
+            self.pTwomMod = 0
+            self.pTwoEvade = 1
+            self.pTwoRiposte = 0
+            self.pTwoQuickDamage = 0
+            self.pTwoFeatInfo = None
+            self.pTwoSpentFeat = []
+            # XP AND LEVEL COUNTERS
+            self.pOneLevel = 0
+            self.pTwoLevel = 0
+            self.xp = 0
+            self.currentPlayerXP = 0
+            self.nextLevel = 0
+            self.levelUp = 0
+            ctx.send("The game has been reset.")
+
+    @commands.command()
+    @commands.guild_only()
     async def score(self, ctx, player):
+
+        player = str(player.capitalize())
 
         path = os.getcwd()
         charFolder = os.path.join(path + "/characters/")
@@ -89,12 +254,14 @@ class Combat(commands.Cog):
             losses = str(score['losses'])
         total = int(wins) + int(losses)
 
+
         if total == 0:
             await ctx.send(player + " has 100% win ratio. Or 0%. However you want to rationalize not having a single "
                                     "fight under their belt.")
         else:
-            ratio = int(wins) / total
-            await ctx.send(player + " has " + wins + " wins, and " + losses + "losses. (" + str(int(ratio)) + "%)")
+            ratio = int((int(wins) / total) * 100)
+
+            await ctx.send(player + " has " + wins + " wins, and " + losses + " losses. (" + (str(ratio)) + "%)")
 
     @commands.command()
     @commands.guild_only()
@@ -111,6 +278,8 @@ class Combat(commands.Cog):
             if not charFile.is_file():
                 await ctx.send("You don't even have a character made to fight. What are you planning to do? Emoji the"
                                "opponent to death? Make a character, first.")
+            elif self.game == 0.5:
+                await ctx.send("A challenge has already been issued.")
             else:
                 self.pOneUsername = ctx.message.author
                 file = open(charFolder + player + ".txt", "r", encoding="utf-8")
@@ -120,6 +289,16 @@ class Combat(commands.Cog):
                 self.pOneInfo = charStats
 
                 await ctx.send(self.pOneInfo['name'] + " has issued a challenge. Who accepts? (type !accept)")
+                self.game = 0.5
+                for second in range(30, 10, -1):
+                    if second == 30:
+                        await ctx.send("30 seconds to respond to challenge.")
+                    elif second == 10:
+                        await ctx.send("10 seconds to respond to challenge.")
+                    elif second == 0:
+                        await ctx.send("closing challenge offered.")
+                        self.game = 0
+                        time.sleep(60)
 
         else:
             await ctx.send("A Fight is already taking place. Wait your turn")
@@ -134,7 +313,7 @@ class Combat(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def accept(self, ctx):
-        if self.game == 0:
+        if self.game == 0.5:
             player = str(ctx.message.author)
             path = os.getcwd()
             charFolder = os.path.join(path + "/characters/")
@@ -424,9 +603,9 @@ class Combat(commands.Cog):
                                         self.pTwoQuickDamage) + "hp of damage.")
                         self.pTwoRiposte = 1
                     # # If Player Two has Evasion, Improved Evasion, or Greater Evasion, give them the option to use it.
-                    print(self.pTwoInfo['feats taken'])
+
                     for word in self.pTwoInfo['feats taken']:
-                        print("Am I here?")
+
                         answer = ""
                         if self.pTwoEvade == 1 and word == "evasion":
                             while answer != "yes" and answer != "no":
@@ -478,7 +657,7 @@ class Combat(commands.Cog):
                     # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
                     await ctx.send(
                                 "Roll: " + str(damage) + " Modifier: " + str(pOneModifier) + " PA: " + str(
-                                    pMod) + " CD: " + str(cMod))
+                                    pMod) + " CE: " + str(cMod))
                     # display total damage done, and reset passive feat counters (power attack and combat async defense)
                     await ctx.send( self.pOneInfo['name'] + " did " + str(total) + " points of damage.")
                     self.pOnepMod = 0
@@ -637,9 +816,9 @@ class Combat(commands.Cog):
                                             'name'] + " used 'quick strike,' managing to do an additional " + str(
                                             self.pTwoQuickDamage) + "hp of damage.")
                         # # If Player Two has Evasion, Improved Evasion, or Greater Evasion, give them the option to use it.
-                        print(self.pTwoInfo['feats taken'])
+
                         for word in self.pTwoInfo['feats taken']:
-                            print("Am I here?")
+
                             answer = ""
                             if self.pTwoEvade == 1 and word == "evasion":
                                 while answer != "yes" and answer != "no":
@@ -718,7 +897,7 @@ class Combat(commands.Cog):
                 # Print the scoreboard.
                 await ctx.send( self.pOneInfo['name'] + ": " + str(self.pOneCurrentHP) + "/" + str(
                     self.pOneTotalHP) + "  ||  " + self.pTwoInfo['name'] + ": " + str(
-                    self.pTwoCurrentHP) + "/" + str(self.pTwoTotalHP) + " " +
+                    self.pTwoCurrentHP) + "/" + str(self.pTwoTotalHP) + " \n" +
                             self.pTwoInfo['name'] + "'s turn. Type: !usefeat <feat> if you wish to use a feat.")
 
                 # If Player Two is dead, state such, and how many rounds it took to win. Calculate and distribute xp.
@@ -1204,7 +1383,7 @@ class Combat(commands.Cog):
                 # Print the scoreboard
                 await ctx.send( self.pOneInfo['name'] + ": " + str(self.pOneCurrentHP) + "/" +
                             str(self.pOneTotalHP) + "  ||  " + self.pTwoInfo['name'] + ": " +
-                            str(self.pTwoCurrentHP) + "/" + str(self.pTwoTotalHP) + " " +
+                            str(self.pTwoCurrentHP) + "/" + str(self.pTwoTotalHP) + " \n" +
                             self.pOneInfo['name'] + "'s turn. Type: !usefeat <feat> if you wish to use a feat.")
 
                 # If Player One is dead, state such, and how many rounds it took to win. Calculate and distribute xp.

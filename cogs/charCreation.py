@@ -16,6 +16,8 @@ class Character(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def name(self, ctx, name):
+
+        name.capitalize()
         player = str(ctx.message.author)
         path = os.getcwd()
         charFolder = os.path.join(path + "/characters/")
@@ -160,7 +162,6 @@ class Character(commands.Cog):
                 name = item[0]
 
         playerDatabase.pop(name, None)
-        print(name)
 
         with open(charFolder + "playerDatabase.txt", "w", encoding="utf-8") as file:
             json.dump(playerDatabase, file, sort_keys=True, indent=2)
