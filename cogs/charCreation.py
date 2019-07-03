@@ -110,7 +110,7 @@ class Character(commands.Cog):
         else:
             strMod = int(int(strength) / 2)
             dexMod = int(int(dexterity) / 2)
-            conMod = int(int(constitution) * 5)
+            conMod = int(int(constitution) / 2) * 5
             reset = charData['reset']
             reset -= 1
             await private("Allocating the following: \n\n"

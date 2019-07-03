@@ -290,15 +290,16 @@ class Combat(commands.Cog):
 
                 await ctx.send(self.pOneInfo['name'] + " has issued a challenge. Who accepts? (type !accept)")
                 self.game = 0.5
-                for second in range(30, 10, -1):
-                    if second == 30:
+
+                for seconds in range(0, 61):
+                    time.sleep(1)
+                    if seconds == 30:
                         await ctx.send("30 seconds to respond to challenge.")
-                    elif second == 10:
+                    elif seconds == 50:
                         await ctx.send("10 seconds to respond to challenge.")
-                    elif second == 0:
-                        await ctx.send("closing challenge offered.")
+                    elif seconds == 60:
+                        await ctx.send("Challenge reset.")
                         self.game = 0
-                        time.sleep(60)
 
         else:
             await ctx.send("A Fight is already taking place. Wait your turn")
