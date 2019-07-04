@@ -116,7 +116,9 @@ class Combat(commands.Cog):
                 newLevel = self.levelUp + 1
                 newLevel = str(newLevel)
                 await ctx.send(self.winner.capitalize() + " has reached level " + newLevel + "!")
-                levelFile = open("levelchart.txt", "r", encoding="utf-8")
+                path = os.getcwd()
+                charFolder = os.path.join(path + "/cogs/")
+                levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
                 levelDict = json.load(levelFile)
                 levelFile.close()
                 with open(charFolder + self.winner + '.txt', 'r+') as file:
@@ -170,7 +172,9 @@ class Combat(commands.Cog):
                 newLevel = self.levelUp + 1
                 newLevel = str(newLevel)
                 await ctx.send(self.winner.capitalize() + " has reached level " + newLevel + "!")
-                levelFile = open("levelchart.txt", "r", encoding="utf-8")
+                path = os.getcwd()
+                charFolder = os.path.join(path + "/cogs/")
+                levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
                 levelDict = json.load(levelFile)
                 levelFile.close()
                 with open(charFolder + self.winner + '.txt', 'r+') as file:
@@ -644,12 +648,12 @@ class Combat(commands.Cog):
                     #                 pass
                     #             else:
                     #                 await ctx.send("Answer 'yes' or 'no'")
-                    # If Player Two used 'async deflect', 'improved async deflect', or 'greater async deflect', apply damage mitigation here
+                    # If Player Two used 'deflect', 'improved deflect', or 'greater deflect', apply damage mitigation here
                     if pTwoFeatUsed[0] == "deflect":
-                        await ctx.send( self.pTwoInfo['name'] + " used async deflect to lessen the blow.")
+                        await ctx.send( self.pTwoInfo['name'] + " used deflect to lessen the blow.")
                         total = int(total * float(pTwoFeatUsed[1]))
                     elif pTwoFeatUsed[0] == "improved deflect":
-                        await ctx.send( self.pTwoInfo['name'] + " used async deflect to lessen the blow")
+                        await ctx.send( self.pTwoInfo['name'] + " used deflect to lessen the blow")
                         total = int(total * float(pTwoFeatUsed[1]))
                     elif pTwoFeatUsed[0] == "greater deflect":
                         await ctx.send( self.pTwoInfo['name'] + " used deflect to lessen the blow")
@@ -959,7 +963,9 @@ class Combat(commands.Cog):
                         newLevel = self.levelUp + 1
                         newLevel = str(newLevel)
                         await ctx.send( self.winner.capitalize() + " has reached level " + newLevel + "!")
-                        levelFile = open("levelchart.txt", "r", encoding="utf-8")
+                        path = os.getcwd()
+                        charFolder = os.path.join(path + "/cogs/")
+                        levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
                         levelDict = json.load(levelFile)
                         levelFile.close()
                         with open(charFolder + self.winner + '.txt', 'r+') as file:
@@ -1443,7 +1449,9 @@ class Combat(commands.Cog):
                         newLevel = self.levelUp + 1
                         newLevel = str(newLevel)
                         await ctx.send( self.winner.capitalize() + " has reached level " + newLevel + "!")
-                        levelFile = open("levelchart.txt", "r", encoding="utf-8")
+                        path = os.getcwd()
+                        charFolder = os.path.join(path + "/cogs/")
+                        levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
                         levelDict = json.load(levelFile)
                         levelFile.close()
                         with open(charFolder + self.winner + '.txt', 'r+') as file:
