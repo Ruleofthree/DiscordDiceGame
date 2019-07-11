@@ -29,30 +29,31 @@ class Character(commands.Cog):
         else:
             await ctx.send("Your character name is: " + name)
             await ctx.send("Your character sheet has been created.")
-            levelDict = {1: [25, 1, 6, 15, 2, 1, 5, 75]}
+            with open(charFolder + "levelchart.txt", 'r', encoding="utf-8") as file:
+                levelDict = json.loads(file.read())
             characterFile = {}
             level = 1
             xp = 0
             characterFile["name"] = name
             characterFile["level"] = level
-            hp = levelDict[1][0]
+            hp = levelDict["1"][0]
             characterFile["hp"] = hp
-            tFeats = levelDict[1][4]
+            tFeats = levelDict["1"][4]
             characterFile["total feats"] = tFeats
-            numberOfDice = levelDict[1][1]
-            numberOfSides = levelDict[1][2]
+            numberOfDice = levelDict["1"][1]
+            numberOfSides = levelDict["1"][2]
             characterFile["base damage"] = str(numberOfDice) + "d" + str(numberOfSides)
-            characterFile["hit"] = levelDict[1][5]
-            characterFile["damage"] = levelDict[1][5]
-            characterFile["ac"] = levelDict[1][6]
+            characterFile["hit"] = levelDict["1"][5]
+            characterFile["damage"] = levelDict["1"][5]
+            characterFile["ac"] = levelDict["1"][6]
             characterFile["currentxp"] = xp
-            nextLevel = levelDict[1][7]
+            nextLevel = levelDict["1"][7]
             characterFile["nextlevel"] = nextLevel
             characterFile["strength"] = 0
             characterFile["dexterity"] = 0
             characterFile["constitution"] = 0
             characterFile["remaining feats"] = 2
-            ap = levelDict[1][3]
+            ap = levelDict["1"][3]
             characterFile["total ap"] = ap
             hasTaken = []
             characterFile["feats taken"] = hasTaken
@@ -122,10 +123,15 @@ class Character(commands.Cog):
                 charData["strength"] = int(strength)
                 charData["dexterity"] = int(dexterity)
                 charData["constitution"] = int(constitution)
-                charData["hit"] = int(charData["hit"] + strMod)
-                charData["damage"] = int(charData["damage"] + strMod)
-                charData["ac"] = int(charData["ac"] + dexMod)
-                charData["hp"] = int(charData["hp"] + conMod)
+                charData["abhit"] = strMod
+                charData["abdamage"] = strMod
+                charData["abac"] = dexMod
+                charData["abhp"] = conMod
+                charData["feathp"] = 0
+                charData["featac"] = 0
+                charData["feathit"] = 0
+                charData["featdamage"] = 0
+                charData["dexfighter"] = 0
                 file.seek(0)
                 file.write(json.dumps(charData, ensure_ascii=False, indent=2))
                 file.truncate()

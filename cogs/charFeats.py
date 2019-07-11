@@ -89,29 +89,29 @@ class Feats(commands.Cog):
         
         path = os.getcwd()
         charFolder = os.path.join(path + "/characters/")
-        charFile = Path(charFolder + player + ".txt")
+        # charFile = Path(charFolder + player + ".txt")
         file = open(charFolder + player + ".txt", "r", encoding="utf-8")
         charData = json.load(file)
         file.close()
 
-        name = charData['name']
+        # name = charData['name']
         level = charData['level']
-        hp = charData['hp']
-        tFeats = charData['total feats']
-        baseDamage = charData['base damage']
-        hit = charData['hit']
-        damage = charData['damage']
-        ac = charData['ac']
-        xp = charData['currentxp']
-        nextLevel = charData['nextlevel']
+        # hp = charData['hp'] + charData['abhp']
+        # tFeats = charData['total feats']
+        # baseDamage = charData['base damage']
+        hit = charData['hit'] + charData['abhit']
+        # damage = charData['damage'] + charData['abdamage']
+        # ac = charData['ac'] + charData['abac']
+        # xp = charData['currentxp']
+        # nextLevel = charData['nextlevel']
         strength = charData['strength']
         dexterity = charData['dexterity']
         constitution = charData['constitution']
         remainingFeats = charData['remaining feats']
         hasTaken = charData['feats taken']
-        charFeats = ", ".join(hasTaken)
-        ap = charData['total ap']
-        reset = charData['reset']
+        # charFeats = ", ".join(hasTaken)
+        # ap = charData['total ap']
+        # reset = charData['reset']
         
         if remainingFeats == 0:
             await private("You have no feat slots left to select a new feat")
@@ -137,136 +137,132 @@ class Feats(commands.Cog):
                 await private(answer + " has been added to your character sheet.")
                 remainingFeats -= 1
                 hasTaken.append(answer)
-                if answer == "dexterous fighter":
-                    dexMod = int(dexterity / 2)
-                    strMod = int(strength / 2)
-                    hit = hit + dexMod - strMod
 
-                if answer == "crushing blow":
-                    damageMod = 1
-                    damage = damage + damageMod
-                if answer == "improved crushing blow":
-                    damageMod = 3
-                    damage = damage + damageMod
-                    index = hasTaken.index("crushing blow")
-                    hasTaken.pop(index)
-                if answer == "greater crushing blow":
-                    damageMod = 5
-                    damage = damage + damageMod
-                    index = hasTaken.index("improved crushing blow")
-                    hasTaken.pop(index)
-                if answer == "titan blow":
-                    index = hasTaken.index("greater crushing blow")
-                    hasTaken.pop(index)
+            hpMod = 0
+            acMod = 0
+            hitMod = 0
+            damageMod = 0
+            switchHit = 0
 
-                if answer == "precision strike":
-                    hitMod = 1
-                    hit = hit + hitMod
-                if answer == "improved precision strike":
-                    hitMod = 3
-                    hit = hit + hitMod
-                    index = hasTaken.index("precision strike")
-                    hasTaken.pop(index)
-                if answer == "greater precision strike":
-                    hitMod = 5
-                    hit = hit + hitMod
-                    index = hasTaken.index("improved precision strike")
-                    hasTaken.pop(index)
-                if answer == "true strike":
-                    index = hasTaken.index("greater precision strike")
-                    hasTaken.pop(index)
+            if answer == "dexterous fighter":
+                dexMod = int(dexterity / 2)
+                strMod = int(strength / 2)
+                switchHit = hit + dexMod - strMod
 
-                if answer == "lightning reflexes":
-                    acMod = 1
-                    ac = ac + acMod
-                if answer == "improved lightning reflexes":
-                    acMod = 3
-                    ac = ac + acMod
-                    index = hasTaken.index("lightning reflexes")
-                    hasTaken.pop(index)
-                if answer == "greater lightning reflexes":
-                    acMod = 5
-                    ac = ac + acMod
-                    index = hasTaken.index("improved lightning reflexes")
-                    hasTaken.pop(index)
+            if answer == "crushing blow":
+                damageMod = 1
+            if answer == "improved crushing blow":
+                damageMod = 3
+                index = hasTaken.index("crushing blow")
+                hasTaken.pop(index)
+            if answer == "greater crushing blow":
+                damageMod = 5
+                index = hasTaken.index("improved crushing blow")
+                hasTaken.pop(index)
+            if answer == "titan blow":
+                index = hasTaken.index("greater crushing blow")
+                hasTaken.pop(index)
 
-                if answer == "endurance":
-                    hpMod = 5
-                    hp = hp + hpMod
-                if answer == "improved endurance":
-                    hpMod = 15
-                    hp = hp + hpMod
-                    index = hasTaken.index("endurance")
-                    hasTaken.pop(index)
-                if answer == "greater endurance":
-                    hpMod = 30
-                    hp = hp + hpMod
-                    index = hasTaken.index("improved endurance")
-                    hasTaken.pop(index)
+            if answer == "precision strike":
+                hitMod = 1
+            if answer == "improved precision strike":
+                hitMod = 3
+                index = hasTaken.index("precision strike")
+                hasTaken.pop(index)
+            if answer == "greater precision strike":
+                hitMod = 5
+                index = hasTaken.index("improved precision strike")
+                hasTaken.pop(index)
+            if answer == "true strike":
+                index = hasTaken.index("greater precision strike")
+                hasTaken.pop(index)
 
-                if answer == "improved crippling blow":
-                    index = hasTaken.index("crippling blow")
-                    hasTaken.pop(index)
-                if answer == "greater crippling blow":
-                    index = hasTaken.index("improved crippling blow")
-                    hasTaken.pop(index)
-                if answer == "staggering blow":
-                    index = hasTaken.index("greater crippling blow")
-                    hasTaken.pop(index)
+            if answer == "lightning reflexes":
+                acMod = 1
+            if answer == "improved lightning reflexes":
+                acMod = 3
+                index = hasTaken.index("lightning reflexes")
+                hasTaken.pop(index)
+            if answer == "greater lightning reflexes":
+                acMod = 5
+                index = hasTaken.index("improved lightning reflexes")
+                hasTaken.pop(index)
 
-                if answer == "improved evasion":
-                    index = hasTaken.index("evasion")
-                    hasTaken.pop(index)
-                if answer == "greater evasion":
-                    index = hasTaken.index("improved evasion")
-                    hasTaken.pop(index)
+            if answer == "endurance":
+                hpMod = 5
+            if answer == "improved endurance":
+                hpMod = 15
+                index = hasTaken.index("endurance")
+                hasTaken.pop(index)
+            if answer == "greater endurance":
+                hpMod = 30
+                index = hasTaken.index("improved endurance")
+                hasTaken.pop(index)
 
-                if answer == "improved quick strike":
-                    index = hasTaken.index("quick strike")
-                    hasTaken.pop(index)
-                if answer == "greater quick strike":
-                    index = hasTaken.index("improved quick strike")
-                    hasTaken.pop(index)
-                if answer == "riposte":
-                    index = hasTaken.index("greater quick strike")
-                    hasTaken.pop(index)
+            if answer == "improved crippling blow":
+                index = hasTaken.index("crippling blow")
+                hasTaken.pop(index)
+            if answer == "greater crippling blow":
+                index = hasTaken.index("improved crippling blow")
+                hasTaken.pop(index)
+            if answer == "staggering blow":
+                index = hasTaken.index("greater crippling blow")
+                hasTaken.pop(index)
 
-                if answer == "improved deflect":
-                    index = hasTaken.index("deflect")
-                    hasTaken.pop(index)
-                if answer == "greater deflect":
-                    index = hasTaken.index("improved deflect")
-                    hasTaken.pop(index)
+            if answer == "improved evasion":
+                index = hasTaken.index("evasion")
+                hasTaken.pop(index)
+            if answer == "greater evasion":
+                index = hasTaken.index("improved evasion")
+                hasTaken.pop(index)
 
-                if answer == "improved hurt me":
-                    index = hasTaken.index("hurt me")
-                    hasTaken.pop(index)
-                if answer == "greater hurt me":
-                    index = hasTaken.index("improved hurt me")
-                    hasTaken.pop(index)
-                if answer == "hurt me more":
-                    index = hasTaken.index("greater hurt me")
-                    hasTaken.pop(index)
+            if answer == "improved quick strike":
+                index = hasTaken.index("quick strike")
+                hasTaken.pop(index)
+            if answer == "greater quick strike":
+                index = hasTaken.index("improved quick strike")
+                hasTaken.pop(index)
+            if answer == "riposte":
+                index = hasTaken.index("greater quick strike")
+                hasTaken.pop(index)
 
-                if answer == "improved reckless abandon":
-                    index = hasTaken.index("reckless abandon")
-                    hasTaken.pop(index)
-                if answer == "greater reckless abandon":
-                    index = hasTaken.index("improved reckless abandon")
-                    hasTaken.pop(index)
+            if answer == "improved deflect":
+                index = hasTaken.index("deflect")
+                hasTaken.pop(index)
+            if answer == "greater deflect":
+                index = hasTaken.index("improved deflect")
+                hasTaken.pop(index)
 
-                with open(charFolder + player + ".txt", "r+", encoding="utf-8") as file:
-                    charData = json.load(file)
-                    charData["hp"] = int(hp)
-                    charData["ac"] = int(ac)
-                    charData["hit"] = int(hit)
-                    charData["damage"] = int(damage)
-                    charData["feats taken"] = hasTaken
-                    charData["remaining feats"] = remainingFeats
-                    file.seek(0)
-                    file.write(json.dumps(charData, ensure_ascii=False, indent=2))
-                    file.truncate()
-                    file.close()
+            if answer == "improved hurt me":
+                index = hasTaken.index("hurt me")
+                hasTaken.pop(index)
+            if answer == "greater hurt me":
+                index = hasTaken.index("improved hurt me")
+                hasTaken.pop(index)
+            if answer == "hurt me more":
+                index = hasTaken.index("greater hurt me")
+                hasTaken.pop(index)
+
+            if answer == "improved reckless abandon":
+                index = hasTaken.index("reckless abandon")
+                hasTaken.pop(index)
+            if answer == "greater reckless abandon":
+                index = hasTaken.index("improved reckless abandon")
+                hasTaken.pop(index)
+
+            with open(charFolder + player + ".txt", "r+", encoding="utf-8") as file:
+                charData = json.load(file)
+                charData["feathp"] = int(hpMod)
+                charData["featac"] = int(acMod)
+                charData["feathit"] = int(hitMod)
+                charData["featdamage"] = int(damageMod)
+                charData["dexfighter"] = int(switchHit)
+                charData["feats taken"] = hasTaken
+                charData["remaining feats"] = remainingFeats
+                file.seek(0)
+                file.write(json.dumps(charData, ensure_ascii=False, indent=2))
+                file.truncate()
+                file.close()
 
     @feat.error
     async def name_feat(self, ctx, error):
