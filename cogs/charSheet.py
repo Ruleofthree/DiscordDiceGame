@@ -53,11 +53,11 @@ class Sheet(commands.Cog):
 
             await private("```\n"
                           "Name:               " + str(name) + "\n"
-                          "Level:              " + str(level) + "                      Strength:           " + str(strength) + "\n"
+                          "Level:              " + str(level) + "                       Strength:           " + str(strength) + "\n"
                           "Hit Points:         " + str(hp) + "                      Dexterity:          " + str(dexterity) + "\n"
                           "Armor Class:        " + str(ac) + "                       Constitution:       " + str(constitution) + "\n"
                           "Base Damage:        " + str(baseDamage) + "                     Ability Points:     " + str(ap) + "\n"
-                          "Hit Modifier:       " + str(hit) + "                      Reset:              " + str(reset) + "\n"
+                          "Hit Modifier:       " + str(hit) + "                       Reset:              " + str(reset) + "\n"
                           "Damage Modifier:    " + str(damage) + "\n"
                           "Total Feats:        " + str(tFeats) + "\n"
                           "Experience Points:  " + str(xp) + "\n"

@@ -32,34 +32,39 @@ class Character(commands.Cog):
             with open(charFolder + "levelchart.txt", 'r', encoding="utf-8") as file:
                 levelDict = json.loads(file.read())
             characterFile = {}
-            level = 1
-            xp = 0
             characterFile["name"] = name
-            characterFile["level"] = level
-            hp = levelDict["1"][0]
-            characterFile["hp"] = hp
-            tFeats = levelDict["1"][4]
-            characterFile["total feats"] = tFeats
-            numberOfDice = levelDict["1"][1]
-            numberOfSides = levelDict["1"][2]
+            characterFile["level"] = 3
+            characterFile["hp"] = levelDict["3"][0]
+            characterFile["total feats"] = levelDict["3"][4]
+            numberOfDice = levelDict["3"][1]
+            numberOfSides = levelDict["3"][2]
             characterFile["base damage"] = str(numberOfDice) + "d" + str(numberOfSides)
-            characterFile["hit"] = levelDict["1"][5]
-            characterFile["damage"] = levelDict["1"][5]
-            characterFile["ac"] = levelDict["1"][6]
-            characterFile["currentxp"] = xp
-            nextLevel = levelDict["1"][7]
+            characterFile["hit"] = levelDict["3"][5]
+            characterFile["damage"] = levelDict["3"][5]
+            characterFile["ac"] = levelDict["3"][6]
+            characterFile["currentxp"] = 835
+            nextLevel = levelDict["3"][7]
             characterFile["nextlevel"] = nextLevel
             characterFile["strength"] = 0
             characterFile["dexterity"] = 0
             characterFile["constitution"] = 0
-            characterFile["remaining feats"] = 2
-            ap = levelDict["1"][3]
+            characterFile["remaining feats"] = levelDict["3"][4]
+            ap = levelDict["3"][3]
             characterFile["total ap"] = ap
             hasTaken = []
             characterFile["feats taken"] = hasTaken
             characterFile["wins"] = 0
             characterFile["losses"] = 0
             characterFile["reset"] = 3
+            characterFile["abhp"] = 0
+            characterFile["abhit"] = 0
+            characterFile["abdamage"] = 0
+            characterFile["abac"] = 0
+            characterFile["feathp"] = 0
+            characterFile["feathit"] = 0
+            characterFile["featdamage"] = 0
+            characterFile["featac"] = 0
+            characterFile["dexfigher"] = 0
 
 
             file = open(charFolder + player + ".txt", "w", encoding="utf-8")
@@ -174,6 +179,11 @@ class Character(commands.Cog):
 
         os.remove(charFile)
         await ctx.send(name + " was successfully deleted.")
+
+    @stats.error
+    async def erase_error(self, ctx, error):
+        if isinstance(error, commands.NoPrivateMessage):
+            await ctx.send("The command !error may not be used in PMs!")
 
 
 def setup(client):
