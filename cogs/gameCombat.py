@@ -116,7 +116,7 @@ class Combat(commands.Cog):
                 newLevel = self.levelUp + 1
                 newLevel = str(newLevel)
                 await ctx.send(self.winner.capitalize() + " has reached level " + newLevel + "!")
-                levelFile = open("levelchart.txt", "r", encoding="utf-8")
+                levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
                 levelDict = json.load(levelFile)
                 levelFile.close()
                 with open(charFolder + self.winner + '.txt', 'r+') as file:
@@ -125,7 +125,16 @@ class Combat(commands.Cog):
                     charData['hitpoints'] = int(levelDict[newLevel][0])
                     charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(
                         levelDict[newLevel][2])
-                    charData['total feats'] = levelDict[newLevel][4]
+                    if charData['total feats'] == levelDict[newLevel][4]:
+                        charData['total feats'] = levelDict[newLevel][4]
+                    else:
+                        await ctx.send("You have a new feat slot to fill. Use the !feat command to select new feat.")
+                        charData['total feats'] = levelDict[newLevel][4]
+                        charData['remaining feats'] = 1
+                    if charData['total ap'] == levelDict[newLevel][3]:
+                        charData['total ap'] = levelDict[newLevel][3]
+                    else:
+                        await ctx.send("You have a new ability point to spend. the !add command.")
                     charData['hit'] = int(levelDict[newLevel][5])
                     charData['damage modifier'] = int(levelDict[newLevel][5])
                     charData['ac'] = int(levelDict[newLevel][6])
@@ -170,15 +179,25 @@ class Combat(commands.Cog):
                 newLevel = self.levelUp + 1
                 newLevel = str(newLevel)
                 await ctx.send(self.winner.capitalize() + " has reached level " + newLevel + "!")
-                levelFile = open("levelchart.txt", "r", encoding="utf-8")
+                levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
                 levelDict = json.load(levelFile)
                 levelFile.close()
                 with open(charFolder + self.winner + '.txt', 'r+') as file:
                     charData = json.load(file)
                     charData['level'] = int(newLevel)
                     charData['hitpoints'] = int(levelDict[newLevel][0])
-                    charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(levelDict[newLevel][2])
-                    charData['total feats'] = levelDict[newLevel][4]
+                    charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(
+                        levelDict[newLevel][2])
+                    if charData['total feats'] == levelDict[newLevel][4]:
+                        charData['total feats'] = levelDict[newLevel][4]
+                    else:
+                        await ctx.send("You have a new feat slot to fill. Use the !feat command to select new feat.")
+                        charData['total feats'] = levelDict[newLevel][4]
+                        charData['remaining feats'] = 1
+                    if charData['total ap'] == levelDict[newLevel][3]:
+                        charData['total ap'] = levelDict[newLevel][3]
+                    else:
+                        await ctx.send("You have a new ability point to spend. the !add command.")
                     charData['hit'] = int(levelDict[newLevel][5])
                     charData['damage modifier'] = int(levelDict[newLevel][5])
                     charData['ac'] = int(levelDict[newLevel][6])
@@ -188,6 +207,7 @@ class Combat(commands.Cog):
                     file.write(json.dumps(charData, ensure_ascii=False, indent=2))
                     file.truncate()
                     file.close()
+
         else:
             self.playerOne = ""
             self.playerTwo = ""
@@ -926,28 +946,35 @@ class Combat(commands.Cog):
                         newLevel = self.levelUp + 1
                         newLevel = str(newLevel)
                         await ctx.send( self.winner.capitalize() + " has reached level " + newLevel + "!")
-                        levelFile = open("levelchart.txt", "r", encoding="utf-8")
+                        levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
                         levelDict = json.load(levelFile)
                         levelFile.close()
                         with open(charFolder + self.winner + '.txt', 'r+') as file:
                             charData = json.load(file)
                             charData['level'] = int(newLevel)
-                            charData['hitpoints'] = int(levelDict[newLevel][0]) + charData['abhp'] + charData['feathp']
+                            charData['hitpoints'] = int(levelDict[newLevel][0])
                             charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(
                                 levelDict[newLevel][2])
-                            charData['total feats'] = levelDict[newLevel][4]
-                            if 'dexterous fighter' in charData['feats taken']:
-                                charData['hit'] = charData['dexfighter'] + int(levelDict[newLevel][5]) + charData['abhit'] + charData['feathit']
+                            if charData['total feats'] == levelDict[newLevel][4]:
+                                charData['total feats'] = levelDict[newLevel][4]
                             else:
-                                charData['hit'] = int(levelDict[newLevel][5]) + charData['abhit'] + charData['feathit']
-                            charData['damage modifier'] = int(levelDict[newLevel][5]) + charData['abdamage'] + charData['featdamage']
-                            charData['ac'] = int(levelDict[newLevel][6]) + charData['abac'] + charData['featac']
+                                await ctx.send("You have a new feat slot to fill. Use the !feat command to select new feat.")
+                                charData['total feats'] = levelDict[newLevel][4]
+                                charData['remaining feats'] = 1
+                            if charData['total ap'] == levelDict[newLevel][3]:
+                                charData['total ap'] = levelDict[newLevel][3]
+                            else:
+                                await ctx.send("You have a new ability point to spend. the !add command.")
+                            charData['hit'] = int(levelDict[newLevel][5])
+                            charData['damage modifier'] = int(levelDict[newLevel][5])
+                            charData['ac'] = int(levelDict[newLevel][6])
                             charData['currentxp'] = int(self.currentPlayerXP)
                             charData['nextlevel'] = int(levelDict[newLevel][7])
                             file.seek(0)
                             file.write(json.dumps(charData, ensure_ascii=False, indent=2))
                             file.truncate()
                             file.close()
+
                     else:
                         pass
             # ensures the command can only be used by player two, when it is their turn. To prevent trolls from
@@ -1413,29 +1440,36 @@ class Combat(commands.Cog):
                         newLevel = self.levelUp + 1
                         newLevel = str(newLevel)
                         await ctx.send( self.winner.capitalize() + " has reached level " + newLevel + "!")
-                        levelFile = open("levelchart.txt", "r", encoding="utf-8")
+                        levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
                         levelDict = json.load(levelFile)
                         levelFile.close()
                         with open(charFolder + self.winner + '.txt', 'r+') as file:
                             charData = json.load(file)
                             charData['level'] = int(newLevel)
-                            charData['hitpoints'] = int(levelDict[newLevel][0]) + charData['abhp'] + charData['feathp']
+                            charData['hitpoints'] = int(levelDict[newLevel][0])
                             charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(
                                 levelDict[newLevel][2])
-                            charData['total feats'] = levelDict[newLevel][4]
-                            if 'dexterous fighter' in charData['feats taken']:
-                                charData['hit'] = charData['dexfighter'] + int(levelDict[newLevel][5]) + charData['abhit'] + charData['feathit']
+                            if charData['total feats'] == levelDict[newLevel][4]:
+                                charData['total feats'] = levelDict[newLevel][4]
                             else:
-                                charData['hit'] = int(levelDict[newLevel][5]) + charData['abhit'] + charData['feathit']
-                            charData['damage modifier'] = int(levelDict[newLevel][5]) + charData['abdamage'] + charData['featdamage']
-                            charData['ac'] = int(levelDict[newLevel][6]) + charData['abac'] + charData['featac']
+                                await ctx.send(
+                                    "You have a new feat slot to fill. Use the !feat command to select new feat.")
+                                charData['total feats'] = levelDict[newLevel][4]
+                                charData['remaining feats'] = 1
+                            if charData['total ap'] == levelDict[newLevel][3]:
+                                charData['total ap'] = levelDict[newLevel][3]
+                            else:
+                                await ctx.send("You have a new ability point to spend. the !add command.")
+                            charData['hit'] = int(levelDict[newLevel][5])
+                            charData['damage modifier'] = int(levelDict[newLevel][5])
+                            charData['ac'] = int(levelDict[newLevel][6])
                             charData['currentxp'] = int(self.currentPlayerXP)
                             charData['nextlevel'] = int(levelDict[newLevel][7])
                             file.seek(0)
                             file.write(json.dumps(charData, ensure_ascii=False, indent=2))
                             file.truncate()
                             file.close()
-                            file.close()
+
                     else:
                         pass
 
