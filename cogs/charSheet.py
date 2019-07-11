@@ -31,12 +31,15 @@ class Sheet(commands.Cog):
 
             name = charStats['name']
             level = charStats['level']
-            hp = charStats['hp']
+            hp = charStats['hp'] + charStats['abhp'] + charStats['feathp']
             tFeats = charStats['total feats']
             baseDamage = charStats['base damage']
-            hit = charStats['hit']
-            damage = charStats['damage']
-            ac = charStats['ac']
+            if "dexterous fighter" in charStats['feats taken']:
+                hit = charStats['dexfighter'] + charStats['abhit'] + charStats['feathit']
+            else:
+                hit = charStats['hit'] + charStats['abhit'] + charStats['feathit']
+            damage = charStats['damage'] + charStats['abdamage'] + charStats['featdamage']
+            ac = charStats['ac'] + charStats['abac'] + charStats['featac']
             xp = charStats['currentxp']
             nextLevel = charStats['nextlevel']
             strength = charStats['strength']
@@ -49,12 +52,12 @@ class Sheet(commands.Cog):
             reset = charStats['reset']
 
             await private("```\n"
-                          "Name:               " + str(name) + "          Strength:           " + str(strength) + "\n"
-                          "Level:              " + str(level) + "               Dexterity:          " + str(dexterity) + "\n"
-                          "Hit Points:         " + str(hp) + "              Constitution:       " + str(constitution) + "\n"
-                          "Armor Class:        " + str(ac) + "              Ability Points:     " + str(ap) + "\n"
-                          "Base Damage:        " + str(baseDamage) + "             Reset:              " + str(reset) + "\n"
-                          "Hit Modifier:       " + str(hit) + "\n"
+                          "Name:               " + str(name) + "\n"
+                          "Level:              " + str(level) + "                            Strength:           " + str(strength) + "\n"
+                          "Hit Points:         " + str(hp) + "                           Dexterity:          " + str(dexterity) + "\n"
+                          "Armor Class:        " + str(ac) + "                           Constitution:       " + str(constitution) + "\n"
+                          "Base Damage:        " + str(baseDamage) + "                          Ability Points:     " + str(ap) + "\n"
+                          "Hit Modifier:       " + str(hit) + "                            Reset:              " + str(reset) + "\n"
                           "Damage Modifier:    " + str(damage) + "\n"
                           "Total Feats:        " + str(tFeats) + "\n"
                           "Experience Points:  " + str(xp) + "\n"

@@ -116,8 +116,6 @@ class Combat(commands.Cog):
                 newLevel = self.levelUp + 1
                 newLevel = str(newLevel)
                 await ctx.send(self.winner.capitalize() + " has reached level " + newLevel + "!")
-                path = os.getcwd()
-                charFolder = os.path.join(path + "/cogs/")
                 levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
                 levelDict = json.load(levelFile)
                 levelFile.close()
@@ -127,7 +125,16 @@ class Combat(commands.Cog):
                     charData['hitpoints'] = int(levelDict[newLevel][0])
                     charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(
                         levelDict[newLevel][2])
-                    charData['total feats'] = levelDict[newLevel][4]
+                    if charData['total feats'] == levelDict[newLevel][4]:
+                        charData['total feats'] = levelDict[newLevel][4]
+                    else:
+                        await ctx.send("You have a new feat slot to fill. Use the !feat command to select new feat.")
+                        charData['total feats'] = levelDict[newLevel][4]
+                        charData['remaining feats'] = 1
+                    if charData['total ap'] == levelDict[newLevel][3]:
+                        charData['total ap'] = levelDict[newLevel][3]
+                    else:
+                        await ctx.send("You have a new ability point to spend. the !add command.")
                     charData['hit'] = int(levelDict[newLevel][5])
                     charData['damage modifier'] = int(levelDict[newLevel][5])
                     charData['ac'] = int(levelDict[newLevel][6])
@@ -172,8 +179,6 @@ class Combat(commands.Cog):
                 newLevel = self.levelUp + 1
                 newLevel = str(newLevel)
                 await ctx.send(self.winner.capitalize() + " has reached level " + newLevel + "!")
-                path = os.getcwd()
-                charFolder = os.path.join(path + "/cogs/")
                 levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
                 levelDict = json.load(levelFile)
                 levelFile.close()
@@ -181,8 +186,18 @@ class Combat(commands.Cog):
                     charData = json.load(file)
                     charData['level'] = int(newLevel)
                     charData['hitpoints'] = int(levelDict[newLevel][0])
-                    charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(levelDict[newLevel][2])
-                    charData['total feats'] = levelDict[newLevel][4]
+                    charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(
+                        levelDict[newLevel][2])
+                    if charData['total feats'] == levelDict[newLevel][4]:
+                        charData['total feats'] = levelDict[newLevel][4]
+                    else:
+                        await ctx.send("You have a new feat slot to fill. Use the !feat command to select new feat.")
+                        charData['total feats'] = levelDict[newLevel][4]
+                        charData['remaining feats'] = 1
+                    if charData['total ap'] == levelDict[newLevel][3]:
+                        charData['total ap'] = levelDict[newLevel][3]
+                    else:
+                        await ctx.send("You have a new ability point to spend. the !add command.")
                     charData['hit'] = int(levelDict[newLevel][5])
                     charData['damage modifier'] = int(levelDict[newLevel][5])
                     charData['ac'] = int(levelDict[newLevel][6])
@@ -192,6 +207,7 @@ class Combat(commands.Cog):
                     file.write(json.dumps(charData, ensure_ascii=False, indent=2))
                     file.truncate()
                     file.close()
+
         else:
             self.playerOne = ""
             self.playerTwo = ""
@@ -478,12 +494,6 @@ class Combat(commands.Cog):
         else:
             raise error
 
-    # Next two methods are created to see if a character hit the other character or not. Simulates rolling 1d20 (1-20)
-    # then adding any modifiers to the result. If the total either meets or exceeds the other players AC, notify the
-    # players that the hit was successful, then move on to the damage methods. If the total does not, notify player
-    # that it was a miss, and move on to other player's turn.
-    # Note: I want to add in a result that will double damage if the ROLL is a 20, not the total.
-
     @commands.command()
     @commands.guild_only()
     async def roll(self, ctx):
@@ -492,10 +502,6 @@ class Combat(commands.Cog):
         if self.game == 1:
             # ensures the command can only be used by player one, when it is their turn. To prevent trolls from
             # spamming commands.
-            # print(character)
-            # print(self.pOneUsername)
-            # print(self.pTwoUsername)
-            # print(self.token)
             if character == self.pOneUsername and self.token == 1:
 
                 # assign both player's feat selections to variables
@@ -514,7 +520,7 @@ class Combat(commands.Cog):
                     await ctx.send( self.pOneInfo['name'] +
                                 " used the feat 'True Strike.' And forgoes the need to determine if hit was success.")
 
-                    # Obtain Player One's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat async defense'
+                    # Obtain Player One's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat defense'
                     # modifiers to variables, and roll damage.
                     pOneBaseDamage = self.pOneInfo['base damage']
                     pOneModifier = self.pOneInfo['damage']
@@ -560,10 +566,8 @@ class Combat(commands.Cog):
                             quickDamage = 1
                         self.pTwoQuickDamage = quickDamage
                         self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                        await ctx.send(
-                                    self.pTwoInfo[
-                                        'name'] + " used 'quick strike,' managing to do an additional " + str(
-                                        self.pTwoQuickDamage) + "hp of damage.")
+                        await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
+                                       + str(self.pTwoQuickDamage) + "hp of damage.")
                     elif pTwoFeatUsed[0] == "improved quick strike":
                         # Roll damage for Player one, and multiply it by desired amount.
                         damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
@@ -574,10 +578,8 @@ class Combat(commands.Cog):
                             quickDamage = 1
                         self.pTwoQuickDamage = quickDamage
                         self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                        await ctx.send(
-                                    self.pTwoInfo[
-                                        'name'] + " used 'quick strike,' managing to do an additional " + str(
-                                        self.pTwoQuickDamage) + "hp of damage.")
+                        await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
+                                       + str(self.pTwoQuickDamage) + "hp of damage.")
                     elif pTwoFeatUsed[0] == "greater quick strike":
                         # roll damage for player One, and multiply it by desired amount
                         damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
@@ -588,10 +590,8 @@ class Combat(commands.Cog):
                             quickDamage = 1
                         self.pTwoQuickDamage = quickDamage
                         self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                        await ctx.send(
-                                    self.pTwoInfo[
-                                        'name'] + " used 'quick strike,' managing to do an additional " + str(
-                                        self.pTwoQuickDamage) + "hp of damage.")
+                        await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
+                                       + str(self.pTwoQuickDamage) + "hp of damage.")
                     elif pTwoFeatUsed[0] == "riposte":
                         # roll damage for player One, and multiply it by desired amount
                         damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
@@ -602,10 +602,8 @@ class Combat(commands.Cog):
                             quickDamage = 1
                         self.pTwoQuickDamage = quickDamage
                         self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                        await ctx.send(
-                                    self.pTwoInfo[
-                                        'name'] + " used 'quick strike,' managing to do an additional " + str(
-                                        self.pTwoQuickDamage) + "hp of damage.")
+                        await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
+                                       + str(self.pTwoQuickDamage) + "hp of damage.")
                         self.pTwoRiposte = 1
                     # # If Player Two has Evasion, Improved Evasion, or Greater Evasion, give them the option to use it.
 
@@ -648,23 +646,22 @@ class Combat(commands.Cog):
                     #                 pass
                     #             else:
                     #                 await ctx.send("Answer 'yes' or 'no'")
-                    # If Player Two used 'deflect', 'improved deflect', or 'greater deflect', apply damage mitigation here
+                    # If Player Two used 'async deflect', 'improved async deflect', or 'greater async deflect', apply damage mitigation here
                     if pTwoFeatUsed[0] == "deflect":
-                        await ctx.send( self.pTwoInfo['name'] + " used deflect to lessen the blow.")
+                        await ctx.send( self.pTwoInfo['name'] + " used async deflect to lessen the blow.")
                         total = int(total * float(pTwoFeatUsed[1]))
                     elif pTwoFeatUsed[0] == "improved deflect":
-                        await ctx.send( self.pTwoInfo['name'] + " used deflect to lessen the blow")
+                        await ctx.send( self.pTwoInfo['name'] + " used async deflect to lessen the blow")
                         total = int(total * float(pTwoFeatUsed[1]))
                     elif pTwoFeatUsed[0] == "greater deflect":
                         await ctx.send( self.pTwoInfo['name'] + " used deflect to lessen the blow")
                         total = int(total * float(pTwoFeatUsed[1]))
                     self.totalDamage = total
                     # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-                    await ctx.send(
-                                "Roll: " + str(damage) + " Modifier: " + str(pOneModifier) + " PA: " + str(
+                    await ctx.send("Roll: " + str(damage) + " Modifier: " + str(pOneModifier) + " PA: " + str(
                                     pMod) + " CE: " + str(cMod))
-                    # display total damage done, and reset passive feat counters (power attack and combat async defense)
-                    await ctx.send( self.pOneInfo['name'] + " did " + str(total) + " points of damage.")
+                    # display total damage done, and reset passive feat counters (power attack and combat defense)
+                    await ctx.send(self.pOneInfo['name'] + " did " + str(total) + " points of damage.")
                     self.pOnepMod = 0
                     self.pOnecMod = 0
                     self.token = 2
@@ -701,34 +698,32 @@ class Combat(commands.Cog):
 
                     # if any version of crippling blow was used, tack on the penalty to the above total
                     if pTwoFeatUsed[0] == "crippling blow" or pTwoFeatUsed[0] == "improved crippling blow" or \
-                            pTwoFeatUsed[
-                                0] == "greater crippling blow":
-                        await ctx.send( self.pTwoInfo['name'] + " Used " + str(pTwoFeatUsed[0])
-                                    + ", Giving " + self.pOneInfo['name'] + " a " + str(
-                            pTwoFeatUsed[1]) + " To their attack.")
+                            pTwoFeatUsed[0] == "greater crippling blow":
+                        await ctx.send(self.pTwoInfo['name'] + " Used " + str(pTwoFeatUsed[0]) + ", Giving "
+                                       + self.pOneInfo['name'] + " a " + str(pTwoFeatUsed[1]) + " To their attack.")
                         total = total + pTwoFeatUsed[1]
 
                     # testing data to see that modifiers are carrying over correctly. Comment out
                     # when project is finished.
-                    await ctx.send( "Roll: " + str(hit) + " Base: " + str(pOneToHit) + " PA: " +
-                                str(pMod) + " CE: " + str(cMod) + " DF: " + str(dMod) + " MC: " + str(mMod))
+                    await ctx.send("Roll: " + str(hit) + " Base: " + str(pOneToHit) + " PA: "
+                                    + str(pMod) + " CE: " + str(cMod) + " DF: " + str(dMod) + " MC: " + str(mMod))
 
                     # find Player One's total AC
                     totalAC = pTwoAC + pTwodMod - pTwomMod
 
                     # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-                    await ctx.send( "P2 AC: " + str(pTwoAC) + " DF: " + str(pTwodMod) + " MC: " + str(pTwomMod))
+                    await ctx.send("P2 AC: " + str(pTwoAC) + " DF: " + str(pTwodMod) + " MC: " + str(pTwomMod))
 
                     # determine if the total roll, after all modifiers have been included, is a successful hit or not. then
                     # head to the appropriate method
                     if total >= totalAC:
-                        await ctx.send( self.pOneInfo['name'] + " rolled a " + str(total) + " to hit an AC " + str(
-                            totalAC) + " and was successful.")
+                        await ctx.send(self.pOneInfo['name'] + " rolled a " + str(total) + " to hit an AC " + str(
+                                       totalAC) + " and was successful.")
                         self.pTwodMod = 0
                         self.pTwomMod = 0
                         self.pTwoRiposte = 0
 
-                        # Obtain Player One's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat async defense'
+                        # Obtain Player One's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat defense'
                         # modifiers to variables, and roll damage.
                         pOneBaseDamage = self.pOneInfo['base damage']
                         pOneModifier = self.pOneInfo['damage']
@@ -746,9 +741,8 @@ class Combat(commands.Cog):
                             damage = damage * float(pOneFeatUsed[1])
                         # if Player Two use 'staggering blow' half damage done.
                         if pTwoFeatUsed[0] == "staggering blow":
-                            await ctx.send(
-                                        self.pTwoInfo['name'] + " used the feat 'staggering blow', halving " +
-                                        self.pOneInfo['name'] + "'s damage roll")
+                            await ctx.send(self.pTwoInfo['name'] + " used the feat 'staggering blow', halving "
+                                           + self.pOneInfo['name'] + "'s damage roll")
                             damage = damage * float(pTwoFeatUsed[1])
                         # ensure that no matter what, raw damage can not fall below 1, then assign total damage to variable, and in turn
                         # assign it to variable to be accessed for scoreboard.
@@ -774,10 +768,8 @@ class Combat(commands.Cog):
                                 quickDamage = 1
                             self.pTwoQuickDamage = quickDamage
                             self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                            await ctx.send(
-                                        self.pTwoInfo[
-                                            'name'] + " used 'quick strike,' managing to do an additional " + str(
-                                            self.pTwoQuickDamage) + "hp of damage.")
+                            await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
+                                           + str(self.pTwoQuickDamage) + "hp of damage.")
                         elif pTwoFeatUsed[0] == "improved quick strike":
                             # Roll damage for Player one, and multiply it by desired amount.
                             damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
@@ -788,10 +780,8 @@ class Combat(commands.Cog):
                                 quickDamage = 1
                             self.pTwoQuickDamage = quickDamage
                             self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                            await ctx.send(
-                                        self.pTwoInfo[
-                                            'name'] + " used 'quick strike,' managing to do an additional " + str(
-                                            self.pTwoQuickDamage) + "hp of damage.")
+                            await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
+                                           + str(self.pTwoQuickDamage) + "hp of damage.")
                         elif pTwoFeatUsed[0] == "greater quick strike":
                             # roll damage for player One, and multiply it by desired amount
                             damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
@@ -802,10 +792,8 @@ class Combat(commands.Cog):
                                 quickDamage = 1
                             self.pTwoQuickDamage = quickDamage
                             self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                            await ctx.send(
-                                        self.pTwoInfo[
-                                            'name'] + " used 'quick strike,' managing to do an additional " + str(
-                                            self.pTwoQuickDamage) + "hp of damage.")
+                            await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
+                                           + str(self.pTwoQuickDamage) + "hp of damage.")
                         elif pTwoFeatUsed[0] == "riposte":
                             # roll damage for player One, and multiply it by desired amount
                             damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
@@ -816,10 +804,8 @@ class Combat(commands.Cog):
                                 quickDamage = 1
                             self.pTwoQuickDamage = quickDamage
                             self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                            await ctx.send(
-                                        self.pTwoInfo[
-                                            'name'] + " used 'quick strike,' managing to do an additional " + str(
-                                            self.pTwoQuickDamage) + "hp of damage.")
+                            await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
+                                           + str(self.pTwoQuickDamage) + "hp of damage.")
                         # # If Player Two has Evasion, Improved Evasion, or Greater Evasion, give them the option to use it.
 
                         for word in self.pTwoInfo['feats taken']:
@@ -873,11 +859,10 @@ class Combat(commands.Cog):
                             total = int(total * float(pTwoFeatUsed[1]))
                         self.totalDamage = total
                         # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-                        await ctx.send(
-                                    "Roll: " + str(damage) + " Modifier: " + str(pOneModifier) + " PA: " + str(
-                                        pMod) + " CD: " + str(cMod))
-                        # display total damage done, and reset passive feat counters (power attack and combat async defense)
-                        await ctx.send( self.pOneInfo['name'] + " did " + str(total) + " points of damage.")
+                        await ctx.send("Roll: " + str(damage) + " Modifier: " + str(pOneModifier) + " PA: "
+                                       + str(pMod) + " CD: " + str(cMod))
+                        # display total damage done, and reset passive feat counters (power attack and combat defense)
+                        await ctx.send(self.pOneInfo['name'] + " did " + str(total) + " points of damage.")
                         self.pOnepMod = 0
                         self.pOnecMod = 0
                         self.token = 2
@@ -918,14 +903,12 @@ class Combat(commands.Cog):
                         levelDiff = level * self.pOneLevel
                         differHP = abs(self.pOneCurrentHP - self.pTwoCurrentHP)
                         self.xp = 10 * levelDiff + differHP
-                        await ctx.send(
-                                    self.pOneInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
+                        await ctx.send(self.pOneInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
                     elif 3 > level < 6:
                         levelDiff = level * self.pOneLevel
                         differHP = abs(self.pOneCurrentHP - self.pTwoCurrentHP)
                         self.xp = 7 * levelDiff + differHP
-                        await ctx.send(
-                                    self.pOneInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
+                        await ctx.send(self.pOneInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
                     elif 7 > level < 10:
                         levelDiff = level * self.pOneLevel
                         differHP = abs(self.pOneCurrentHP - self.pTwoCurrentHP)
@@ -963,8 +946,6 @@ class Combat(commands.Cog):
                         newLevel = self.levelUp + 1
                         newLevel = str(newLevel)
                         await ctx.send( self.winner.capitalize() + " has reached level " + newLevel + "!")
-                        path = os.getcwd()
-                        charFolder = os.path.join(path + "/cogs/")
                         levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
                         levelDict = json.load(levelFile)
                         levelFile.close()
@@ -974,7 +955,16 @@ class Combat(commands.Cog):
                             charData['hitpoints'] = int(levelDict[newLevel][0])
                             charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(
                                 levelDict[newLevel][2])
-                            charData['total feats'] = levelDict[newLevel][4]
+                            if charData['total feats'] == levelDict[newLevel][4]:
+                                charData['total feats'] = levelDict[newLevel][4]
+                            else:
+                                await ctx.send("You have a new feat slot to fill. Use the !feat command to select new feat.")
+                                charData['total feats'] = levelDict[newLevel][4]
+                                charData['remaining feats'] = 1
+                            if charData['total ap'] == levelDict[newLevel][3]:
+                                charData['total ap'] = levelDict[newLevel][3]
+                            else:
+                                await ctx.send("You have a new ability point to spend. the !add command.")
                             charData['hit'] = int(levelDict[newLevel][5])
                             charData['damage modifier'] = int(levelDict[newLevel][5])
                             charData['ac'] = int(levelDict[newLevel][6])
@@ -984,6 +974,7 @@ class Combat(commands.Cog):
                             file.write(json.dumps(charData, ensure_ascii=False, indent=2))
                             file.truncate()
                             file.close()
+
                     else:
                         pass
             # ensures the command can only be used by player two, when it is their turn. To prevent trolls from
@@ -1005,7 +996,7 @@ class Combat(commands.Cog):
                     await ctx.send( self.pTwoInfo['name'] +
                                 " used the feat 'True Strike.' And forgoes the need to determine if hit was success.")
 
-                    # Obtain Player Two's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat async defense'
+                    # Obtain Player Two's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat defense'
                     # modifiers to variables, and roll damage.
                     pTwoBaseDamage = self.pTwoInfo['base damage']
                     pTwoModifier = self.pTwoInfo['damage']
@@ -1153,7 +1144,7 @@ class Combat(commands.Cog):
                     await ctx.send(
                                 "Roll: " + str(damage) + " Modifier: " + str(pTwoModifier) + " PA: " + str(
                                     pMod) + " CD: " + str(cMod))
-                    # display total damage done, and reset passive feat counters (power attack and combat async defense).
+                    # display total damage done, and reset passive feat counters (power attack and combat defense).
                     await ctx.send( self.pTwoInfo['name'] + " did " + str(total) + " points of damage.")
                     self.pTwopMod = 0
                     self.pTwocMod = 0
@@ -1220,7 +1211,7 @@ class Combat(commands.Cog):
                         self.pOnemMod = 0
                         self.pOneRiposte = 0
 
-                        # Obtain Player Two's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat async defense'
+                        # Obtain Player Two's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat defense'
                         # modifiers to variables, and roll damage.
                         pTwoBaseDamage = self.pTwoInfo['base damage']
                         pTwoModifier = self.pTwoInfo['damage']
@@ -1364,7 +1355,7 @@ class Combat(commands.Cog):
                         await ctx.send(
                                     "Roll: " + str(damage) + " Modifier: " + str(pTwoModifier) + " PA: " + str(
                                         pMod) + " CD: " + str(cMod))
-                        # display total damage done, and reset passive feat counters (power attack and combat async defense).
+                        # display total damage done, and reset passive feat counters (power attack and combat defense).
                         await ctx.send( self.pTwoInfo['name'] + " did " + str(total) + " points of damage.")
                         self.pTwopMod = 0
                         self.pTwocMod = 0
@@ -1449,8 +1440,6 @@ class Combat(commands.Cog):
                         newLevel = self.levelUp + 1
                         newLevel = str(newLevel)
                         await ctx.send( self.winner.capitalize() + " has reached level " + newLevel + "!")
-                        path = os.getcwd()
-                        charFolder = os.path.join(path + "/cogs/")
                         levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
                         levelDict = json.load(levelFile)
                         levelFile.close()
@@ -1458,8 +1447,19 @@ class Combat(commands.Cog):
                             charData = json.load(file)
                             charData['level'] = int(newLevel)
                             charData['hitpoints'] = int(levelDict[newLevel][0])
-                            charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(levelDict[newLevel][2])
-                            charData['total feats'] = levelDict[newLevel][4]
+                            charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(
+                                levelDict[newLevel][2])
+                            if charData['total feats'] == levelDict[newLevel][4]:
+                                charData['total feats'] = levelDict[newLevel][4]
+                            else:
+                                await ctx.send(
+                                    "You have a new feat slot to fill. Use the !feat command to select new feat.")
+                                charData['total feats'] = levelDict[newLevel][4]
+                                charData['remaining feats'] = 1
+                            if charData['total ap'] == levelDict[newLevel][3]:
+                                charData['total ap'] = levelDict[newLevel][3]
+                            else:
+                                await ctx.send("You have a new ability point to spend. the !add command.")
                             charData['hit'] = int(levelDict[newLevel][5])
                             charData['damage modifier'] = int(levelDict[newLevel][5])
                             charData['ac'] = int(levelDict[newLevel][6])
@@ -1469,6 +1469,7 @@ class Combat(commands.Cog):
                             file.write(json.dumps(charData, ensure_ascii=False, indent=2))
                             file.truncate()
                             file.close()
+
                     else:
                         pass
 
@@ -1485,7 +1486,6 @@ class Combat(commands.Cog):
         else:
             raise error
 
-    # Allows for the use of the 'power attack' passive feat. Makes sure it applies correct bonuses for correct levels.
     @commands.command()
     @commands.guild_only()
     async def pattack(self, ctx, *, message):
@@ -1533,7 +1533,7 @@ class Combat(commands.Cog):
         # levels.
 
     @pattack.error
-    async def name_roll(self, ctx, error):
+    async def name_pattack(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !pattack may not be used in PMs!")
         else:
@@ -1636,8 +1636,6 @@ class Combat(commands.Cog):
 
         else:
             await ctx.send( "This command does nothing right now. No combat is taking place.")
-    # Allows for the use of the 'masochist' passive feat. Makes sure it applies correct bonuses for correct
-    # levels.
 
     @cexpert.error
     async def name_cexpert(self, ctx, error):

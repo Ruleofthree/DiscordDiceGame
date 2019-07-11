@@ -29,40 +29,42 @@ class Character(commands.Cog):
         else:
             await ctx.send("Your character name is: " + name)
             await ctx.send("Your character sheet has been created.")
-            path = os.getcwd()
-            charFolder = os.path.join(path + "/characters/")
-            levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
-            levelDict = json.load(levelFile)
-            levelFile.close()
+            with open(charFolder + "levelchart.txt", 'r', encoding="utf-8") as file:
+                levelDict = json.loads(file.read())
             characterFile = {}
-            level = 1
-            xp = 0
             characterFile["name"] = name
-            characterFile["level"] = level
-            hp = levelDict["1"][0]
-            characterFile["hp"] = hp
-            tFeats = levelDict["1"][4]
-            characterFile["total feats"] = tFeats
-            numberOfDice = levelDict["1"][1]
-            numberOfSides = levelDict["1"][2]
+            characterFile["level"] = 3
+            characterFile["hp"] = levelDict["3"][0]
+            characterFile["total feats"] = levelDict["3"][4]
+            numberOfDice = levelDict["3"][1]
+            numberOfSides = levelDict["3"][2]
             characterFile["base damage"] = str(numberOfDice) + "d" + str(numberOfSides)
-            characterFile["hit"] = levelDict["1"][5]
-            characterFile["damage"] = levelDict["1"][5]
-            characterFile["ac"] = levelDict["1"][6]
-            characterFile["currentxp"] = xp
-            nextLevel = levelDict["1"][7]
+            characterFile["hit"] = levelDict["3"][5]
+            characterFile["damage"] = levelDict["3"][5]
+            characterFile["ac"] = levelDict["3"][6]
+            characterFile["currentxp"] = 835
+            nextLevel = levelDict["3"][7]
             characterFile["nextlevel"] = nextLevel
             characterFile["strength"] = 0
             characterFile["dexterity"] = 0
             characterFile["constitution"] = 0
-            characterFile["remaining feats"] = 2
-            ap = levelDict["1"][3]
+            characterFile["remaining feats"] = levelDict["3"][4]
+            ap = levelDict["3"][3]
             characterFile["total ap"] = ap
             hasTaken = []
             characterFile["feats taken"] = hasTaken
             characterFile["wins"] = 0
             characterFile["losses"] = 0
             characterFile["reset"] = 3
+            characterFile["abhp"] = 0
+            characterFile["abhit"] = 0
+            characterFile["abdamage"] = 0
+            characterFile["abac"] = 0
+            characterFile["feathp"] = 0
+            characterFile["feathit"] = 0
+            characterFile["featdamage"] = 0
+            characterFile["featac"] = 0
+            characterFile["dexfigher"] = 0
 
 
             file = open(charFolder + player + ".txt", "w", encoding="utf-8")
@@ -81,7 +83,7 @@ class Character(commands.Cog):
     async def name_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !name may not be used in PMs!")
-        if isinstance(error, commands.MissingRequiredArgument):
+        elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("Give your character a name. You can't just be "". Do you have any idea how hard that "
                            "be to keep track of? Watch: ")
             await ctx.send("     hit      for 9 points of damage.")
@@ -109,8 +111,8 @@ class Character(commands.Cog):
             await private("You do not have a reset point with which to redo your ability points. If you feel this is "
                           "in error, please contact management.")
 
-        elif total > 15:
-            await private("You can not have more than 15 total points distributed between stats.")
+        elif total > charData['total ap']:
+            await private("You can not have more than " + str(charData) + " total points distributed between stats.")
         else:
             strMod = int(int(strength) / 2)
             dexMod = int(int(dexterity) / 2)
@@ -126,10 +128,15 @@ class Character(commands.Cog):
                 charData["strength"] = int(strength)
                 charData["dexterity"] = int(dexterity)
                 charData["constitution"] = int(constitution)
-                charData["hit"] = int(charData["hit"] + strMod)
-                charData["damage"] = int(charData["damage"] + strMod)
-                charData["ac"] = int(charData["ac"] + dexMod)
-                charData["hp"] = int(charData["hp"] + conMod)
+                charData["abhit"] = strMod
+                charData["abdamage"] = strMod
+                charData["abac"] = dexMod
+                charData["abhp"] = conMod
+                charData["feathp"] = 0
+                charData["featac"] = 0
+                charData["feathit"] = 0
+                charData["featdamage"] = 0
+                charData["dexfighter"] = 0
                 file.seek(0)
                 file.write(json.dumps(charData, ensure_ascii=False, indent=2))
                 file.truncate()
@@ -139,11 +146,62 @@ class Character(commands.Cog):
     async def stats_error(self, ctx, error):
         if isinstance(error, commands.PrivateMessageOnly):
             await ctx.send("You're an idiot, now everyone knows. You need to PM me with '!stats <str> <dex> <con>.")
-        if isinstance(error, commands.MissingRequiredArgument):
+        elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("So...you don't want stats? You want infinite stats? Only even numbers? Odd? Prime? What "
                            "I'm getting at here, is that I don't know what you want, because ***you won't tell me!*** "
                            "please type !stats <str> <dex> <con>. Where <str> is the number you want in strength, the "
                            "second for dexterity, and the third for constitution. Ex: !stats 10 5 0")
+        else:
+            raise error
+
+    @commands.command()
+    @commands.dm_only()
+    async def add(self, ctx, ability):
+        ability.lower()
+        player = str(ctx.message.author)
+        path = os.getcwd()
+        charFolder = os.path.join(path + "/characters/")
+        with open(charFolder + player + ".txt", "r+", encoding="utf-8") as file:
+            charData = json.load(file)
+            strength =charData['strength']
+            dexterity = charData['dexterity']
+            constitution = charData['constitution']
+            total = strength + dexterity + constitution
+            if total < charData['total ap']:
+                if ability == "strength" or ability == "str":
+                    charData['strength'] += 1
+                    charData['abhit'] = int(charData['strength'] / 2)
+                    charData['abdamage'] = int(charData['strength'] / 2)
+                    file.seek(0)
+                    file.write(json.dumps(charData, ensure_ascii=False, indent=2))
+                    file.truncate()
+                    await ctx.send("You have added an ability point to Strength.")
+                if ability == "dexterity" or ability == "dex":
+                    charData['dexterity'] += 1
+                    charData['abac'] = int(charData['dexterity'])
+                    file.seek(0)
+                    file.write(json.dumps(charData, ensure_ascii=False, indent=2))
+                    file.truncate()
+                    await ctx.send("You have added an ability point to Dexterity.")
+                if ability == "constitution" or ability == "con":
+                    charData['constitution'] += 1
+                    charData['abhp'] = int(charData['constitution'])
+                    file.seek(0)
+                    file.write(json.dumps(charData, ensure_ascii=False, indent=2))
+                    file.truncate()
+                file.close()
+            else:
+                await ctx.send("You do not have any more ability points to spend.")
+
+    @add.error
+    async def add_error(self, ctx, error):
+        if isinstance(error, commands.PrivateMessageOnly):
+            await ctx.send("This is a PM only command. I try to keep your ability points secret, and this is the "
+                           "thanks I get for it.")
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("You need to specify the ability you want to point the point to. I couldn't have made it "
+                           "any more simple for you. Type '!add str' or '!add strength' for strength, and so on. I don't "
+                           "even need a number, just follow the instructions, and I'll do the rest.")
         else:
             raise error
 
@@ -172,6 +230,13 @@ class Character(commands.Cog):
 
         os.remove(charFile)
         await ctx.send(name + " was successfully deleted.")
+
+    @erase.error
+    async def erase_error(self, ctx, error):
+        if isinstance(error, commands.NoPrivateMessage):
+            await ctx.send("The command !error may not be used in PMs!")
+        else:
+            raise error
 
 
 def setup(client):
