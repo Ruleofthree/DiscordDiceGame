@@ -27,6 +27,7 @@ class Combat(commands.Cog):
 
     def __init__(self, client):
 
+        self.opponent = ""
         self.client = client
         # STRINGS
         self.playerOne = ""
@@ -285,7 +286,7 @@ class Combat(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def challenge(self, ctx):
+    async def challenge(self, ctx, opponent):
         # opens and loads in player one's character sheet. This is done in this method solely because I'm unsure if
         # loading json files in __init__ is actually a good idea. If I understand things correctly, things in a class's
         # __init__ is ran EVERY TIME a method is called within it. If so, then the json files would be opened, loaded,
@@ -295,12 +296,16 @@ class Combat(commands.Cog):
             path = os.getcwd()
             charFolder = os.path.join(path + "/characters/")
             charFile = Path(charFolder + player + ".txt")
+            file = open(charFolder + "playerDatabase.txt", "r", encoding="utf-8")
+            playerDatabase = json.load(file)
+            file.close()
+            self.opponent = opponent.lower()
             if not charFile.is_file():
                 await ctx.send("You don't even have a character made to fight. What are you planning to do? Emoji the"
                                "opponent to death? Make a character, first.")
             elif self.game == 0.5:
                 await ctx.send("A challenge has already been issued.")
-            else:
+            elif self.opponent in playerDatabase:
                 self.pOneUsername = ctx.message.author
                 file = open(charFolder + player + ".txt", "r", encoding="utf-8")
                 charStats = json.load(file)
@@ -308,18 +313,22 @@ class Combat(commands.Cog):
 
                 self.pOneInfo = charStats
 
-                await ctx.send(self.pOneInfo['name'] + " has issued a challenge. Who accepts? (type !accept)")
+                await ctx.send(self.pOneInfo['name'] + " has issued a challenge to " + self.opponent.capitalize() + " do"
+                                                       " you !accept?")
                 self.game = 0.5
+            else:
+                await ctx.send(self.opponent.capitalize() + " isn't a character, or you mistyped it. Use the !who command"
+                                                         " to find out.")
 
-                for seconds in range(0, 61):
-                    time.sleep(1)
-                    if seconds == 30:
-                        await ctx.send("30 seconds to respond to challenge.")
-                    elif seconds == 50:
-                        await ctx.send("10 seconds to respond to challenge.")
-                    elif seconds == 60:
-                        await ctx.send("Challenge reset.")
-                        self.game = 0
+                # for seconds in range(0, 61):
+                #     time.sleep(1)
+                #     if seconds == 30:
+                #         await ctx.send("30 seconds to respond to challenge.")
+                #     elif seconds == 50:
+                #         await ctx.send("10 seconds to respond to challenge.")
+                #     elif seconds == 60:
+                #         await ctx.send("Challenge reset.")
+                #         self.game = 0
 
         else:
             await ctx.send("A Fight is already taking place. Wait your turn")
@@ -336,93 +345,98 @@ class Combat(commands.Cog):
     async def accept(self, ctx):
         if self.game == 0.5:
             player = str(ctx.message.author)
-            path = os.getcwd()
-            charFolder = os.path.join(path + "/characters/")
-            charFile = Path(charFolder + player + ".txt")
-            if not charFile.is_file():
-                await ctx.send("You don't even have a character made to fight. What are you planning to do? Emoji the "
-                               "opponent to death? Make a character, first.")
-            elif ctx.message.author == self.pOneUsername:
-                await ctx.send("You can't fight yourself. This isn't Street Fighter.")
-            else:
-                self.game = 1
-                self.pTwoUsername = ctx.message.author
-                file = open(charFolder + player + ".txt", "r", encoding="utf-8")
-                charStats = json.load(file)
-                file.close()
+            player.lower()
+            if self.opponent == player:
+                path = os.getcwd()
+                charFolder = os.path.join(path + "/characters/")
+                charFile = Path(charFolder + player + ".txt")
+                if not charFile.is_file():
+                    await ctx.send("You don't even have a character made to fight. What are you planning to do? Emoji the "
+                                   "opponent to death? Make a character, first.")
+                elif ctx.message.author == self.pOneUsername:
+                    await ctx.send("You can't fight yourself. This isn't Street Fighter.")
+                else:
+                    self.game = 1
+                    self.pTwoUsername = ctx.message.author
+                    file = open(charFolder + player + ".txt", "r", encoding="utf-8")
+                    charStats = json.load(file)
+                    file.close()
 
-                self.pTwoInfo = charStats
+                    self.pTwoInfo = charStats
 
-                self.pOneTotalHP = self.pOneInfo['hp']
-                self.pTwoTotalHP = self.pTwoInfo['hp']
-                self.pOneCurrentHP = self.pOneInfo['hp']
-                self.pTwoCurrentHP = self.pTwoInfo['hp']
-                self.pOneLevel = self.pOneInfo['level']
-                self.pTwoLevel = self.pTwoInfo['level']
+                    self.pOneTotalHP = self.pOneInfo['hp']
+                    self.pTwoTotalHP = self.pTwoInfo['hp']
+                    self.pOneCurrentHP = self.pOneInfo['hp']
+                    self.pTwoCurrentHP = self.pTwoInfo['hp']
+                    self.pOneLevel = self.pOneInfo['level']
+                    self.pTwoLevel = self.pTwoInfo['level']
 
-                await ctx.send("Rolling for Initiative (1d20 + (dexterity / 2). In result of tie, highest dex goes first. Should "
-                               "that tie as well, coin toss. Player One has value of One.")
+                    await ctx.send("Rolling for Initiative (1d20 + (dexterity / 2). In result of tie, highest dex goes first. Should "
+                                   "that tie as well, coin toss. Player One has value of One.")
 
-                playerOneInit = random.randint(1, 20)
-                playerOneMod = int(self.pOneInfo['dexterity'] / 2)
-                totalOne = playerOneInit + playerOneMod
-                await ctx.send(self.pOneInfo['name'] + " rolled: " + str(playerOneInit) + " + " + str(
-                    playerOneMod) + " and got " + str(totalOne))
+                    playerOneInit = random.randint(1, 20)
+                    playerOneMod = int(self.pOneInfo['dexterity'] / 2)
+                    totalOne = playerOneInit + playerOneMod
+                    await ctx.send(self.pOneInfo['name'] + " rolled: " + str(playerOneInit) + " + " + str(
+                        playerOneMod) + " and got " + str(totalOne))
 
-                playerTwoInit = random.randint(1, 20)
-                playerTwoMod = int(self.pTwoInfo['dexterity'] / 2)
-                totalTwo = playerTwoInit + playerTwoMod
-                await ctx.send(self.pTwoInfo['name'] + " rolled: " + str(playerTwoInit) + " + " + str(
-                    playerTwoMod) + " and got " + str(totalTwo))
+                    playerTwoInit = random.randint(1, 20)
+                    playerTwoMod = int(self.pTwoInfo['dexterity'] / 2)
+                    totalTwo = playerTwoInit + playerTwoMod
+                    await ctx.send(self.pTwoInfo['name'] + " rolled: " + str(playerTwoInit) + " + " + str(
+                        playerTwoMod) + " and got " + str(totalTwo))
 
-                if totalOne > totalTwo:
-                    await ctx.send(self.pOneInfo['name'] + " Goes first")
-                    token = 1
-                    self.token = token
-                    await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. ")
-
-                elif totalTwo > totalOne:
-                    await ctx.send(self.pTwoInfo['name'] + " Goes first")
-                    token = 2
-                    self.token = token
-                    await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. ")
-
-                elif totalOne == totalTwo:
-                    await ctx.send("In result of tie, person with highest dexterity modifier goes first:")
-                    await ctx.send(self.pOneInfo['name'] + "'s dexterity: " + str(playerOneMod))
-                    await ctx.send(self.pTwoInfo['name'] + "'s dexterity: " + str(playerTwoMod))
-
-                    if playerOneMod > playerTwoMod:
+                    if totalOne > totalTwo:
                         await ctx.send(self.pOneInfo['name'] + " Goes first")
                         token = 1
                         self.token = token
                         await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. ")
 
-                    elif playerOneMod < playerTwoMod:
+                    elif totalTwo > totalOne:
                         await ctx.send(self.pTwoInfo['name'] + " Goes first")
                         token = 2
                         self.token = token
                         await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. ")
 
-                    else:
-                        await ctx.send("As both dexterity values are equal as well. A coin flip. Value of one means " + self.pOneInfo['name'] + " goes first")
-                        value = random.randint(1, 2)
-                        await ctx.send(value)
+                    elif totalOne == totalTwo:
+                        await ctx.send("In result of tie, person with highest dexterity modifier goes first:")
+                        await ctx.send(self.pOneInfo['name'] + "'s dexterity: " + str(playerOneMod))
+                        await ctx.send(self.pTwoInfo['name'] + "'s dexterity: " + str(playerTwoMod))
 
-                        if value == 1:
-                            await ctx.send(self.pTwoInfo['name'] + " Goes first")
+                        if playerOneMod > playerTwoMod:
+                            await ctx.send(self.pOneInfo['name'] + " Goes first")
                             token = 1
                             self.token = token
                             await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. ")
 
-                        else:
-                            await ctx.send(self.playerTwo + " Goes first")
+                        elif playerOneMod < playerTwoMod:
+                            await ctx.send(self.pTwoInfo['name'] + " Goes first")
                             token = 2
                             self.token = token
                             await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. ")
+
+                        else:
+                            await ctx.send("As both dexterity values are equal as well. A coin flip. Value of one means " + self.pOneInfo['name'] + " goes first")
+                            value = random.randint(1, 2)
+                            await ctx.send(value)
+
+                            if value == 1:
+                                await ctx.send(self.pTwoInfo['name'] + " Goes first")
+                                token = 1
+                                self.token = token
+                                await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. ")
+
+                            else:
+                                await ctx.send(self.playerTwo + " Goes first")
+                                token = 2
+                                self.token = token
+                                await ctx.send("If you wish to use one of your feats, type !usefeat <feat>. ")
+            else:
+                await ctx.send("I know I'm just a bot and all, but I'm pretty sure your not "
+                               + self.opponent.capitalize() + ". A for effort though.")
         else:
-                await ctx.send("A Fight is already taking place. Wait your turn")
-            
+            await ctx.send("A Fight is already taking place. Wait your turn")
+
     @accept.error
     async def name_accept(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):

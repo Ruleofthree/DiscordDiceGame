@@ -83,7 +83,7 @@ class Character(commands.Cog):
     async def name_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !name may not be used in PMs!")
-        elif isinstance(error, commands.MissingRequiredArgument):
+        if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("Give your character a name. You can't just be "". Do you have any idea how hard that "
                            "be to keep track of? Watch: ")
             await ctx.send("     hit      for 9 points of damage.")
@@ -146,7 +146,7 @@ class Character(commands.Cog):
     async def stats_error(self, ctx, error):
         if isinstance(error, commands.PrivateMessageOnly):
             await ctx.send("You're an idiot, now everyone knows. You need to PM me with '!stats <str> <dex> <con>.")
-        elif isinstance(error, commands.MissingRequiredArgument):
+        if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("So...you don't want stats? You want infinite stats? Only even numbers? Odd? Prime? What "
                            "I'm getting at here, is that I don't know what you want, because ***you won't tell me!*** "
                            "please type !stats <str> <dex> <con>. Where <str> is the number you want in strength, the "
@@ -198,7 +198,7 @@ class Character(commands.Cog):
         if isinstance(error, commands.PrivateMessageOnly):
             await ctx.send("This is a PM only command. I try to keep your ability points secret, and this is the "
                            "thanks I get for it.")
-        elif isinstance(error, commands.MissingRequiredArgument):
+        if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("You need to specify the ability you want to point the point to. I couldn't have made it "
                            "any more simple for you. Type '!add str' or '!add strength' for strength, and so on. I don't "
                            "even need a number, just follow the instructions, and I'll do the rest.")
