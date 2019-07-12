@@ -43,6 +43,7 @@ class Combat(commands.Cog):
         self.count = 0
         self.token = 0
         self.game = 0
+        self.bonusHurt = 0
         self.critical = 0
         self.totalDamage = 0
         self.pOneTotalHP = 0
@@ -542,6 +543,7 @@ class Combat(commands.Cog):
                     pMod = self.pOnepMod
                     cMod = self.pOnecMod
                     damage = random.randint(int(pOneMinimum), int(pOneMaximum))
+
                     # if critical counter is a value of 1, double the damage done, then reset counter to 0.
                     if self.critical == 1:
                         damage = damage * 2
@@ -556,11 +558,13 @@ class Combat(commands.Cog):
                                     self.pTwoInfo['name'] + " used the feat 'staggering blow', halving " +
                                     self.pOneInfo['name'] + "'s damage roll")
                         damage = damage * float(pTwoFeatUsed[1])
+
                     # ensure that no matter what, raw damage can not fall below 1, then assign total damage to variable, and in turn
                     # assign it to variable to be accessed for scoreboard.
                     if damage < 1:
                         damage = 1
                     total = int(damage + pOneModifier + pMod - cMod)
+
                     # if Player Two used 'quick strike', 'improved quick strike', or 'greater quick strike', apply the return
                     # damage here
                     pTwoBaseDamage = self.pTwoInfo['base damage']
@@ -568,13 +572,16 @@ class Combat(commands.Cog):
                     pTwoMinimum, pTwoMaximum = pTwoBaseDamage.split('d')
                     pMod = self.pTwopMod
                     cMod = self.pTwocMod
+
                     # apply the damage from 'quick strike', 'improved quick strike', or 'greater quick strike' if such feats were
                     # used
                     if pTwoFeatUsed[0] == "quick strike":
+
                         # Roll damage for Player One, and multiply it by desired amount.
                         damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
                         total = (damage + pTwoModifier + pMod - cMod)
                         quickDamage = int(total * float(pTwoFeatUsed[1]))
+
                         # Ensure damage is always at least 1hp and print out result
                         if quickDamage < 1:
                             quickDamage = 1
@@ -582,6 +589,7 @@ class Combat(commands.Cog):
                         self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
                         await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
                                        + str(self.pTwoQuickDamage) + "hp of damage.")
+
                     elif pTwoFeatUsed[0] == "improved quick strike":
                         # Roll damage for Player one, and multiply it by desired amount.
                         damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
@@ -594,7 +602,9 @@ class Combat(commands.Cog):
                         self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
                         await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
                                        + str(self.pTwoQuickDamage) + "hp of damage.")
+
                     elif pTwoFeatUsed[0] == "greater quick strike":
+
                         # roll damage for player One, and multiply it by desired amount
                         damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
                         total = (damage + pTwoModifier + pMod - cMod)
@@ -606,6 +616,7 @@ class Combat(commands.Cog):
                         self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
                         await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
                                        + str(self.pTwoQuickDamage) + "hp of damage.")
+
                     elif pTwoFeatUsed[0] == "riposte":
                         # roll damage for player One, and multiply it by desired amount
                         damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
@@ -619,10 +630,9 @@ class Combat(commands.Cog):
                         await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
                                        + str(self.pTwoQuickDamage) + "hp of damage.")
                         self.pTwoRiposte = 1
-                    # # If Player Two has Evasion, Improved Evasion, or Greater Evasion, give them the option to use it.
 
+                    # If Player Two has Evasion, Improved Evasion, or Greater Evasion, give them the option to use it.
                     for word in self.pTwoInfo['feats taken']:
-
                         answer = ""
                         if self.pTwoEvade == 1 and word == "evasion":
                             while answer != "yes" and answer != "no":
@@ -699,16 +709,46 @@ class Combat(commands.Cog):
                         self.critical = 1
                         await ctx.send( self.pOneInfo['name'] + " has critically hit.")
 
+                    # If Player One has Hurt Me, Improved Hurt Me, and Greater Hurt Me, check hit points, and apply
+                    # bonuses.
+                    for word in self.pOneInfo['feats taken']
+                        percentage = int((self.pOneCurrentHP / self.pOneTotalHP) * 100)
+                        if word == 'hurt me':
+                            if percentage < 66:
+                                self.bonusHurt = 1
+                            elif percentage < 33:
+                                self.bonusHurt = 2
+                        elif word == 'improved hurt me':
+                            if percentage < 66:
+                                self.bonusHurt = 2
+                            elif percentage < 33:
+                                self.bonusHurt = 3
+                        elif word == 'greater hurt me':
+                            if percentage < 66:
+                                self.bonusHurt = 2
+                            elif percentage < 33:
+                                self.bonusHurt = 4
+                        elif word == 'hurt me more':
+                            if percentage < 75:
+                                self.bonusHurt = 2
+                            elif percentage < 50:
+                                self.bonusHurt = 4
+                            elif percentage < 25:
+                                self.bonusHurt = 6
+
                     # Notify that Player One is getting the hit benefit from 'riposte'
                     if self.pOneRiposte == 5:
                         await ctx.send( self.pOneInfo['name'] +
                                     " benefits from +5 hit bonus effect from riposte.")
 
                     # calculate the total after modifiers
-                    total = int(hit + pOneToHit - pMod + cMod - dMod + mMod + self.pOneRiposte)
+                    total = int(hit + pOneToHit - pMod + cMod - dMod + mMod + self.pOneRiposte + self.bonusHurt)
 
                     # Ensures Player One benefits from hit bonus of Riposte only once.
                     self.pOneRiposte = 0
+
+                    # Reset Hurt Me bonuses, so it doesn't bleed over to player two.
+                    self.bonusHurt = 0
 
                     # if any version of crippling blow was used, tack on the penalty to the above total
                     if pTwoFeatUsed[0] == "crippling blow" or pTwoFeatUsed[0] == "improved crippling blow" or \
@@ -720,7 +760,8 @@ class Combat(commands.Cog):
                     # testing data to see that modifiers are carrying over correctly. Comment out
                     # when project is finished.
                     await ctx.send("Roll: " + str(hit) + " Base: " + str(pOneToHit) + " PA: "
-                                    + str(pMod) + " CE: " + str(cMod) + " DF: " + str(dMod) + " MC: " + str(mMod))
+                                   + str(pMod) + " CE: " + str(cMod) + " DF: " + str(dMod) + " MC: "
+                                   + str(mMod) + " Riposte: " + str(self.pOneRiposte) + " Hurt Me: " + str(self.bonusHurt))
 
                     # find Player One's total AC
                     totalAC = pTwoAC + pTwodMod - pTwomMod
@@ -1179,6 +1220,34 @@ class Combat(commands.Cog):
                     # determine the roll of the 1d20.
                     hit = random.randint(1, 20)
 
+
+                    # If Player Two has Hurt Me, Improved Hurt Me, and Greater Hurt Me, check hit points, and apply
+                    # bonuses.
+                    for word in self.pOneInfo['feats taken']
+                        percentage = int((self.pTwoCurrentHP / self.pTwoTotalHP) * 100)
+                        if word == 'hurt me':
+                            if percentage < 66:
+                                self.bonusHurt = 1
+                            elif percentage < 33:
+                                self.bonusHurt = 2
+                        elif word == 'improved hurt me':
+                            if percentage < 66:
+                                self.bonusHurt = 2
+                            elif percentage < 33:
+                                self.bonusHurt = 3
+                        elif word == 'greater hurt me':
+                            if percentage < 66:
+                                self.bonusHurt = 2
+                            elif percentage < 33:
+                                self.bonusHurt = 4
+                        elif word == 'hurt me more':
+                            if percentage < 75:
+                                self.bonusHurt = 2
+                            elif percentage < 50:
+                                self.bonusHurt = 4
+                            elif percentage < 25:
+                                self.bonusHurt = 6
+
                     # if the raw result is equal to 20, count the critical counter up to 1.
                     if hit == 20:
                         self.critical = 1
@@ -1189,10 +1258,13 @@ class Combat(commands.Cog):
                                     self.pTwoInfo['name'] + "Benefits from +5 hit bonus effect from riposte.")
 
                     # calculate the total after modifiers
-                    total = int(hit + pTwoToHit - pMod + cMod - dMod + mMod + self.pTwoRiposte)
+                    total = int(hit + pTwoToHit - pMod + cMod - dMod + mMod + self.pTwoRiposte + self.hurtBonus)
 
                     # Ensures Player Two benefits from hit bonus of Riposte only once.
                     self.pTwoRiposte = 0
+
+                    # Reset Hurt Me bonuses to ensure it doesn't bleed over to Player One.
+                    self.hurtBonus = 0
 
                     # if Player Two used riposte, and
                     # if any version of crippling blow was used, tack on the penalty to the above total
@@ -1205,8 +1277,9 @@ class Combat(commands.Cog):
 
                     # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
                     await ctx.send(
-                                "Roll: " + str(hit) + " Base: " + str(pTwoToHit) + " PA: " + str(pMod) + " CE: " + str(
-                                    cMod) + " DF: " + str(dMod) + " MC: " + str(mMod))
+                                "Roll: " + str(hit) + " Base: " + str(pTwoToHit) + " PA: " + str(pMod) + " CE: "
+                                + str(cMod) + " DF: " + str(dMod) + " MC: " + str(mMod) +
+                                " Riposte: " + str(self.pTwoRiposte) + " Hurt Me: " + str(self.bonusHurt))
 
                     # find Player One's total AC
                     totalAC = int(pOneAC + pOnedMod - pOnemMod)
