@@ -53,7 +53,7 @@ def message_roll(user, charFolder, \
                 pOneRiposte, pTwoRiposte, pOneFeatUsed, pTwoFeatUsed, pOneFeatInfo, pTwoFeatInfo, pOneCurrentHP, pTwoCurrentHP, \
                 pOneTotalHP, pTwoTotalHP, pOneEvade, pTwoEvade, pOneDeflect, pTwoDeflect, pOneQuickDamage, pTwoQuickDamage, iddqd, \
                 critical, count, featToken, bGameTimer, \
-                token, totalDamage = True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod, pOnedMod,
+                token, totalDamage = Roll_true_strike.True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod, pOnedMod,
                                     pTwodMod, pOnemMod, pTwomMod, \
                                     pOneRiposte, pTwoRiposte, pOneFeatUsed, pTwoFeatUsed, pOneFeatInfo,
                                     pTwoFeatInfo, pOneCurrentHP, pTwoCurrentHP, \
@@ -66,7 +66,7 @@ def message_roll(user, charFolder, \
                 msg, bEvasion, bDeflect, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod, pOnedMod, pTwodMod, pOnemMod, pTwomMod, \
                 pOneRiposte, pTwoRiposte, pOneFeatUsed, pTwoFeatUsed, pOneFeatInfo, pTwoFeatInfo, pOneCurrentHP, pTwoCurrentHP, \
                 pOneTotalHP, pTwoTotalHP, pOneEvade, pTwoEvade, pOneDeflect, pTwoDeflect, pOneQuickDamage, pTwoQuickDamage, iddqd, critical, count, featToken, bGameTimer, \
-                token, totalDamage = Not_True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod, pOnedMod,
+                token, totalDamage = Roll_not_strike.Not_True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod, pOnedMod,
                                         pTwodMod, pOnemMod, pTwomMod, \
                                         pOneRiposte, pTwoRiposte, pOneFeatUsed, pTwoFeatUsed, pOneFeatInfo,
                                         pTwoFeatInfo, pOneCurrentHP, pTwoCurrentHP, \
@@ -83,19 +83,19 @@ def message_roll(user, charFolder, \
                 rounds = int(count / 2)
                 bGameTimer = False
                 count = 0
-                msg, pOneInfo, pTwoInfo = playerone_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne,
+                msg, pOneInfo, pTwoInfo = playerone_zero_current_hp.playerone_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne,
                                                                         playerTwo,
                                                                         pOneCurrentHP, pTwoCurrentHP,
                                                                         pOneLevel, pTwoLevel, charFolder, rounds)
         # ensures the command can only be used by player two, when it is their turn. To prevent trolls from
         # spamming commands.
-        elif character.lower() == playerTwo and token == 2:
+        elif user == playerTwo and token == 2:
             # If the feat used was 'true strike' forgo rolling to see if player hit opponent, and go straight to damage.
             if pTwoFeatUsed[0] == "true strike":
                 msg, bEvasion, bDeflect, pTwoInfo, pOneInfo, pTwopMod, pOnepMod, pTwocMod, pOnecMod, pTwodMod, pOnedMod, pTwomMod, pOnemMod, \
                 pTwoRiposte, pOneRiposte, pTwoFeatUsed, pOneFeatUsed, pTwoFeatInfo, pOneFeatInfo, pTwoCurrentHP, pOneCurrentHP, \
                 pTwoTotalHP, pOneTotalHP, pTwoEvade, pOneEvade, pTwoDeflect, pOneDeflect, pTwoQuickDamage, pOneQuickDamage, iddqd, critical, count, featToken, bGameTimer, \
-                token, totalDamage = Not_True_Strike(msg, pTwoInfo, pOneInfo, pTwopMod, pOnepMod, pTwocMod, pOnecMod, pTwodMod,
+                token, totalDamage = Roll_true_strike.True_Strike(msg, pTwoInfo, pOneInfo, pTwopMod, pOnepMod, pTwocMod, pOnecMod, pTwodMod,
                                         pOnedMod, pTwomMod, pOnemMod, \
                                         pTwoRiposte, pOneRiposte, pTwoFeatUsed, pOneFeatUsed, pTwoFeatInfo,
                                         pOneFeatInfo, pTwoCurrentHP, pOneCurrentHP, \
@@ -108,7 +108,7 @@ def message_roll(user, charFolder, \
                 msg, bEvasion, bDeflect, pTwoInfo, pOneInfo, pTwopMod, pOnepMod, pTwocMod, pOnecMod, pTwodMod, pOnedMod, pTwomMod, pOnemMod, \
                 pTwoRiposte, pOneRiposte, pTwoFeatUsed, pOneFeatUsed, pTwoFeatInfo, pOneFeatInfo, pTwoCurrentHP, pOneCurrentHP, \
                 pTwoTotalHP, pOneTotalHP, pTwoEvade, pOneEvade, pTwoDeflect, pOneDeflect, pTwoQuickDamage, pOneQuickDamage, iddqd, critical, count, featToken, bGameTimer, \
-                token, totalDamage = Not_True_Strike(msg, pTwoInfo, pOneInfo, pTwopMod, pOnepMod, pTwocMod, pOnecMod, pTwodMod,
+                token, totalDamage = Roll_not_strike.Not_True_Strike(msg, pTwoInfo, pOneInfo, pTwopMod, pOnepMod, pTwocMod, pOnecMod, pTwodMod,
                                         pOnedMod, pTwomMod, pOnemMod, \
                                         pTwoRiposte, pOneRiposte, pTwoFeatUsed, pOneFeatUsed, pTwoFeatInfo,
                                         pOneFeatInfo, pTwoCurrentHP, pOneCurrentHP, \
@@ -126,7 +126,7 @@ def message_roll(user, charFolder, \
                 rounds = int(count / 2)
                 bGameTimer = False
                 count = 0
-                msg, pTwoInfo, pOneInfo = playertwo_currentHP_less_zero(msg, pTwoInfo, pOneInfo, playerTwo,
+                msg, pTwoInfo, pOneInfo = playertwo_zero_current_hp.playertwo_currentHP_less_zero(msg, pTwoInfo, pOneInfo, playerTwo,
                                                                         playerOne,
                                                                         pOneCurrentHP, pTwoCurrentHP, pOneLevel,
                                                                         pTwoLevel, charFolder, rounds)

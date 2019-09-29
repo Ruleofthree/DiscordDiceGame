@@ -33,7 +33,7 @@ def message_accept(charFolder, accepted, game, opponentID, pOneInfo):
             # will be used to determine whose turn it is during the fight, and lock out anyone using fight commands
             # but the player whose turn it is.
             msg.append("Rolling Initiative to see who goes first. In result of tie, person with "
-                       "highest dexterity modifier goes first. Should [b]that[/b] tie as well, then fuck "
+                       "highest dexterity modifier goes first. Should that tie as well, then fuck "
                        "it, coin flip. " + pOneInfo['name'] + " wins on a One.")
 
             playerOneInit = random.randint(1, 20)
@@ -45,35 +45,37 @@ def message_accept(charFolder, accepted, game, opponentID, pOneInfo):
             totalTwo = playerTwoInit + playerTwoMod
 
             msg.append("\n" + pOneInfo['name'] + " rolled: " + str(playerOneInit) + " + " +
-                       str(playerOneMod) + " and got [color=red]" + str(totalOne) + "[/color]\n" + pTwoInfo[
+                       str(playerOneMod) + " and got " + str(totalOne) + "\n" + pTwoInfo[
                            'name'] +
                        " rolled: " + str(playerTwoInit) + " + " + str(playerTwoMod) +
-                       " and got [color=red]" + str(totalTwo) + "[/color]")
+                       " and got " + str(totalTwo) + "")
 
             if totalOne > totalTwo:
                 msg.append(pOneInfo['name'] + " Goes first")
                 token = 1
-                msg.append("Type [color=pink]!usefeat <feat>[/color] to use a feat.")
+                msg.append("Type !usefeat <feat> to use a feat, or spend points for your passiv a passive, such as !pattack."
+                           "(use !feathelp in DM with Fight Bot for more help)")
 
             elif totalTwo > totalOne:
                 msg.append(pTwoInfo['name'] + " Goes first")
                 token = 2
-                msg.append("Type [color=pink]!usefeat <feat>[/color] to use a feat.")
+                msg.append("Type !usefeat <feat> to use a feat, or spend points for your passiv a passive, such as !pattack."
+                           "(use !feathelp in DM with Fight Bot for more help)")
 
             elif totalOne == totalTwo:
-                msg.append(pOneInfo['name'] + "'s dexterity: [color=red]" + str(playerOneMod) +
-                           "[/color]\n" + pTwoInfo['name'] + "'s dexterity: [color=red]" + str(playerTwoMod) +
-                           "[/color]")
+                msg.append(pOneInfo['name'] + "'s dexterity: " + str(playerOneMod) +
+                           "\n" + pTwoInfo['name'] + "'s dexterity: " + str(playerTwoMod) +
+                           "")
 
                 if playerOneMod > playerTwoMod:
-                    msg.append(pOneInfo['name'] + " Goes first. Type [color=pink]!usefeat <feat>"
-                                                  "[/color] to use a feat.")
+                    msg.append(pOneInfo['name'] + "Type !usefeat <feat> to use a feat, or spend points for your a passive,"
+                               " such as !pattack. (use !feathelp in DM with Fight Bot for more help)")
                     token = 1
 
 
                 elif playerOneMod < playerTwoMod:
-                    msg.append(pTwoInfo['name'] + " Goes first. Type [color=pink]!usefeat <feat>"
-                                                  "[/color] to use a feat.")
+                    msg.append(pOneInfo['name'] + "Type !usefeat <feat> to use a feat, or spend points for your a passive,"
+                               " such as !pattack. (use !feathelp in DM with Fight Bot for more help)")
                     token = 2
 
 
@@ -81,20 +83,22 @@ def message_accept(charFolder, accepted, game, opponentID, pOneInfo):
                     value = random.randint(1, 2)
 
                     if value == 1:
-                        msg.append(pOneInfo['name'] + " Goes first. Type [color=pink]!usefeat <feat>"
-                                                      "[/color] to use a feat.")
+                        msg.append(
+                            pOneInfo['name'] + "Type !usefeat <feat> to use a feat, or spend points for your a passive,"
+                                               " such as !pattack. (use !feathelp in DM with Fight Bot for more help)")
                         token = 1
 
 
                     else:
-                        msg.append(pTwoInfo['name'] + " Goes first. Type [color=pink]!usefeat <feat>"
-                                                      "[/color] to use a feat.")
+                        msg.append(
+                            pOneInfo['name'] + "Type !usefeat <feat> to use a feat, or spend points for your a passive,"
+                                               " such as !pattack. (use !feathelp in DM with Fight Bot for more help)")
                         token = 2
             bGameTimer = True
 
         else:
             msg.append("I may be a bot, but I'm pretty sure you aren't " + opponent + ". A for"
-                                                                                      " effort, though.")
+                       " effort, though.")
     else:
         msg.append("A fight is already taking place. Wait your turn.")
 

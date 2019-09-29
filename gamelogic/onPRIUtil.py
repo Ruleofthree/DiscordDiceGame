@@ -28,7 +28,7 @@ def pri_6_stats(charData, charFolder, charFile, player, strength, dexterity, con
     else:
         total = strength + dexterity + constitution
         if total > ap or total < ap:
-            msg.append("You've allocated more points than you have. Make sure total points used is less than" + str(
+            msg.append("You've allocated more points than you have. Make sure total points used is **exactly** " + str(
                 ap) + ".")
         elif strength > 10 or dexterity > 10 or constitution > 10:
             msg.append("No one stat can be above 10 at this point in time. Please try again.")
@@ -65,6 +65,95 @@ def pri_6_stats(charData, charFolder, charFile, player, strength, dexterity, con
                 file.write(json.dumps(charData, ensure_ascii=False, indent=2))
                 file.truncate()
                 file.close()
+    return msg
+
+def pri_6_trait(charData, charFolder, charFile, player, traitList, traitDictionary, trait):
+    path = os.getcwd()
+    charFolder = os.path.join(path + "/characters/")
+    charFile = Path(charFolder + player + ".txt")
+
+    try:
+        charSheet = open(charFolder + player + ".txt", "r", encoding="utf-8")
+        charData = json.load(charSheet)
+        charSheet.close()
+        hp = charData['hp']
+        hit = charData['hit']
+        damage = charData['damage']
+        ac = charData['ac']
+        strength = charData['strength']
+        dexterity = charData['dexterity']
+        constitution = charData['constitution']
+        ap = charData['ap']
+        regeneration = charData['regeneration']
+        dr = charData['dr']
+    except:
+        pass
+
+    if charData['trait'] != "":
+        msg = "You've alread selected a trait. If you wish to change it, you must !respec if you have the points."
+    elif strength != 0 and dexterity != 0 and constitution != 0:
+        with open(charFolder + player + ".txt", "r+", encoding="utf-8") as file:
+            charData = json.load(file)
+            if trait in traitList:
+                charData['trait'] = trait
+                if trait == 'regeneration':
+                    msg = "The trait 'Regeneration' has been added to your character sheet."
+                    regeneration += 2
+                    charData['regeneration'] = regeneration
+                elif trait == 'brawler':
+                    msg = "The trait 'Brawler' has been added to your character sheet."
+                    strength += 1
+                    charData['strength'] = strength
+                elif trait == 'hearty':
+                    msg = "The trait 'Hearty' has been added to your character sheet."
+                    constitution += 1
+                    charData['constitution'] = constitution
+                elif trait == 'nimble':
+                    msg = "The trait 'Nimble' has been added to your character sheet."
+                    dexterity += 1
+                    charData['dexterity'] = dexterity
+                elif trait == 'thickskinned':
+                    msg = "The trait 'Thickskinned' has been added to your character sheet."
+                    dr += 2
+                    charData['dr'] = dr
+                file.seek(0)
+                file.write(json.dumps(charData, ensure_ascii=False, indent=2))
+                file.truncate()
+                file.close()
+    else:
+        msg = "You need to set up your stats first, before selecting a trait. Please use the !stats command."
+
+    return msg
+
+def pri_7_respec(charData, charFolder, charFile, player):
+
+    reset = charData['reset']
+    print("charData is " + str(charData['reset']))
+    print("reset is " + str(reset))
+    tFeats = charData['total feats']
+
+    if reset != 0:
+
+        reset -= 1
+        with open(charFolder + player + ".txt", "r+", encoding="utf-8") as file:
+            charData = json.load(file)
+            charData['strength'] = 0
+            charData['dexterity'] = 0
+            charData['constitution'] = 0
+            charData['feats taken'] = []
+            charData['hfeats taken'] = []
+            charData['remaining feats'] = tFeats
+            charData['reset'] = reset
+            charData['trait'] = ""
+            file.seek(0)
+            file.write(json.dumps(charData, ensure_ascii=False, indent=2))
+            file.truncate()
+            file.close()
+        msg = "Your characters abilities and feats have been reset, please use the !stats command to select new stats," \
+              "and the !featpick command to select new feats. (You have " + str(reset) + " points remaining.)"
+    else:
+        msg = "You currently have no more reset points to use."
+
     return msg
 
 def pri_4_add(player, ability):
@@ -114,18 +203,20 @@ def pri_viewchar(player):
     path = os.getcwd()
     charFolder = os.path.join(path + "/characters/")
     charFile = Path(charFolder + player + ".txt")
-
+    player = str(player)
     if not charFile.is_file():
         msg.append("You don't even have a character created yet. Type !name <name> in the room. "
                    "Where <name> is your character's actual name. (Example: !name Joe")
     # If it turns out the are not an idiot, and are using the command correctly. Display the character shit
     # as nicely as you can in F-list...which isn't nice at all.
+
     else:
-        try:
+       try:
             charSheet = open(charFolder + player + ".txt", "r+", encoding="utf-8")
             charData = json.load(charSheet)
             charSheet.close()
             name = charData['name']
+            trait = charData['trait']
             level = charData['level']
             hp = charData['hp']
             tFeats = charData['total feats']
@@ -133,6 +224,7 @@ def pri_viewchar(player):
             hit = charData['hit']
             damage = charData['damage']
             ac = charData['ac']
+            gold = charData['gold']
             xp = charData['currentxp']
             nextLevel = charData['nextlevel']
             strength = charData['strength']
@@ -142,6 +234,7 @@ def pri_viewchar(player):
             hasTaken = charData['feats taken']
             hiddenTaken = charData['hfeats taken']
             dr = charData['dr']
+            regeneration = charData['regeneration']
             ap = charData['ap']
             reset = charData['reset']
             wins = charData['wins']
@@ -154,38 +247,40 @@ def pri_viewchar(player):
             feathit = charData["feathit"]
             featdamage = charData["featdamage"]
             featac = charData["featac"]
-            dexfighter = charData["dexfigher"]
             thp = charData["thp"]
             tac = charData["tac"]
             thit = charData["thit"]
             tdamage = charData["tdamage"]
-        except:
-            pass
+       except:
+            msg.append("Either you don't have a character, or something messed up. Please contact a moderator so that they"
+                       "can look into this as soon as possible.")
 
-        thp = hp + abhp + feathp
-        tdamage = damage + abdamage + featdamage
-        tac = ac + abac + featac
-        hasTakenList = ", ".join(hasTaken)
-        thit = hit + abhit + feathit
-        for feat in hasTaken:
-            if feat == 'dexterous fighter':
-                thit = hit + abac + feathit
 
-        msg.append("```\n"
-                   "Character Name:                " + name + "\n"
-                   "Strength:                      " + str(strength) + "          Level:                         " + str(level) + "\n"
-                   "Dexterity:                     " + str(dexterity) + "          Hit Points:                    " + str(thp) + "\n"
-                   "Constitution:                  " + str(constitution) + "          To Hit Modifier:               " + str(thit) + "\n"
-                   "Armor Class:                   " + str(tac) + "         Damage Modifier:               " + str(tdamage) + "\n"
-                   "Reset:                         " + str(reset) + "          Total Feats:                   " + str(tFeats) + "\n"
-                   "Wins:                          " + str(wins) + "          Base Damage:                   " + str(baseDamage) + "\n"
-                   "Losses:                        " + str(losses) + "          Damage Reduction:              " + str(dr) +
-                   "\nTotal Ability Points:          " + str(ap) +
-                   "\nCurrent XP:                    " + str(xp) +
-                   "\nXP needed to level:            " + str(nextLevel) +
-                   "\nAvailable Feats:               " + str(remainingFeats) +
-                   "\nFeats Taken:                   " + hasTakenList + "\n```")
-        with open(charFolder + player + ".txt", "r+", encoding="utf-8") as file:
+       thp = hp + abhp + feathp
+       tdamage = damage + abdamage + featdamage
+       tac = ac + abac + featac
+       hasTakenList = ", ".join(hasTaken)
+       thit = hit + abhit + feathit
+       for feat in hasTaken:
+           if feat == 'dexterous fighter':
+               thit = hit + abac + feathit
+
+       msg.append("```\n"
+                  "Character Name:                " + name + "\n"
+                  "Strength:                      " + str(strength) + "          Level:                         " + str(level) + "\n"
+                  "Dexterity:                     " + str(dexterity) + "          Hit Points:                    " + str(thp) + "\n"
+                  "Constitution:                  " + str(constitution) + "          To Hit Modifier:               " + str(thit) + "\n"
+                  "Armor Class:                   " + str(tac) + "         Damage Modifier:               " + str(tdamage) + "\n"
+                  "Reset:                         " + str(reset) + "          Total Feats:                   " + str(tFeats) + "\n"
+                  "Wins:                          " + str(wins) + "          Base Damage:                   " + str(baseDamage) + "\n"
+                  "Losses:                        " + str(losses) + "          Damage Reduction:              " + str(dr) + "\n"
+                  "Total Ability Points:          " + str(ap) + "         Regeneration:                  " + str(regeneration) +  "\n"
+                  "Total Gold:                    " + str(gold) + "          Trait:                         " + trait +
+                  "\nCurrent XP:                    " + str(xp) +
+                  "\nXP needed to level:            " + str(nextLevel) +
+                  "\nAvailable Feats:               " + str(remainingFeats) +
+                  "\nFeats Taken:                   " + hasTakenList + "\n```")
+       with open(charFolder + player + ".txt", "r+", encoding="utf-8") as file:
             charData = json.load(file)
             charData["thp"] = thp
             charData["tac"] = tac
@@ -208,7 +303,7 @@ def pri_10_feat_pick(answer, player, featList, featDictionary):
         charSheet.close()
         name = charData['name']
         level = charData['level']
-        hp = charData['hp']
+        vhp = charData['hp']
         tFeats = charData['total feats']
         baseDamage = charData['base damage']
         hit = charData['hit']
@@ -222,6 +317,8 @@ def pri_10_feat_pick(answer, player, featList, featDictionary):
         remainingFeats = charData['remaining feats']
         hasTaken = charData['feats taken']
         hiddenTaken = charData['hfeats taken']
+        dr = charData['dr']
+        regeneration = charData['regeneration']
         ap = charData['ap']
         reset = charData['reset']
         wins = charData['wins']
@@ -296,7 +393,6 @@ def pri_10_feat_pick(answer, player, featList, featDictionary):
                 damageMod = 0
                 hitMod = 0
                 hpMod = 0
-                dr = 0
 
                 if answer == "bull strength":
                     charData['strength'] = charData['strength'] + 2
@@ -345,7 +441,6 @@ def pri_10_feat_pick(answer, player, featList, featDictionary):
                     charData["featdamage"] = damageMod
                     index = hasTaken.index("crushing blow")
                     hasTaken.pop(index)
-
                 if answer == "greater crushing blow":
                     damageMod = 5
                     charData["featdamage"] = damageMod
@@ -396,15 +491,15 @@ def pri_10_feat_pick(answer, player, featList, featDictionary):
 
                 if answer == "thick skin":
                     dr = 1
-                    charData["dr"] = dr
+                    charData["dr"] += dr
                 if answer == "improved thick skin":
                     dr = 2
-                    charData["dr"] = dr
+                    charData["dr"] += dr
                     index = hasTaken.index("thick skin")
                     hasTaken.pop(index)
                 if answer == "greater thick skin":
                     dr = 3
-                    charData["dr"] = dr
+                    charData["dr"] += dr
                     index = hasTaken.index("thick skin")
                     hasTaken.pop(index)
 

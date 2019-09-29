@@ -2,6 +2,8 @@ import os
 import json
 import random
 import time
+
+import asyncio
 from pathlib import Path
 
 import discord
@@ -24,6 +26,20 @@ def featDict():
     for keys in featDictionary[0]:
         featList.append(keys)
     return featDictionary, featList
+
+def traitDict():
+    # Open up a json object containing the list of traits.
+    path = os.getcwd()
+    traitFolder = os.path.join(path + "/cogs/")
+    traitFile = open(traitFolder + "trait.txt", "r", encoding="utf-8")
+    traitDictonary = json.load(traitFile)
+    traitFile.close()
+
+    # place all keys within a list for comparison later
+    traitList = []
+    for keys in traitDictonary[0]:
+        traitList.append(keys)
+    return traitDictonary, traitList
 
 class Combat(commands.Cog):
 
@@ -94,8 +110,17 @@ class Combat(commands.Cog):
     async def on_ready(self):
         print("Bot is Online")
 
-#---------------------------------------------CHATROOM COMMANDS---------------------------------------------------------
+    async def challengeTimeout(self, ctx):
+        print("Am I here?")
+        await asyncio.sleep(60)
+        self.game = 0
+        await ctx.send("Challenge was not accepted. Challenge reset.")
 
+    async def gameTimeout(self, ctx):
+        await asyncio.sleep(3600)
+        await ctx.send("!reset")
+
+#---------------------------------------------CHATROOM COMMANDS---------------------------------------------------------
     #!start
     @commands.command()
     @commands.guild_only()
@@ -127,7 +152,7 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def feats(self, ctx):
         msg = onMSGUtil.message_6_feats()
-        await ctx.send( msg)
+        await ctx.send(msg)
 
     @feats.error
     async def feats_error(self, ctx, error):
@@ -138,9 +163,11 @@ class Combat(commands.Cog):
     #!leaderboard
     @commands.command()
     @commands.guild_only()
-    async def leaderboard(self, ctx, option):
+    async def leaderboard(self, ctx, option=None):
+        if option == None:
+            option = "win"
         msg = onMSGUtil.message_12_leaderboard(option)
-        # await ctx.send( "This is working.")
+        # await ctx.send("This is working.")
         for msg_item in msg:
             await ctx.send(msg_item)
 
@@ -199,12 +226,12 @@ class Combat(commands.Cog):
         self.quitter = str(ctx.message.author.id)
         path = os.getcwd()
         charFolder = os.path.join(path + "/characters/")
-        charFile = Path(charFolder + player + ".txt")
+        charFile = Path(charFolder + self.quitter + ".txt")
 
         charSheet = open(charFolder + self.quitter + ".txt", "r", encoding="utf-8")
         pInfo = json.load(charSheet)
         charSheet.close()
-        await ctx.send( "Are you sure you want to delete " + pInfo['name'] + "? (Type **!confirm**"
+        await ctx.send("Are you sure you want to delete " + pInfo['name'] + "? (Type **!confirm**"
                                                                                   " to do the deed, or **!deny** to save a life.)")
 
     @erase.error
@@ -224,7 +251,7 @@ class Combat(commands.Cog):
             await ctx.send(msg)
             self.quitter = ""
         else:
-            await ctx.send( "You aren't the one asking for the erase, not cool.")
+            await ctx.send("You aren't the one asking for the erase, not cool.")
 
     @confirm.error
     async def confirm_error(self, ctx, error):
@@ -237,7 +264,7 @@ class Combat(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def deny(self, ctx):
-        plyer = str(ctx.message.author.id)
+        player = str(ctx.message.author.id)
         if player == self.quitter:
             await ctx.send("Yay.")
             self.quitter = ""
@@ -316,25 +343,42 @@ class Combat(commands.Cog):
         else:
             await ctx.send("There isn't a game to reset.")
 
+    @reset.error
+    async def reset_error(self, ctx, error):
+        if isinstance(error, commands.NoPrivateMessage):
+            await ctx.send("The command !reset may not be used in PMs!")
+        else:
+            raise error
+
+    #!player
     @commands.command()
     @commands.guild_only()
     async def player(self, ctx, player):
         msg = onMSGUtil.message_7_player(player)
         await ctx.send(msg)
 
-
-        if total == 0:
-            await ctx.send(player + " has 100% win ratio. Or 0%. However you want to rationalize not having a single "
-                                    "fight under their belt.")
-        else:
-            ratio = int((int(wins) / total) * 100)
-
-            await ctx.send(player + " has " + wins + " wins, and " + losses + " losses. (" + (str(ratio)) + "%)")
-
     @player.error
     async def player_error(self,ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !player may not be used in PMs!")
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("Please follow the command with the name of a player. Exmaple: !player Joe")
+        else:
+            raise error
+
+    #!who
+    @commands.command()
+    @commands.guild_only()
+    async def who(self, ctx, player):
+        msg = onMSGUtil.message_4_who(player)
+        await ctx.send(msg)
+
+    @who.error
+    async def who_error(self, ctx, player):
+        if isinstance(error, commands.NoPrivateMessage):
+            await ctx.send("The command !who may not be used in PMs!")
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("Please follow the command with the name of a character. Example: !who Joe")
         else:
             raise error
 #------------------------------------------COMBAT COMMANDS--------------------------------------------------------------
@@ -347,27 +391,30 @@ class Combat(commands.Cog):
         charFolder = os.path.join(path + "/characters/")
         msg, opponentID, pOneInfo, new_game, bTimer, playerOne = onMSGUtil.message_10_challenge(challenger, opponent, charFolder,
                                                                                     self.game)
-        if opponent is not "":
-            self.opponent = opponentID
-        if pOneInfo is not None:
-            self.pOneInfo = pOneInfo
-            self.pOneTotalHP = self.pOneInfo['thp']
-            self.pOneCurrentHP = self.pOneInfo['thp']
-            self.pOneLevel = self.pOneInfo['level']
-        if new_game != 0:
-            self.game = new_game
-        if bTimer is True:
-            timeout = 60
-            self.timer = Timer(timeout, self.challengeTimeOut)
-            self.timer.start()
-        if playerOne is not "":
-            self.playerOne = playerOne
-        await ctx.send(msg)
+        if self.game == 0:
+            await ctx.send(msg)
+            if opponent is not "":
+                self.opponent = opponentID
+            if pOneInfo is not None:
+                self.pOneInfo = pOneInfo
+                self.pOneTotalHP = self.pOneInfo['thp']
+                self.pOneCurrentHP = self.pOneInfo['thp']
+                self.pOneLevel = self.pOneInfo['level']
+            if new_game != 0:
+                self.game = new_game
+            if bTimer is True:
+                self.timer = asyncio.create_task(self.challengeTimeout(ctx))
+            if playerOne is not "":
+                self.playerOne = playerOne
+        else:
+            await ctx.send("A challenge has already been issued. Please wait until it has expired, or their fight is complete.")
 
     @challenge.error
-    async def name_challenge(self, ctx, error):
+    async def challenge_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !challenge may not be used in PMs!")
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("You cannot challenge Nobody. He's immortal.")
         else:
             raise error
 
@@ -380,35 +427,31 @@ class Combat(commands.Cog):
         charFolder = os.path.join(path + "/characters/")
         msg, pTwoInfo, new_game, playerTwo, bTimer, bGameTimer, new_oppenent, token = onMSGAccept.message_accept(charFolder, accepted,
                                                                                                      self.game,
-                                                                                                     self.opponentID,
+                                                                                                     self.opponent,
                                                                                                      self.pOneInfo)
-        if not charFile.is_file():
-            await ctx.send("You don't even have a character made to fight.")
-        else:
-            if new_game is not None:
-                self.game = new_game
-            if pTwoInfo is not None:
-                self.pTwoInfo = pTwoInfo
-                self.pTwoTotalHP = self.pTwoInfo['thp']
-                self.pTwoCurrentHP = self.pTwoInfo['thp']
-                self.pTwoLevel = self.pTwoInfo['level']
-            if bTimer:
-                self.timer.cancel()
-            if bGameTimer:
-                gametimeout = 3600
-                self.gameTimer = Timer(gametimeout, self.combatTimeOut)
-                self.gameTimer.start()
-            if new_oppenent is not None:
-                self.opponent = new_oppenent
-            if playerTwo is not None:
-                self.playerTwo = playerTwo
-            if token is not None:
-                self.token = token
-            for msg_item in msg:
-                await ctx.send( msg_item)
+
+        if new_game is not None:
+            self.game = new_game
+        if pTwoInfo is not None:
+            self.pTwoInfo = pTwoInfo
+            self.pTwoTotalHP = self.pTwoInfo['thp']
+            self.pTwoCurrentHP = self.pTwoInfo['thp']
+            self.pTwoLevel = self.pTwoInfo['level']
+        if bTimer:
+            self.timer.cancel()
+        if bGameTimer:
+            self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
+        if new_oppenent is not None:
+            self.opponent = new_oppenent
+        if playerTwo is not None:
+            self.playerTwo = playerTwo
+        if token is not None:
+            self.token = token
+        for msg_item in msg:
+            await ctx.send(msg_item)
 
     @accept.error
-    async def name_accept(self, ctx, error):
+    async def accept_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !accept may not be used in PMs!")
         else:
@@ -418,8 +461,10 @@ class Combat(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def usefeat(self, ctx, *, answer):
-        user = str(cxt.message.author.id)
-        msg, featToken_new, pOneSpentFeat, pOneFeatInfo, pTwoSpentFeat, pTwoFeatInfo = message_8_usefeat(answer, charFolder,
+        user = str(ctx.message.author.id)
+        path = os.getcwd()
+        charFolder = os.path.join(path + "/characters/")
+        msg, featToken_new, pOneSpentFeat, pOneFeatInfo, pTwoSpentFeat, pTwoFeatInfo = onMSGUtil.message_8_usefeat(answer, charFolder,
                                                                                                          user, self.game,
                                                                                                          self.playerOne, \
                                                                                                          self.playerTwo,
@@ -443,9 +488,11 @@ class Combat(commands.Cog):
             self.pTwoFeatInfo = pTwoFeatInfo
 
     @usefeat.error
-    async def name_usefeat(self, ctx, error):
+    async def usefeat_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !usefeat may not be used in PMs!")
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("Please follow the command with the feat you want to use. Example: !usefeat Titan Blow")
         else:
             raise error
 
@@ -454,7 +501,11 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def roll(self, ctx):
         user = str(ctx.message.author.id)
+        print("Am I here?")
+        path = os.getcwd()
+        charFolder = os.path.join(path + "/characters/")
         try:
+
             self.gameTimer.cancel()
             msg, self.bEvasion, self.bDeflect, bGameTimer, self.opponent, self.playerOne, self.playerTwo, self.winner, \
             self.pOneInfo, self.pTwoInfo, self.featToken, self.game, self.count, self.token, self.critical, \
@@ -478,9 +529,7 @@ class Combat(commands.Cog):
             for msg_item in msg:
                 await ctx.send(msg_item)
                 if bGameTimer:
-                   gametimeout = 3600
-                   self.gameTimer = Timer(gametimeout, self.combatTimeOut)
-                   self.gameTimer.start()
+                   self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
         except AttributeError:
             await ctx.send("Either a fight is not taking place, or it isn't your turn.")
 
@@ -491,7 +540,7 @@ class Combat(commands.Cog):
                 # # If the feat used was 'true strike' forgo rolling to see if player hit opponent, and go
                 # # straight to damage.
                 # if pOneFeatUsed[0] == "true strike":
-                #     await ctx.send( self.pOneInfo['name'] +
+                #     await ctx.send(self.pOneInfo['name'] +
                 #                 " used the feat 'True Strike.' And forgoes the need to determine if hit was success.")
                 #
                 #     # Obtain Player One's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat defense'
@@ -509,7 +558,7 @@ class Combat(commands.Cog):
                 #         self.critical = 0
                 #     # if Player One used feat 'titan blow', apply 50% bonus damage.
                 #     if pOneFeatUsed[0] == "titan blow":
-                #         await ctx.send( self.pOneInfo['name'] + " used the feat 'titan blow'.")
+                #         await ctx.send(self.pOneInfo['name'] + " used the feat 'titan blow'.")
                 #         damage = damage * float(pOneFeatUsed[1])
                 #     # if Player Two use 'staggering blow' half damage done.
                 #     if pTwoFeatUsed[0] == "staggering blow":
@@ -631,13 +680,13 @@ class Combat(commands.Cog):
                 #     #                 await ctx.send("Answer 'yes' or 'no'")
                 #     # If Player Two used 'async deflect', 'improved async deflect', or 'greater async deflect', apply damage mitigation here
                 #     if pTwoFeatUsed[0] == "deflect":
-                #         await ctx.send( self.pTwoInfo['name'] + " used async deflect to lessen the blow.")
+                #         await ctx.send(self.pTwoInfo['name'] + " used async deflect to lessen the blow.")
                 #         total = int(total * float(pTwoFeatUsed[1]))
                 #     elif pTwoFeatUsed[0] == "improved deflect":
-                #         await ctx.send( self.pTwoInfo['name'] + " used async deflect to lessen the blow")
+                #         await ctx.send(self.pTwoInfo['name'] + " used async deflect to lessen the blow")
                 #         total = int(total * float(pTwoFeatUsed[1]))
                 #     elif pTwoFeatUsed[0] == "greater deflect":
-                #         await ctx.send( self.pTwoInfo['name'] + " used deflect to lessen the blow")
+                #         await ctx.send(self.pTwoInfo['name'] + " used deflect to lessen the blow")
                 #         total = int(total * float(pTwoFeatUsed[1]))
                 #     self.totalDamage = total
                 #     # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
@@ -666,7 +715,7 @@ class Combat(commands.Cog):
                 #     # if the raw result is equal to 20, count the critical counter up to 1.
                 #     if hit == 20:
                 #         self.critical = 1
-                #         await ctx.send( self.pOneInfo['name'] + " has critically hit.")
+                #         await ctx.send(self.pOneInfo['name'] + " has critically hit.")
                 #
                 #     # If Player One has Hurt Me, Improved Hurt Me, and Greater Hurt Me, check hit points, and apply
                 #     # bonuses.
@@ -697,7 +746,7 @@ class Combat(commands.Cog):
                 #
                 #     # Notify that Player One is getting the hit benefit from 'riposte'
                 #     if self.pOneRiposte == 5:
-                #         await ctx.send( self.pOneInfo['name'] +
+                #         await ctx.send(self.pOneInfo['name'] +
                 #                     " benefits from +5 hit bonus effect from riposte.")
                 #
                 #     # calculate the total after modifiers
@@ -751,7 +800,7 @@ class Combat(commands.Cog):
                 #             self.critical = 0
                 #         # if Player One used feat 'titan blow', apply 50% bonus damage.
                 #         if pOneFeatUsed[0] == "titan blow":
-                #             await ctx.send( self.pOneInfo['name'] + " used the feat 'titan blow'.")
+                #             await ctx.send(self.pOneInfo['name'] + " used the feat 'titan blow'.")
                 #             damage = damage * float(pOneFeatUsed[1])
                 #         # if Player Two use 'staggering blow' half damage done.
                 #         if pTwoFeatUsed[0] == "staggering blow":
@@ -863,13 +912,13 @@ class Combat(commands.Cog):
                 #         #                 await ctx.send("Answer 'yes' or 'no'")
                 #         # If Player Two used 'async deflect', 'improved async deflect', or 'greater async deflect', apply damage mitigation here
                 #         if pTwoFeatUsed[0] == "deflect":
-                #             await ctx.send( self.pTwoInfo['name'] + " used deflect to lessen the blow.")
+                #             await ctx.send(self.pTwoInfo['name'] + " used deflect to lessen the blow.")
                 #             total = int(total * float(pTwoFeatUsed[1]))
                 #         elif pTwoFeatUsed[0] == "improved deflect":
-                #             await ctx.send( self.pTwoInfo['name'] + " used deflect to lessen the blow")
+                #             await ctx.send(self.pTwoInfo['name'] + " used deflect to lessen the blow")
                 #             total = int(total * float(pTwoFeatUsed[1]))
                 #         elif pTwoFeatUsed[0] == "greater deflect":
-                #             await ctx.send( self.pTwoInfo['name'] + " used deflect to lessen the blow")
+                #             await ctx.send(self.pTwoInfo['name'] + " used deflect to lessen the blow")
                 #             total = int(total * float(pTwoFeatUsed[1]))
                 #         self.totalDamage = total
                 #         # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
@@ -881,7 +930,7 @@ class Combat(commands.Cog):
                 #         self.pOnecMod = 0
                 #         self.token = 2
                 #     else:
-                #         await ctx.send( self.pOneInfo['name'] + " rolled a " + str(total) + " to hit an AC " + str(
+                #         await ctx.send(self.pOneInfo['name'] + " rolled a " + str(total) + " to hit an AC " + str(
                 #             totalAC) + " and missed.")
                 #         self.pTwodMod = 0
                 #         self.pTwomMod = 0
@@ -899,7 +948,7 @@ class Combat(commands.Cog):
                 #     self.pTwoCurrentHP = self.pTwoCurrentHP - self.totalDamage
                 #
                 # # Print the scoreboard.
-                # await ctx.send( self.pOneInfo['name'] + ": " + str(self.pOneCurrentHP) + "/" + str(
+                # await ctx.send(self.pOneInfo['name'] + ": " + str(self.pOneCurrentHP) + "/" + str(
                 #     self.pOneTotalHP) + "  ||  " + self.pTwoInfo['name'] + ": " + str(
                 #     self.pTwoCurrentHP) + "/" + str(self.pTwoTotalHP) + " \n" +
                 #             self.pTwoInfo['name'] + "'s turn. Type: !usefeat <feat> if you wish to use a feat.")
@@ -909,7 +958,7 @@ class Combat(commands.Cog):
                 # if self.pTwoCurrentHP <= 0:
                 #     self.game = 0
                 #     self.token = 0
-                #     await ctx.send( self.pOneInfo['name'] + " won in " + str(int(self.count / 2)) + " rounds")
+                #     await ctx.send(self.pOneInfo['name'] + " won in " + str(int(self.count / 2)) + " rounds")
                 #     level = abs(self.pOneLevel - self.pTwoLevel)
                 #     if level == 0:
                 #         level = 1
@@ -930,8 +979,8 @@ class Combat(commands.Cog):
                 #         await ctx.send(
                 #                     self.pOneInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
                 #     else:
-                #         await ctx.send( "As the level difference was greater than 10, no XP was awarded.")
-                #     await ctx.send( self.pOneInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
+                #         await ctx.send("As the level difference was greater than 10, no XP was awarded.")
+                #     await ctx.send(self.pOneInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
                 #     self.currentPlayerXP = self.pOneInfo['currentxp'] + self.xp
                 #     self.nextLevel = self.pOneInfo['nextlevel']
                 #     self.winner = self.pOneUsername
@@ -959,7 +1008,7 @@ class Combat(commands.Cog):
                 #     if self.currentPlayerXP >= self.nextLevel:
                 #         newLevel = self.levelUp + 1
                 #         newLevel = str(newLevel)
-                #         await ctx.send( self.winner.capitalize() + " has reached level " + newLevel + "!")
+                #         await ctx.send(self.winner.capitalize() + " has reached level " + newLevel + "!")
                 #         levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
                 #         levelDict = json.load(levelFile)
                 #         levelFile.close()
@@ -1005,7 +1054,7 @@ class Combat(commands.Cog):
                 #
                 # # If the feat used was 'true strike' forgo rolling to see if player hit opponent, and go straight to damage.
                 # if pTwoFeatUsed[0] == "true strike":
-                #     await ctx.send( self.pTwoInfo['name'] +
+                #     await ctx.send(self.pTwoInfo['name'] +
                 #                 " used the feat 'True Strike.' And forgoes the need to determine if hit was success.")
                 #
                 #     # Obtain Player Two's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat defense'
@@ -1022,7 +1071,7 @@ class Combat(commands.Cog):
                 #         self.critical = 0
                 #     # if Player Two used feat 'titan blow', apply 50% bonus damage.
                 #     if pTwoFeatUsed[0] == "titan blow":
-                #         await ctx.send( self.pTwoInfo['name'] + " used the feat 'titan blow'.")
+                #         await ctx.send(self.pTwoInfo['name'] + " used the feat 'titan blow'.")
                 #         damage = damage * float(pTwoFeatUsed[1])
                 #     # if Player One use 'staggering blow' half damage done.
                 #     if pOneFeatUsed[0] == "staggering blow":
@@ -1140,24 +1189,24 @@ class Combat(commands.Cog):
                 #     #                 await ctx.send("Answer 'yes' or 'no'")
                 #     # If Player One used 'deflect', 'improved async deflect', or 'greater async deflect', apply damage mitigation here
                 #     if pOneFeatUsed[0] == "deflect":
-                #         await ctx.send( self.pOneInfo['name'] + " used async deflect to lessen the blow.")
+                #         await ctx.send(self.pOneInfo['name'] + " used async deflect to lessen the blow.")
                 #         total = int(total * float(pOneFeatUsed[1]))
                 #     elif pOneFeatUsed[0] == "improved deflect":
-                #         await ctx.send( self.pOneInfo['name'] + " used async deflect to lessen the blow")
+                #         await ctx.send(self.pOneInfo['name'] + " used async deflect to lessen the blow")
                 #         total = int(total * float(pOneFeatUsed[1]))
                 #     elif pOneFeatUsed[0] == "greater deflect":
-                #         await ctx.send( self.pOneInfo['name'] + " used async deflect to lessen the blow")
-                #         await ctx.send( pOneFeatUsed[1])
-                #         await ctx.send( total)
+                #         await ctx.send(self.pOneInfo['name'] + " used async deflect to lessen the blow")
+                #         await ctx.send(pOneFeatUsed[1])
+                #         await ctx.send(total)
                 #         total = int(total * float(pOneFeatUsed[1]))
-                #         await ctx.send( total)
+                #         await ctx.send(total)
                 #     self.totalDamage = total
                 #     # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
                 #     await ctx.send(
                 #                 "Roll: " + str(damage) + " Modifier: " + str(pTwoModifier) + " PA: " + str(
                 #                     pMod) + " CD: " + str(cMod))
                 #     # display total damage done, and reset passive feat counters (power attack and combat defense).
-                #     await ctx.send( self.pTwoInfo['name'] + " did " + str(total) + " points of damage.")
+                #     await ctx.send(self.pTwoInfo['name'] + " did " + str(total) + " points of damage.")
                 #     self.pTwopMod = 0
                 #     self.pTwocMod = 0
                 #     self.token = 1
@@ -1208,7 +1257,7 @@ class Combat(commands.Cog):
                 #     # if the raw result is equal to 20, count the critical counter up to 1.
                 #     if hit == 20:
                 #         self.critical = 1
-                #         await ctx.send( self.pTwoInfo['name'] + " has critically hit.")
+                #         await ctx.send(self.pTwoInfo['name'] + " has critically hit.")
                 #
                 #     if self.pTwoRiposte == 5:
                 #         await ctx.send(
@@ -1242,7 +1291,7 @@ class Combat(commands.Cog):
                 #     totalAC = int(pOneAC + pOnedMod - pOnemMod)
                 #
                 #     # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-                #     await ctx.send( " P1 AC: " + str(pOneAC) + " DF: " + str(pOnedMod) + " MC: " + str(pOnemMod))
+                #     await ctx.send(" P1 AC: " + str(pOneAC) + " DF: " + str(pOnedMod) + " MC: " + str(pOnemMod))
                 #
                 #     # determine if the total roll, after all modifiers have been included, is a successful hit or not. then
                 #     # head to the appropriate method
@@ -1269,7 +1318,7 @@ class Combat(commands.Cog):
                 #             self.critical = 0
                 #         # if Player Two used feat 'titan blow', apply 50% bonus damage.
                 #         if pTwoFeatUsed[0] == "titan blow":
-                #             await ctx.send( self.pTwoInfo['name'] + " used the feat 'titan blow'.")
+                #             await ctx.send(self.pTwoInfo['name'] + " used the feat 'titan blow'.")
                 #             damage = damage * float(pTwoFeatUsed[1])
                 #         # if Player One use 'staggering blow' half damage done.
                 #         if pOneFeatUsed[0] == "staggering blow":
@@ -1383,24 +1432,24 @@ class Combat(commands.Cog):
                 #         #                 await ctx.send("Answer 'yes' or 'no'")
                 #         # If Player One used 'deflect', 'improved async deflect', or 'greater async deflect', apply damage mitigation here
                 #         if pOneFeatUsed[0] == "deflect":
-                #             await ctx.send( self.pOneInfo['name'] + " used async deflect to lessen the blow.")
+                #             await ctx.send(self.pOneInfo['name'] + " used async deflect to lessen the blow.")
                 #             total = int(total * float(pOneFeatUsed[1]))
                 #         elif pOneFeatUsed[0] == "improved deflect":
-                #             await ctx.send( self.pOneInfo['name'] + " used async deflect to lessen the blow")
+                #             await ctx.send(self.pOneInfo['name'] + " used async deflect to lessen the blow")
                 #             total = int(total * float(pOneFeatUsed[1]))
                 #         elif pOneFeatUsed[0] == "greater deflect":
-                #             await ctx.send( self.pOneInfo['name'] + " used async deflect to lessen the blow")
-                #             await ctx.send( pOneFeatUsed[1])
-                #             await ctx.send( total)
+                #             await ctx.send(self.pOneInfo['name'] + " used async deflect to lessen the blow")
+                #             await ctx.send(pOneFeatUsed[1])
+                #             await ctx.send(total)
                 #             total = int(total * float(pOneFeatUsed[1]))
-                #             await ctx.send( total)
+                #             await ctx.send(total)
                 #         self.totalDamage = total
                 #         # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
                 #         await ctx.send(
                 #                     "Roll: " + str(damage) + " Modifier: " + str(pTwoModifier) + " PA: " + str(
                 #                         pMod) + " CD: " + str(cMod))
                 #         # display total damage done, and reset passive feat counters (power attack and combat defense).
-                #         await ctx.send( self.pTwoInfo['name'] + " did " + str(total) + " points of damage.")
+                #         await ctx.send(self.pTwoInfo['name'] + " did " + str(total) + " points of damage.")
                 #         self.pTwopMod = 0
                 #         self.pTwocMod = 0
                 #         self.token = 1
@@ -1423,7 +1472,7 @@ class Combat(commands.Cog):
                 #     self.pOneCurrentHP = self.pOneCurrentHP - self.totalDamage
                 #
                 # # Print the scoreboard
-                # await ctx.send( self.pOneInfo['name'] + ": " + str(self.pOneCurrentHP) + "/" +
+                # await ctx.send(self.pOneInfo['name'] + ": " + str(self.pOneCurrentHP) + "/" +
                 #             str(self.pOneTotalHP) + "  ||  " + self.pTwoInfo['name'] + ": " +
                 #             str(self.pTwoCurrentHP) + "/" + str(self.pTwoTotalHP) + " \n" +
                 #             self.pOneInfo['name'] + "'s turn. Type: !usefeat <feat> if you wish to use a feat.")
@@ -1433,7 +1482,7 @@ class Combat(commands.Cog):
                 # if self.pOneCurrentHP <= 0:
                 #     self.game = 0
                 #     self.token = 0
-                #     await ctx.send( self.pTwoInfo['name'] + " won in " + str(int(self.count / 2)) + " rounds")
+                #     await ctx.send(self.pTwoInfo['name'] + " won in " + str(int(self.count / 2)) + " rounds")
                 #     level = abs(self.pOneLevel - self.pTwoLevel)
                 #     if level == 0:
                 #         level = 1
@@ -1453,8 +1502,8 @@ class Combat(commands.Cog):
                 #         self.xp = 5 * levelDiff + differHP
                 #
                 #     else:
-                #         await ctx.send( "As the level difference was greater than 10, no XP was awarded.")
-                #     await ctx.send( self.pTwoInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
+                #         await ctx.send("As the level difference was greater than 10, no XP was awarded.")
+                #     await ctx.send(self.pTwoInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
                 #     self.currentPlayerXP = self.pTwoInfo['currentxp'] + self.xp
                 #     self.nextLevel = self.pTwoInfo['nextlevel']
                 #     self.winner = self.pTwoUsername
@@ -1483,7 +1532,7 @@ class Combat(commands.Cog):
                 #     if self.currentPlayerXP >= self.nextLevel:
                 #         newLevel = self.levelUp + 1
                 #         newLevel = str(newLevel)
-                #         await ctx.send( self.winner.capitalize() + " has reached level " + newLevel + "!")
+                #         await ctx.send(self.winner.capitalize() + " has reached level " + newLevel + "!")
                 #         levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
                 #         levelDict = json.load(levelFile)
                 #         levelFile.close()
@@ -1518,7 +1567,7 @@ class Combat(commands.Cog):
                 #         pass
 
     @roll.error
-    async def name_roll(self, ctx, error):
+    async def roll_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !roll may not be used in PMs!")
         else:
@@ -1547,15 +1596,14 @@ class Combat(commands.Cog):
             await ctx.send(msg_item)
         if bGameTimer:
             gametimeout = 3600
-            self.gameTimer = Timer(gametimeout, self.combatTimeOut)
-            self.gameTimer.start()
+            self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
         if self.bEvasion is True:
             self.bEvasion = False
         if self.bDeflect is True:
             self.bDeflect = False
     
     @evasion.error
-    async def name_evasion(self, ctx,error):
+    async def evasion_error(self, ctx,error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !evasion may not be used in PMs!")
         else:
@@ -1570,7 +1618,7 @@ class Combat(commands.Cog):
         self.count, self.token, self.totalDamage, self.pOneTotalHP, self.pTwoTotalHP, \
         self.pOneCurrentHP, self.pTwoCurrentHP, self.pOnepMod, self.pOnecMod, self.pOnedMod,\
         self.pOnemMod, self.pOneQuickDamage, self.pTwoQuickDamage, \
-        self.pTwoDeflect, self.pOneDeflect, self.iddqd = message_8_deflect(user, self.playerOne, self.playerTwo,
+        self.pTwoDeflect, self.pOneDeflect, self.iddqd = onMSGUtil.message_8_deflect(user, self.playerOne, self.playerTwo,
                                                                            self.pOneInfo, self.pTwoInfo, self.featToken, \
                                                                            self.count, self.token, self.critical,
                                                                            self.bonusHurt, self.totalDamage,
@@ -1584,21 +1632,53 @@ class Combat(commands.Cog):
             await ctx.send(msg_item)
         if bGameTimer:
             gametimeout = 3600
-            self.gameTimer = Timer(gametimeout, self.combatTimeOut)
-            self.gameTimer.start()
+            self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
         if self.bDeflect is True:
             self.bDeflect = False
         if self.bEvasion is True:
             self.bEvasion = False
 
-    @evasion.error
-    async def name_deflect(self, ctx,error):
+    @deflect.error
+    async def deflect_error(self, ctx,error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !deflect may not be used in PMs!")
         else:
             raise error
 
-    # !forfeit
+    @commands.command()
+    @commands.guild_only()
+    async def permit(self, ctx):
+        user = str(ctx.message.author.id)
+        msg, bGameTimer, self.playerOne, self.playerTwo, self.pOneInfo, self.pTwoInfo, self.featToken, \
+        self.count, self.token, self.critical, self.bonusHurt, self.totalDamage, self.pOneTotalHP, \
+        self.pTwoTotalHP, self.pOneCurrentHP, self.pTwoCurrentHP, self.pOnepMod, self.pOnecMod, self.pOnedMod,\
+        self.pOnemMod, self.pOneQuickDamage, self.pTwoQuickDamage, self.iddqd = onMSGUtil.message_7_permit(user, self.playerOne, self.playerTwo,
+                                                                                   self.pOneInfo, self.pTwoInfo, self.featToken,
+                                                                                   self.count, self.token, self.critical,
+                                                                                   self.bonusHurt, self.totalDamage, self.pOneTotalHP,
+                                                                                   self.pTwoTotalHP, self.pOneCurrentHP,
+                                                                                   self.pTwoCurrentHP, self.pOnepMod, self.pOnecMod,
+                                                                                   self.pOnedMod, self.pOnemMod,
+                                                                                   self.pOneQuickDamage, self.pTwoQuickDamage, self.iddqd)
+        for msg_item in msg:
+            await ctx.send(msg_item)
+        if bGameTimer:
+            gametimeout = 3600
+            self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
+
+        if self.bEvasion is True:
+            self.bEvasion = False
+        if self.bDeflect is True:
+            self.bDeflect = False
+
+    @permit.error
+    async def permit_error(self, ctx, error):
+        if isinstance(error, commands.NoPrivateMessage):
+            await ctx.send("The command !permit may not be used in PMs!")
+        else:
+            raise error
+
+    #!forfeit
     @commands.command()
     @commands.guild_only()
     async def forfeit(self, ctx):
@@ -1693,8 +1773,8 @@ class Combat(commands.Cog):
         else:
             await ctx.send("There is no fight taking place. What are you running from?")
 
-    @player.error
-    async def player_error(self, ctx, error):
+    @forfeit.error
+    async def forfeit_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !forfeit may not be used in PMs!")
         else:
@@ -1704,7 +1784,7 @@ class Combat(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def pattack(self, ctx, *, points):
-        user = str(cts.message.author.id)
+        user = str(ctx.message.author.id)
 
         msg, self.game, self.playerOne, self.playerTwo, self.pOneInfo, self.pTwoInfo, self.token, \
         self.pOnepMod, self.pTwopMod, self.pOneLevel, self.pTwoLevel \
@@ -1715,9 +1795,12 @@ class Combat(commands.Cog):
             await ctx.send(msg_item)
 
     @pattack.error
-    async def name_pattack(self, ctx, error):
+    async def pattack_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !pattack may not be used in PMs!")
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("Please follow the command with the amount of points you want to spend. Example: "
+                           "!pattack 1")
         else:
             raise error
 
@@ -1728,7 +1811,7 @@ class Combat(commands.Cog):
         user = str(ctx.message.author.id)
         msg, self.game, self.playerOne, self.playerTwo, self.pOneInfo, self.pTwoInfo, self.token, self.pOnedMod, \
         self.pTwodMod, self.pOneLevel, self.pTwoLevel \
-            = message_8_dfight(user, points, self.game, self.playerOne,
+            = onMSGUtil.message_8_dfight(user, points, self.game, self.playerOne,
                                self.playerTwo,
                                self.pOneInfo, self.pTwoInfo, self.token, self.pOnedMod, self.pTwodMod,
                                self.pOneLevel, self.pTwoLevel)
@@ -1738,9 +1821,12 @@ class Combat(commands.Cog):
         # levels.
 
     @dfight.error
-    async def name_dfight(self, ctx, error):
+    async def dfight_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !dfight may not be used in PMs!")
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("Please follow the command with the amount of points you want to spend. Example: "
+                           "!dfight 1")
         else:
             raise error
 
@@ -1766,7 +1852,7 @@ class Combat(commands.Cog):
     #             elif 16 < self.pOneLevel <= 20 and mod == 5:
     #                 self.pOnecMod = 5
     #             else:
-    #                 await ctx.send( "You are not high enough level to invest that many points.")
+    #                 await ctx.send("You are not high enough level to invest that many points.")
     #         # ensures the command can only be used by player two, when it is their turn. To prevent trolls from
     #         # spamming commands.
     #         elif character == self.pTwoUsername and self.token == 2:
@@ -1782,13 +1868,13 @@ class Combat(commands.Cog):
     #             elif 16 < self.pTwoLevel <= 20 and mod == 5:
     #                 self.pTwocMod = 5
     #             else:
-    #                 await ctx.send( "You are not high enough level to invest that many points.")
+    #                 await ctx.send("You are not high enough level to invest that many points.")
     #
     #         else:
-    #             await ctx.send( "Either it's not your turn, or you aren't even fighting. Either way, No.")
+    #             await ctx.send("Either it's not your turn, or you aren't even fighting. Either way, No.")
     #
     #     else:
-    #         await ctx.send( "This command does nothing right now. No combat is taking place.")
+    #         await ctx.send("This command does nothing right now. No combat is taking place.")
     #
     # @cexpert.error
     # async def name_cexpert(self, ctx, error):
@@ -1798,64 +1884,37 @@ class Combat(commands.Cog):
     #         raise error
 
     #!masochist
+
+    #!masochist
     @commands.command()
     @commands.guild_only()
     async def masochist(self, ctx, *, points):
-        character = ctx.author.send
+        user = str(ctx.message.author.id)
         # make sure that this command cannot be ran if a fight is taking place.
-        if self.game == 1:
-            # ensures the command can only be used by player one, when it is their turn. To prevent trolls from
-            # spamming commands.
-            if character == self.pOneUsername and self.token == 1:
-                mod = int(message)
-                if self.pOneLevel <= 4 and mod == 1:
-                    self.pOnemMod = 1
-                elif 4 < self.pOneLevel <= 8 and mod == 2:
-                    self.pOnemMod = 2
-                elif 8 < self.pOneLevel <= 12 and mod == 3:
-                    self.pOnemMod = 3
-                elif 12 < self.pOneLevel <= 16 and mod == 4:
-                    self.pOnemMod = 4
-                elif 16 < self.pOneLevel <= 20 and mod == 5:
-                    self.pOnemMod = 5
-                else:
-                    await ctx.send( "You are not high enough level to invest that many points.")
-            # ensures the command can only be used by player two, when it is their turn. To prevent trolls from
-            # spamming commands.
-            elif character == self.pTwoUsername and self.token == 2:
-                mod = int(message)
-                if self.pTwoLevel <= 4 and mod == 1:
-                    self.pTwomMod = 1
-                elif 4 < self.pTwoLevel <= 8 and mod == 2:
-                    self.pTwomMod = 2
-                elif 8 < self.pTwoLevel <= 12 and mod == 3:
-                    self.pTwomMod = 3
-                elif 12 < self.pTwoLevel <= 16 and mod == 4:
-                    self.pTwomMod = 4
-                elif 16 < self.pTwoLevel <= 20 and mod == 5:
-                    self.pTwomMod = 5
-                else:
-                    await ctx.send( "You are not high enough level to invest that many points.")
-
-            else:
-                await ctx.send( "Either it's not your turn, or you aren't even fighting. Either way, No.")
-        else:
-            await ctx.send( "This command does nothing right now. No combat is taking place.")
+        msg, self.game, self.playerOne, self.playerTwo, self.pOneInfo, self.pTwoInfo, self.token, self.pOnemMod, \
+        self.pTwomMod, self.pOneLevel, self.pTwoLevel \
+            = onMSGUtil.message_10_masochist(character, channel, unspoiledArena, message, self.game, self.playerOne,
+                                   self.playerTwo,
+                                   self.pOneInfo, self.pTwoInfo, self.token, self.pOnemMod, self.pTwomMod,
+                                   self.pOneLevel, self.pTwoLevel)
+        for msg_item in msg:
+            await ctx.send(msg_item)
 
     @masochist.error
-    async def name_masochist(self, ctx, error):
+    async def masochist_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !masochist may not be used in PMs!")
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("Please follow the command with the amount of points you want to spend. Example: "
+                           "!masochist 1")
         else:
             raise error
 
 #------------------------------------------PM COMMANDS------------------------------------------------------------------
    #!stats
-    #!stats
     @commands.command()
     @commands.dm_only()
     async def stats(self, ctx, strength, dexterity, constitution):
-        private = ctx.send
         player = str(ctx.message.author.id)
         path = os.getcwd()
         charFolder = os.path.join(path + "/characters/")
@@ -1863,25 +1922,21 @@ class Combat(commands.Cog):
         file = open(charFolder + player + ".txt", "r", encoding="utf-8")
         charData = json.load(file)
         file.close()
-        reset = charData['reset']
         try:
             msg = onPRIUtil.pri_6_stats(charData, charFolder, charFile, player, strength, dexterity, constitution)
             for msg_item in msg:
-                await ctx.send( msg_item)
+                await ctx.send(msg_item)
         except IndexError:
-            await ctx.send( "You need to use the command as instructed. !stat <str> <dex> <con>. Where "
+            await ctx.send("You need to use the command as instructed. !stat <str> <dex> <con>. Where "
                                    "<str> is your desired strength, <dex> is your desired dexterity, and "
-                                   "<con> is your desired constitution. do **NOT** use commas, and place a "
-                                   "space between each number. Example; !stats 10 5 0")
+                                   "<con> is your desired constitution. Example: !stats 10 5 0")
         except ValueError:
-            await ctx.send( "You need to use the command as instructed. !stat <str> <dex> <con>. Where "
+            await ctx.send("You need to use the command as instructed. !stat <str> <dex> <con>. Where "
                                    "<str> is your desired strength, <dex> is your desired dexterity, and "
-                                   "<con> is your desired constitution. do **NOT** use commas, and place a "
-
-                                   "space between each number. Example: !stats 10 5 0")
+                                   "<con> is your desired constitution. Example: !stats 10 5 0")
         except UnboundLocalError:
-            await ctx.send( "You don't even have a character created yet. Type !name <name> in the room. "
-                                   "Where <name> is your character's actual name. (Example: !name Joe")
+            await ctx.send("You don't even have a character created yet. Type !name <name> in the room. "
+                                   "Where <name> is your character's actual name. Example: !name Joe")
 
     @stats.error
     async def stats_error(self, ctx, error):
@@ -1892,6 +1947,92 @@ class Combat(commands.Cog):
                            "I'm getting at here, is that I don't know what you want, because ***you won't tell me!*** "
                            "please type !stats <str> <dex> <con>. Where <str> is the number you want in strength, the "
                            "second for dexterity, and the third for constitution. Ex: !stats 10 5 0")
+        else:
+            raise error
+
+    #!trait
+    @commands.command()
+    @commands.dm_only()
+    async def trait(self, ctx, trait):
+        traitDictionary = traitDict()[0]
+        traitList = traitDict()[1]
+        trait = trait.lower()
+        player = str(ctx.message.author.id)
+        path = os.getcwd()
+        charFolder = os.path.join(path + "/characters/")
+        charFile = Path(charFolder + player + ".txt")
+        file = open(charFolder + player + ".txt", "r", encoding="utf-8")
+        charData = json.load(file)
+        file.close()
+
+        msg = onPRIUtil.pri_6_trait(charData, charFolder, charFile, player, traitList, traitDictionary, trait)
+        await ctx.send(msg)
+
+    @trait.error
+    async def trait_error(self, ctx, error):
+        if isinstance(error, commands.NoPrivateMessage):
+            await ctx.send("The command !trait can only be used in PMs!")
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("Please follow the command with the name of the trait you want to select. Example: "
+                           "!trait regeneration")
+        else:
+            raise error
+
+    #!traitlist
+    @commands.command()
+    @commands.dm_only()
+    async def traitlist(self, ctx):
+        traitDictionary = traitDict()[0]
+        traitList = traitDict()[1]
+
+        stringList = "\n".join(traitList)
+        await ctx.send(stringList + "\n Type: !traithelp <trait name> to get a PM of feat info")
+
+    @traitlist.error
+    async def traitlist_error(self, ctx, error):
+        if isinstance(error, commands.NoPrivateMessage):
+            await ctx.send("The command !traitlist can only be used in PMs!")
+        else:
+            raise error
+
+    #!traithelp
+    @commands.command()
+    @commands.dm_only()
+    async def traithelp(self, ctx, answer):
+        traitDictionary = traitDict()[0]
+        traitList = traitDict()[1]
+
+        if answer not in traitList:
+            await ctx.send("Make sure you have spelled the feat correctly")
+        else:
+            await ctx.send("```" + answer + ":\n" + traitDictionary[0][answer]['desc'] + "```")
+
+    @traithelp.error
+    async def traithelp_error(self, ctx, error):
+        if isinstance(error, commands.NoPrivateMessage):
+            await ctx.send("The command !traithelp can only be used in PMs!")
+        else:
+            raise error
+
+    #!respec
+    @commands.command()
+    @commands.dm_only()
+    async def respec(self, ctx):
+        print("Am I here?")
+        player = str(ctx.message.author.id)
+        path = os.getcwd()
+        charFolder = os.path.join(path + "/characters/")
+        charFile = Path(charFolder + player + ".txt")
+        file = open(charFolder + player + ".txt", "r", encoding="utf-8")
+        charData = json.load(file)
+        file.close()
+        msg = onPRIUtil.pri_7_respec(charData, charFolder, charFile, player)
+        await ctx.send(msg)
+
+    @respec.error
+    async def respec_error(self, ctx, error):
+        if isinstance(error, commands.NoPrivateMessage):
+            await ctx.send("The command !respec can only be used in PMs!")
         else:
             raise error
 
@@ -1937,7 +2078,7 @@ class Combat(commands.Cog):
         # Find out if player even has a character created yet. If not. Tell them they are an idiot.
         msg = onPRIUtil.pri_viewchar(player)
         for msg_item in msg:
-            await ctx.send( msg_item)
+            await ctx.send(msg_item)
 
     @viewchar.error
     async def viewchar_error(self, ctx, error):
@@ -1956,12 +2097,12 @@ class Combat(commands.Cog):
         featList = featDict()[1]
 
         stringList = "\n".join(featList)
-        await ctx.send( stringList + "\n Type: !feat help <feat name> to get a PM of feat info\n"
-                                            "or just go "
+        await ctx.send(stringList + "\n Type: !feathelp <feat name> to get a PM of feat info\n"
+                                            "or just go here: "
                                             "https://docs.google.com/document/d/1CJjC0FxunXXi8zh1I9fZqRrWij9oJiIfIZoxrPJ7GYQ/edit?usp=sharing")
 
     @featlist.error
-    async def name_featlist(self, ctx, error):
+    async def featlist_error(self, ctx, error):
         if isinstance(error, commands.PrivateMessageOnly):
             await ctx.send("I'm not gonna spam the arena with this list, man. PM me with !featlist")
         else:
@@ -1976,7 +2117,7 @@ class Combat(commands.Cog):
         featList = featDict()[1]
 
         if answer not in featList:
-            await ctx.send( "Make sure you have spelled the feat correctly")
+            await ctx.send("Make sure you have spelled the feat correctly")
         else:
             reqStat = featDictionary[0][answer]['stat']
             featStatus = featDictionary[0][answer]['status']
@@ -1992,12 +2133,12 @@ class Combat(commands.Cog):
                         str(reqDex) + " Constitution: " + str(reqCon) + " Required Feats: " + reqFeats + "```")
 
     @feathelp.error
-    async def name_feathelp(self, ctx, error):
+    async def feathelp_error(self, ctx, error):
         if isinstance(error, commands.PrivateMessageOnly):
             await ctx.send("I'm not gonna spam the arena with this list, man. PM me with !feathelp <feat> for assistance.")
 
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("I need the name of the feat you want help on. I can't read minds.")
+            await ctx.send("Please enter the name of the feat you want help on. Example: !featlist power attack")
 
         raise error
 
@@ -2024,11 +2165,13 @@ class Combat(commands.Cog):
             await ctx.send(msg_item)
 
     @feathelp.error
-    async def name_featpick(self, ctx, error):
+    async def featpick_error(self, ctx, error):
         if isinstance(error, commands.PrivateMessageOnly):
             await ctx.send(
                 "Hey! Good work! You just told everyone what feat you are going to take! Now PM me with !feat <feat> to"
                 " do it correctly.")
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("Please enter the name of the feat you want to take. Example: !featpick power attack")
         else:
             raise error
 

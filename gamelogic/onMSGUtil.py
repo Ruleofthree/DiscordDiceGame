@@ -6,10 +6,11 @@ import time
 from pathlib import Path
 from threading import Timer
 
-
 def featDict():
     # Open up the json object containing the list of feats.
-    featFile = open("feats.txt", "r", encoding="utf-8")
+    path = os.getcwd()
+    charFolder = os.path.join(path + "/cogs/")
+    featFile = open(charFolder + "feats.txt", "r", encoding="utf-8")
     featDictionary = json.load(featFile)
     featFile.close()
 
@@ -18,6 +19,20 @@ def featDict():
     for keys in featDictionary[0]:
         featList.append(keys)
     return featDictionary, featList
+
+def traitDict():
+    # Open up a json object containing the list of traits.
+    path = os.getcwd()
+    traitFolder = os.path.join(path + "/cogs/")
+    traitFile = open(traitFolder + "trait.txt", "r", encoding="utf-8")
+    traitDictonary = json.load(traitFile)
+    traitfile.close()
+
+    # place all keys within a list for comparison later
+    traitList = []
+    for keys in traitDictonary[0]:
+        traitList.append(keys)
+    return traitDictonary, traitList
 
 def message_10_tutortial():
     msg = "https://docs.google.com/document/d/1_icTTM7xBZ-i_rynFFpbW6TT23x4GZS9NwT6t5N6U6k/edit?usp=sharing"
@@ -74,55 +89,56 @@ def message_12_leaderboard(option):
         indexSearch = 2
     elif option == "percent":
         indexSearch = 3
-    else:
-        indexSearch = 1
-    indices = sorted(ratio, key=lambda d: ratio[d][indexSearch], reverse=True)
+
+    indices = sorted(ratio, key=lambda d: ratio[d][indexSearch], reverse=False)
     sortedDict = {}
     index = 1
     for i in indices:
         sortedDict[index] = ratio[i]
         index += 1
-    num = 5
+    print(sortedDict)
+    num = 2
     stringDict = []
     for num in range(1, num + 1):
         total = sortedDict[num][2] + sortedDict[num][3]
-        stringDict.append("\n" + sortedDict[num][1] + " (" + sortedDict[num][0] + ", Level: [color=green]" +
-                          str(sortedDict[num][5]) + "[/color]): [color=pink]" + str(sortedDict[num][2]) +
-                          "[/color] wins/[color=yellow]" + str(sortedDict[num][3]) + "[/color] losses. [color=red]("
-                          + str(sortedDict[num][4]) + "%)[/color]")
+        stringDict.append("\n" + sortedDict[num][1] + " (Level: " +
+                          str(sortedDict[num][5]) + "): " + str(sortedDict[num][2]) +
+                          " wins/" + str(sortedDict[num][3]) + " losses. ("
+                          + str(sortedDict[num][4]) + "%)")
     seperator = " "
     completeMessage = seperator.join(stringDict)
     msg.append(completeMessage)
     return msg
 
-def message_4_who(channel, charFolder, unspoiledBar, message):
+def message_4_who(player):
     path = os.getcwd()
     charFolder = os.path.join(path + "/characters/")
 
     msg = ""
-    if channel == unspoiledBar:
-        profile = message[5:].lower()
-        with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
-            playerDatabase = json.loads(file2.read())
-            file2.close()
+    with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
+        playerDatabase = json.loads(file2.read())
+        file2.close()
 
-        name = ""
+    playerID = ""
 
-        for item in playerDatabase.items():
+    for item in playerDatabase.items():
+        if item[0].lower() == player.lower():
+            playerID = item[1]
+        else:
+            msg = player + " isn't a character name."
 
-            if item[1] == profile:
-                name = item[0]
-        try:
-            with open(charFolder + profile + ".txt", "r+", encoding="utf-8") as file:
-                charData = json.load(file)
-                file.close()
-            msg = profile + "'s character name is: " + name + \
-                  ", and they are level: " + str(charData['level'])
-        except FileNotFoundError:
-            msg = profile + " isn't a valid name for a character sheet. You are just typing " \
-                            "in their profile name. example: !who their perfect doll"
-    else:
-        msg = "This command is only available in the Bar."
+    charFile = Path(charFolder + playerID + ".txt")
+
+    if not charFile.is_file():
+        msg = "Either they don't have a character, or you fucked up typing. (type: !player <character name>)"
+    try:
+        with open(charFolder + playerID + ".txt", "r+", encoding="utf-8") as file:
+            charData = json.load(file)
+            file.close()
+        msg = player + ", is level: " + str(charData['level'])
+    except FileNotFoundError:
+        msg = player + " isn't a valid name for a character sheet. You are just typing " \
+                        "in their profile name. example: !who RuleofThree"
 
     return msg
 
@@ -134,14 +150,16 @@ def message_7_player(player):
         playerDatabase = json.loads(file.read())
         file.close()
 
-    playerID = 0
+    playerID = ""
 
     for item in playerDatabase.items():
         if item[0].lower() == player.lower():
             playerID = item[1]
         else:
             msg = player + " isn't a character name."
+
     charFile = Path(charFolder + playerID + ".txt")
+
     if not charFile.is_file():
         msg = "Either they don't have a character, or you fucked up typing. (type: !player <character name>)" \
 
@@ -171,38 +189,34 @@ def message_5_name(charFile, charFolder, name, player, game):
 
         levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
         levelDict = json.load(levelFile)
+        numberOfDice = levelDict["1"][1]
+        numberOfSides = levelDict["1"][2]
 
         # store character data in to dictonary (characterFile), then dump it into a .json file.
         # .json file is named after the F-chat profile name, NOT the character name stored in the variable 'name'.
         # This is to prevent people from making multiple characters on one profile name.
         characterFile = {}
-        level = 1
-        xp = 0
         characterFile["name"] = name
-        characterFile["level"] = level
-        hp = levelDict["1"][0]
-        characterFile["hp"] = hp
-        tFeats = levelDict["1"][4]
-        characterFile["total feats"] = tFeats
-        numberOfDice = levelDict["1"][1]
-        numberOfSides = levelDict["1"][2]
+        characterFile["level"] = 1
+        characterFile["trait"] = ""
+        characterFile["hp"] = levelDict["1"][0]
+        characterFile["total feats"] = levelDict["1"][4]
         characterFile["base damage"] = str(numberOfDice) + "d" + str(numberOfSides)
         characterFile["hit"] = levelDict["1"][5]
         characterFile["damage"] = levelDict["1"][5]
         characterFile["ac"] = levelDict["1"][6]
-        characterFile["currentxp"] = xp
-        nextLevel = levelDict["1"][7]
-        characterFile["nextlevel"] = nextLevel
+        characterFile["currentxp"] = 0
+        characterFile["nextlevel"] = levelDict["1"][7]
         characterFile["strength"] = 0
         characterFile["dexterity"] = 0
         characterFile["constitution"] = 0
         characterFile["remaining feats"] = 2
-        ap = levelDict["1"][3]
-        characterFile["ap"] = ap
+        characterFile["ap"] = levelDict["1"][3]
         characterFile["dr"] = 0
+        characterFile["regeneration"] = 0
         characterFile["feats taken"] = []
         characterFile["hfeats taken"] = []
-        characterFile["reset"] = 3
+        characterFile["reset"] = 1
         characterFile["wins"] = 0
         characterFile["losses"] = 0
         characterFile["abhp"] = 0
@@ -218,6 +232,7 @@ def message_5_name(charFile, charFolder, name, player, game):
         characterFile["thit"] = 0
         characterFile["tdamage"] = 0
         characterFile["dexfighter"] = 0
+        characterFile["gold"] = 0
         file = open(charFolder + player + ".txt", "w", encoding="utf-8")
         json.dump(characterFile, file, ensure_ascii=False, indent=2)
 
@@ -263,53 +278,57 @@ def message_7_erase(player):
         msg = "You don't have a character to delete."
     return msg
 
-def message_10_challenge(challenger, oppenent, charFolder, game):
+def message_10_challenge(challenger, opponent, charFolder, game):
     msg = ""
     pOneInfo = None
     bTimer = False
     new_game = 0
     playerOne = ""
 
-    if game == 0:
-        charFile = Path(charFolder + challenger + ".txt")
-        # make sure the only people that can issue a challenge, is a person that has a character made.
-        if not charFile.is_file():
-            msg = "You don't even have a character made to fight."
-        else:
-            # find opponent's .json file, if one exists.
-            with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file:
-                playerDatabase = json.loads(file.read())
-                file.close()
-
-            opponentID = 0
-
-            for item in playerDatabase.items():
-                if item[0].lower() == opponent.lower():
-                    opponentID = item[1]
-                else:
-                    msg = opponent + " doesn't have a character made for you to fight."
-            charFile = Path(charFolder + opponentID + ".txt")
-            if opponentID == challenger:
-                msg = "You can't fight yourself. No one is that special."
-            else:
-                # load in challenger's .json file, refered to from here on as 'pOneInfo'
-                charSheet = open(charFolder + challenger + ".txt", "r", encoding="utf-8")
-                pOneInfo = json.load(charSheet)
-                charSheet.close()
-
-                playerOne = challenger
-                msg = pOneInfo['name'] + " is challenging " + opponent + " (Type '!accept') "
-                new_game = 0.5
-                timeout = 60
-                bTimer = True
+    charFile = Path(charFolder + challenger + ".txt")
+    # make sure the only people that can issue a challenge, is a person that has a character made.
+    if not charFile.is_file():
+        msg = "You don't even have a character made to fight."
     else:
-            msg = "A fight is already taking place. Wait your turn."
+        # find opponent's .json file, if one exists.
+        with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file:
+            playerDatabase = json.loads(file.read())
+            file.close()
+
+        opponentID = 0
+
+        for item in playerDatabase.items():
+            if item[0].lower() == opponent.lower():
+                opponentID = item[1]
+            else:
+                msg = opponent + " doesn't have a character made for you to fight."
+        charFile = Path(charFolder + opponentID + ".txt")
+        if opponentID == challenger:
+            msg = "You can't fight yourself. No one is that special."
+        else:
+            # load in challenger's .json file, refered to from here on as 'pOneInfo'
+            charSheet = open(charFolder + challenger + ".txt", "r", encoding="utf-8")
+            pOneInfo = json.load(charSheet)
+            charSheet.close()
+
+            playerOne = challenger
+            msg = pOneInfo['name'] + " is challenging " + opponent + " (Type '!accept') "
+            new_game = 0.5
+            timeout = 60
+            bTimer = True
 
     return msg, opponentID, pOneInfo, new_game, bTimer, playerOne
 
 def message_8_usefeat(answer, charFolder, user, game, playerOne, playerTwo, token, featToken, pOneInfo, pOneSpentFeat,
                       pTwoSpentFeat, pTwoInfo):
     msg = []
+    passiveFeats = ['power attack', 'pattack', 'defensive fighting', 'dfight', 'masochist', 'nerve strike', 'improved nerve strike',
+                    'greater nerve strike', 'nerve damage', 'evasion', 'improved evasion', 'greater evasion', 'hurt me',
+                    'improved hurt me', 'greater hurt me', 'hurt me more', 'deflect', 'improved deflect', 'greater deflect', 'cat grace',
+                    'improved cat grace', 'greater cat grace', 'bear endurance', 'improved bear endurance', 'greater bear endurance']
+    passiveStats = ['crushing blow', 'improved crushing blow', 'greater crushing blow', 'precision strike',
+                    'improved precision strike', 'greater precision strike', 'lightning reflexes',
+                    'improved lightning reflexes', 'greater lightning reflexes']
     featToken_new = None
     # pOneSpentFeat = None
     pOneFeatInfo = None
@@ -332,16 +351,11 @@ def message_8_usefeat(answer, charFolder, user, game, playerOne, playerTwo, toke
             # if the feat is one of the listed below. Tell the player that those feats are used with a different
             # command
             if featToken == 0:
-                if pOneLastFeat in ('power attack', 'defensive fighting', 'masochist', 'nerve strike', 'improved nerve strike',
-                'greater nerve strike', 'nerve damage', 'evasion', 'improved evasion', 'greater evasion', 'hurt me',
-                'improved hurt me', 'greater hurt me', 'hurt me more', 'deflect', 'improved deflect', 'greater deflect'):
+                if pOneLastFeat in passiveFeats:
                     msg.append(pOneLastFeat + " will be determined elsewhere.")
 
-                elif pOneLastFeat in ('crushing blow', 'improved crushing blow', 'greater crushing blow', 'precision strike',
-                'improved precision strike', 'greater precision strike', 'lightning reflexes',
-                'improved lightning reflexes', 'greater lightning reflexes'):
+                elif pOneLastFeat in passiveStats:
                     msg.append(pOneLastFeat + " is already factored into your attack/defense.")
-
                 # make sure that a player can't reuse a feat already used.
                 elif pOneLastFeat in pOneSpentFeat:
                     msg.append("You have already used this feat.")
@@ -352,8 +366,8 @@ def message_8_usefeat(answer, charFolder, user, game, playerOne, playerTwo, toke
                     featToken_new = 1
                     pOneSpentFeat = pOneLastFeat
                     pOneFeatInfo = [pOneLastFeat, featDictionary[0][pOneLastFeat]['action']]
-                    msg.append(pOneInfo['name'] + " has used [color=yellow] " + pOneSpentFeat +
-                               "[/color]")
+                    msg.append(pOneInfo['name'] + " has used  " + pOneSpentFeat +
+                               "")
 
                 # If the player doesn't have the feat, he can't use it.
                 elif pOneLastFeat not in pOneInfo['feats taken']:
@@ -367,18 +381,17 @@ def message_8_usefeat(answer, charFolder, user, game, playerOne, playerTwo, toke
             # pull in the feat dictionary from the gameFeats definition.
             featDictionary = featDict()[0]
 
-            if message[9:] != 'none':
-                pTwoLastFeat = message[9:]
+            if answer != 'none':
+                pTwoLastFeat = answer
             else:
                 pTwoLastFeat = "none"
 
             if featToken == 0:
                 # if the feat is one of the listed below. Tell the player that those feats are used with a different
                 # command
-                if pTwoLastFeat in (
-                'power attack', 'combat expertise', 'defensive fighting', 'masochist', 'hurt me',
-                'improved hurt me', 'greater hurt me', 'hurt me more', 'evasion', 'improved evasion',
-                'greater evasion'):
+                if pTwoLastFeat in ('power attack', 'pattack', 'defensive fighting', 'dfight', 'masochist', 'nerve strike', 'improved nerve strike',
+                'greater nerve strike', 'nerve damage', 'evasion', 'improved evasion', 'greater evasion', 'hurt me',
+                'improved hurt me', 'greater hurt me', 'hurt me more', 'deflect', 'improved deflect', 'greater deflect'):
                     msg.append(pTwoLastFeat + " will be determined elsewhere.")
 
                 elif pTwoLastFeat in (
@@ -397,8 +410,8 @@ def message_8_usefeat(answer, charFolder, user, game, playerOne, playerTwo, toke
                     featToken_new = 1
                     pTwoSpentFeat = pTwoLastFeat
                     pTwoFeatInfo = [pTwoLastFeat, featDictionary[0][pTwoLastFeat]['action']]
-                    msg.append(pTwoInfo['name'] + " has used [color=yellow]" + pTwoLastFeat +
-                               "[/color]")
+                    msg.append(pTwoInfo['name'] + " has used " + pTwoLastFeat +
+                               "")
 
                 # If the player doesn't have the feat, he can't use it.
                 elif pTwoLastFeat not in pTwoInfo['feats taken']:
@@ -412,60 +425,69 @@ def message_8_usefeat(answer, charFolder, user, game, playerOne, playerTwo, toke
 
     return msg, featToken_new, pOneSpentFeat, pOneFeatInfo, pTwoSpentFeat, pTwoFeatInfo
 
-def message_5_pass(character, channel, unspoiledArena, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
+def message_7_permit(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
                    count, token, critical, bonusHurt, totalDamage, pOneTotalHP, pTwoTotalHP,
                    pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, pOnedMod, pOnemMod, pOneQuickDamage,
                    pTwoQuickDamage, iddqd):
     msg = []
     bGameTimer = False
-    if channel == unspoiledArena:
-        if token == 2 and character.lower() == playerOne:
-            msg.append(pOneInfo['name'] + " has chosen not to prevent this attack.")
-            pOneCurrentHP = pOneCurrentHP - totalDamage
 
-            # Print the scoreboard
-            msg.append(pOneInfo['name'] + ": [color=red]"
-                       + str(pOneCurrentHP) + "[/color]/" +
-                       str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": [color=red]" +
-                       str(pTwoCurrentHP) + "[/color]/" + str(pTwoTotalHP) + " \n" +
-                       pOneInfo['name'] + "'s turn. Type: [color=pink]!usefeat <feat>[/color]"
-                                          " if you wish to use a feat.")
-            count += 1
-            featToken = 0
-            token = 1
-            pOnedMod = 0
-            pOnemMod = 0
-            iddqd = 0
-            bGameTimer = True
-            pOneFeatInfo = None
+    if token == 2 and user == playerOne:
+        msg.append(pOneInfo['name'] + " has chosen not to prevent this attack.")
+        pOneCurrentHP = pOneCurrentHP - totalDamage
 
-        elif token == 1 and character.lower() == playerTwo:
-            msg.append(pTwoInfo['name'] + " has chosen not to evade this attack.")
-            # Determine if Quick Strike was used by Player Two and apply damage
-            if pTwoQuickDamage != 0:
-                pOneCurrentHP = pOneCurrentHP - totalDamage - pTwoQuickDamage
-                pOneQuickDamage = 0
-            else:
-                pTwoCurrentHP = pTwoCurrentHP - totalDamage
+        if pOneInfo['regeneration'] != 0 and pOneCurrentHP < pOneTotalHP:
+            msg.append(pOneInfo['name'] + " has regenerated " + str(pOneInfo['regeneration']) +" hp.")
+            pOneCurrentHP += pOneInfo['regeneration']
 
-            # Print the scoreboard
-            msg.append(pOneInfo['name'] + ": [color=red]" + str(pOneCurrentHP) + "[/color]/" +
-                       str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": [color=red]" +
-                       str(pTwoCurrentHP) + "[/color]/" + str(pTwoTotalHP) + " \n" +
-                       pTwoInfo['name'] + "'s turn. Type: [color=pink]!usefeat <feat>[/color]"
-                                          " if you wish to use a feat.")
-            count += 1
-            featToken = 0
-            pOnepMod = 0
-            pOnecMod = 0
-            token = 2
-            iddqd = 0
-            bGameTimer = True
+        # Print the scoreboard
+        msg.append(pOneInfo['name'] + ": "
+                   + str(pOneCurrentHP) + "/" +
+                   str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": " +
+                   str(pTwoCurrentHP) + "/" + str(pTwoTotalHP) + " \n" +
+                   pOneInfo['name'] + "'s turn. Type: !usefeat <feat>"
+                                      " if you wish to use a feat.")
+
+        count += 1
+        featToken = 0
+        token = 1
+        pOnedMod = 0
+        pOnemMod = 0
+        iddqd = 0
+        bGameTimer = True
+        pOneFeatInfo = None
+
+    elif token == 1 and user == playerTwo:
+        msg.append(pTwoInfo['name'] + " has chosen not to evade this attack.")
+        # Determine if Quick Strike was used by Player Two and apply damage
+        if pTwoQuickDamage != 0:
+            pOneCurrentHP = pOneCurrentHP - totalDamage - pTwoQuickDamage
+            pOneQuickDamage = 0
         else:
-            msg.append(
-                "You are either not in the fight, or it's not your turn. Either way, Don't do it again.")
+            pTwoCurrentHP = pTwoCurrentHP - totalDamage
+
+        if pTwoInfo['regeneration'] != 0 and pTwoCurrentHP < pTwoTotalHP:
+            msg.append(pTwoInfo['name'] + " has regenerated " + str(pTwoInfo['regeneration']) +" hp.")
+            pTwoCurrentHP += pTwoInfo['regeneration']
+
+        # Print the scoreboard
+        msg.append(pOneInfo['name'] + ": " + str(pOneCurrentHP) + "/" +
+                   str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": " +
+                   str(pTwoCurrentHP) + "/" + str(pTwoTotalHP) + " \n" +
+                   pTwoInfo['name'] + "'s turn. Type: !usefeat <feat>"
+                                      " if you wish to use a feat.")
+
+        count += 1
+        featToken = 0
+        pOnepMod = 0
+        pOnecMod = 0
+        token = 2
+        iddqd = 0
+        bGameTimer = True
     else:
-        msg.append("This command is only available in the Arena.")
+        msg.append(
+            "You are either not in the fight, or it's not your turn. Either way, Don't do it again.")
+
     return msg, bGameTimer, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken, \
            count, token, critical, bonusHurt, totalDamage, pOneTotalHP, pTwoTotalHP, \
            pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, pOnedMod, pOnemMod, pOneQuickDamage, pTwoQuickDamage, iddqd
@@ -477,95 +499,103 @@ def message_8_evasion(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
     msg = []
     bGameTimer = False
 
-    if channel == unspoiledArena:
-        if token == 2 and user == playerOne:
-            for word in pOneInfo['feats taken']:
-                if pOneEvade == 1 and word == "evasion":
-                    totalDamage = int(totalDamage * 0.5)
-                    pOneEvade = 0
-                    msg.append(playerOne + " used [color=yellow]'" + word + "'[/color],"
-                                           " reducing damage taken to [color=red]" + str(totalDamage) + "[/color]. \n")
-                elif pOneEvade == 1 and word == "improved evasion":
-                    totalDamage = int(totalDamage * 0.25)
-                    pOneEvade = 0
-                    msg.append(playerOne + " used [color=yellow]'" + word + "'[/color],"
-                                                                            " reducing damage taken to [color=red]" + str(
-                        totalDamage) + "[/color]. \n")
-                elif pOneEvade == 1 and word == "greater evasion":
-                    totalDamage = 0
-                    pTwoEvade = 0
-                    msg.append(playerOne + " used [color=yellow]'" + word + "'[/color],"
-                                                                            " reducing damage taken to [color=red]" + str(
-                        totalDamage) + "[/color]. \n")
+    if token == 2 and user == playerOne:
+        for word in pOneInfo['feats taken']:
+            if pOneEvade == 1 and word == "evasion":
+                totalDamage = int(totalDamage * 0.5)
+                pOneEvade = 0
+                msg.append(playerOne + " used '" + word + "',"
+                                       " reducing damage taken to " + str(totalDamage) + ". \n")
+            elif pOneEvade == 1 and word == "improved evasion":
+                totalDamage = int(totalDamage * 0.25)
+                pOneEvade = 0
+                msg.append(playerOne + " used '" + word + "',"
+                                                                        " reducing damage taken to " + str(
+                    totalDamage) + ". \n")
+            elif pOneEvade == 1 and word == "greater evasion":
+                totalDamage = 0
+                pTwoEvade = 0
+                msg.append(playerOne + " used '" + word + "',"
+                                                                        " reducing damage taken to " + str(
+                    totalDamage) + ". \n")
 
-            # Determine if Quick Strike was used by Player One and apply damage
-            if pOneQuickDamage != 0:
-                pTwoCurrentHP = pTwoCurrentHP - totalDamage - pOneQuickDamage
-                pOneQuickDamage = 0
-            else:
-                pOneCurrentHP = pOneCurrentHP - totalDamage
-
-            # Print the scoreboard
-            msg.append(pOneInfo['name'] + ": [color=red]" + str(pOneCurrentHP) + "[/color]/" +
-                       str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": [color=red]" +
-                       str(pTwoCurrentHP) + "[/color]/" + str(pTwoTotalHP) + " \n" +
-                       pOneInfo['name'] + "'s turn. Type: [color=pink]!usefeat <feat>[/color]"
-                                          " if you wish to use a feat.")
-            count += 1
-            featToken = 0
-            token = 1
-            pOnedMod = 0
-            pOnemMod = 0
-            iddqd = 0
-            bGameTimer = True
-
-
-        elif token == 1 and user == playerTwo:
-            for word in pTwoInfo['feats taken']:
-                if pTwoEvade == 1 and word == "evasion":
-                    totalDamage = int(totalDamage * 0.75)
-                    pTwoEvade = 0
-                    msg.append(playerTwo + " used [color=yellow]'" + word + "'[/color],"
-                                                                            " reducing damage taken to [color=red]" + str(
-                        totalDamage) + "[/color]. \n")
-                elif pTwoEvade == 1 and word == "improved evasion":
-                    totalDamage = int(totalDamage * 0.5)
-                    pTwoEvade = 0
-                    msg.append(playerTwo + " used [color=yellow]'" + str(totalDamage) + "'[/color],"
-                                                                                        " reducing damage taken to [color=red]" + str(
-                        total) + "[/color]. \n")
-                elif pTwoEvade == 1 and word == "greater evasion":
-                    totalDamage = 0
-                    pTwoEvade = 0
-                    msg.append(playerTwo + " used [color=yellow]'" + word + "'[/color],"
-                                                                            " reducing damage taken to [color=red]" + str(
-                        totalDamage) + "[/color]. \n")
-
-            # Determine if Quick Strike was used by Player Two and apply damage
-            if pTwoQuickDamage != 0:
-                pOneCurrentHP = pOneCurrentHP - totalDamage - pTwoQuickDamage
-                pOneQuickDamage = 0
-            else:
-                pTwoCurrentHP = pTwoCurrentHP - totalDamage
-
-            # Print the scoreboard
-            msg.append(pOneInfo['name'] + ": [color=red]" + str(pOneCurrentHP) + "[/color]/" +
-                       str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": [color=red]" +
-                       str(pTwoCurrentHP) + "[/color]/" + str(pTwoTotalHP) + " \n" +
-                       pTwoInfo['name'] + "'s turn. Type: [color=pink]!usefeat <feat>[/color]"
-                                          " if you wish to use a feat.")
-            count += 1
-            featToken = 0
-            pOnepMod = 0
-            pOnecMod = 0
-            token = 2
-            iddqd = 0
-            bGameTimer = True
+        # Determine if Quick Strike was used by Player One and apply damage
+        if pOneQuickDamage != 0:
+            pTwoCurrentHP = pTwoCurrentHP - totalDamage - pOneQuickDamage
+            pOneQuickDamage = 0
         else:
-            msg.append(
-                "You are either not in the fight, or it's not your turn. Either way, Don't do it again.")
+            pOneCurrentHP = pOneCurrentHP - totalDamage
+
+        if pOneInfo['regeneration'] != 0 and pOneCurrentHP < pOneTotalHP:
+            msg.append(pOneInfo['name'] + " has regenerated " + str(pOneInfo['regeneration']) +" hp.")
+            pOneCurrentHP += pOneInfo['regeneration']
+
+        # Print the scoreboard
+        msg.append(pOneInfo['name'] + ": " + str(pOneCurrentHP) + "/" +
+                   str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": " +
+                   str(pTwoCurrentHP) + "/" + str(pTwoTotalHP) + " \n" +
+                   pOneInfo['name'] + "'s turn. Type: !usefeat <feat>"
+                                      " if you wish to use a feat.")
+
+        count += 1
+        featToken = 0
+        token = 1
+        pOnedMod = 0
+        pOnemMod = 0
+        iddqd = 0
+        bGameTimer = True
+
+
+    elif token == 1 and user == playerTwo:
+        for word in pTwoInfo['feats taken']:
+            if pTwoEvade == 1 and word == "evasion":
+                totalDamage = int(totalDamage * 0.75)
+                pTwoEvade = 0
+                msg.append(playerTwo + " used '" + word + "',"
+                                                                        " reducing damage taken to " + str(
+                    totalDamage) + ". \n")
+            elif pTwoEvade == 1 and word == "improved evasion":
+                totalDamage = int(totalDamage * 0.5)
+                pTwoEvade = 0
+                msg.append(playerTwo + " used '" + str(totalDamage) + "',"
+                                                                                    " reducing damage taken to " + str(
+                    total) + ". \n")
+            elif pTwoEvade == 1 and word == "greater evasion":
+                totalDamage = 0
+                pTwoEvade = 0
+                msg.append(playerTwo + " used '" + word + "',"
+                                                                        " reducing damage taken to " + str(
+                    totalDamage) + ". \n")
+
+        # Determine if Quick Strike was used by Player Two and apply damage
+        if pTwoQuickDamage != 0:
+            pOneCurrentHP = pOneCurrentHP - totalDamage - pTwoQuickDamage
+            pOneQuickDamage = 0
+        else:
+            pTwoCurrentHP = pTwoCurrentHP - totalDamage
+
+        if pTwoInfo['regeneration'] != 0 and pTwoCurrentHP < pTwoTotalHP:
+            msg.append(pTwoInfo['name'] + " has regenerated " + str(pTwoInfo['regeneration']) +" hp.")
+            pTwoCurrentHP += pTwoInfo['regeneration']
+
+        # Print the scoreboard
+        msg.append(pOneInfo['name'] + ": " + str(pOneCurrentHP) + "/" +
+                   str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": " +
+                   str(pTwoCurrentHP) + "/" + str(pTwoTotalHP) + " \n" +
+                   pTwoInfo['name'] + "'s turn. Type: !usefeat <feat>"
+                                      " if you wish to use a feat.")
+
+        count += 1
+        featToken = 0
+        pOnepMod = 0
+        pOnecMod = 0
+        token = 2
+        iddqd = 0
+        bGameTimer = True
     else:
-        msg.append("This command is only available in the Arena.")
+        msg.append(
+            "You are either not in the fight, or it's not your turn. Either way, Don't do it again.")
+
     return msg, bGameTimer, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken, \
            count, token, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, \
            pOnedMod, pOnemMod, pOneQuickDamage, pTwoQuickDamage, pTwoEvade, pOneEvade, iddqd
@@ -585,9 +615,9 @@ def message_8_deflect(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
                 totalDamage = int(totalDamage - int(pOneInfo['abac']))
                 if totalDamage < 1:
                     totalDamage = 1
-                msg.append(pOneInfo['name'] + " used [color=yellow]'deflect'[/color] "
-                           "to lessen the blow from [color=red]" + str(oldDamage) +
-                           "[/color] to [color=red]" + str(int(totalDamage)) + "[/color]")
+                msg.append(pOneInfo['name'] + " used 'deflect' "
+                           "to lessen the blow from " + str(oldDamage) +
+                           " to " + str(int(totalDamage)) + "")
 
             elif word == "improved deflect" and pOneDeflect == 1:
                 pOneDeflect = 0
@@ -595,9 +625,9 @@ def message_8_deflect(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
                 totalDamage = int(totalDamage - int(pOneInfo['abac'] * 1.5))
                 if totalDamage < 1:
                     totalDamage = 1
-                msg.append(pOneInfo['name'] + " used [color=yellow]'deflect'[/color] "
-                                              "to lessen the blow from [color=red]" + str(oldDamage) +
-                           "[/color] to [color=red]" + str(int(totalDamage)) + "[/color]")
+                msg.append(pOneInfo['name'] + " used 'deflect' "
+                                              "to lessen the blow from " + str(oldDamage) +
+                           " to " + str(int(totalDamage)) + "")
 
             elif word == "greater deflect" and pOneDeflect == 1:
                 pOneDeflect = 0
@@ -605,9 +635,9 @@ def message_8_deflect(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
                 totalDamage = int(totalDamage - int(pOneInfo['abac'] * 2))
                 if totalDamage < 1:
                     totalDamage = 1
-                msg.append(pOneInfo['name'] + " used [color=yellow]'deflect'[/color] "
-                           "to lessen the blow from [color=red]" + str(oldDamage) +
-                           "[/color] to [color=red]" + str(int(totalDamage)) + "[/color]")
+                msg.append(pOneInfo['name'] + " used 'deflect' "
+                           "to lessen the blow from " + str(oldDamage) +
+                           " to " + str(int(totalDamage)) + "")
 
         # Determine if Quick Strike was used by Player One and apply damage
         if pOneQuickDamage != 0:
@@ -616,12 +646,17 @@ def message_8_deflect(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
         else:
             pOneCurrentHP = pOneCurrentHP - totalDamage
 
+        if pOneInfo['regeneration'] != 0 and pOneCurrentHP < pOnetotalHP:
+            msg.append(pOneInfo['name'] + " has regenerated " + str(pOneInfo['regeneration']) +" hp.")
+            pOneCurrentHP += pOneInfo['regeneration']
+
         # Print the scoreboard
-        msg.append(pOneInfo['name'] + ": [color=red]" + str(pOneCurrentHP) + "[/color]/" +
-                   str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": [color=red]" +
-                   str(pTwoCurrentHP) + "[/color]/" + str(pTwoTotalHP) + " \n" +
-                   pOneInfo['name'] + "'s turn. Type: [color=pink]!usefeat <feat>[/color]"
+        msg.append(pOneInfo['name'] + ": " + str(pOneCurrentHP) + "/" +
+                   str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": " +
+                   str(pTwoCurrentHP) + "/" + str(pTwoTotalHP) + " \n" +
+                   pOneInfo['name'] + "'s turn. Type: !usefeat <feat>"
                                       " if you wish to use a feat.")
+
         count += 1
         featToken = 0
         token = 1
@@ -629,7 +664,6 @@ def message_8_deflect(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
         pOnemMod = 0
         iddqd = 0
         bGameTimer = True
-
 
     elif token == 1 and user == playerTwo:
         for word in pTwoInfo['feats taken']:
@@ -639,9 +673,9 @@ def message_8_deflect(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
                 totalDamage = int(totalDamage - int(pTwoInfo['abac']))
                 if totalDamage < 1:
                     totalDamage = 1
-                msg.append(pTwoInfo['name'] + " used [color=yellow]'deflect'[/color] "
-                           "to lessen the blow from [color=red]" + str(oldDamage) + "[/color] to [color=red]" +
-                           str(int(totalDamage)) + "[/color]")
+                msg.append(pTwoInfo['name'] + " used 'deflect' "
+                           "to lessen the blow from " + str(oldDamage) + " to " +
+                           str(int(totalDamage)) + "")
 
             elif word == "improved deflect" and pTwoDeflect == 1:
                 pTwoDeflect = 0
@@ -649,9 +683,9 @@ def message_8_deflect(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
                 totalDamage = int(totalDamage - int(pTwoInfo['abac'] * 1.5))
                 if totalDamage < 1:
                     totalDamage = 1
-                msg.append(pTwoInfo['name'] + " used [color=yellow]'deflect'[/color] "
-                          "to lessen the blow from [color=red]" + str(oldDamage) +
-                           "[/color] to [color=red]" + str(int(totalDamage)) + "[/color]")
+                msg.append(pTwoInfo['name'] + " used 'deflect' "
+                          "to lessen the blow from " + str(oldDamage) +
+                           " to " + str(int(totalDamage)) + "")
 
             elif word == "greater deflect" and pTwoDeflect == 1:
                 pTwoDeflect = 0
@@ -659,9 +693,9 @@ def message_8_deflect(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
                 totalDamage = int(totalDamage - int(pTwoInfo['abac'] * 2))
                 if totalDamage < 1:
                     totalDamage = 1
-                msg.append(pTwoInfo['name'] + " used [color=yellow]'deflect'[/color] "
-                           "to lessen the blow from [color=red]" + str(oldDamage) +
-                           "[/color] to [color=red]" + str(int(totalDamage)) + "[/color]")
+                msg.append(pTwoInfo['name'] + " used 'deflect' "
+                           "to lessen the blow from " + str(oldDamage) +
+                           " to " + str(int(totalDamage)) + "")
 
         # Determine if Quick Strike was used by Player Two and apply damage
         if pTwoQuickDamage != 0:
@@ -670,12 +704,17 @@ def message_8_deflect(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
         else:
             pTwoCurrentHP = pTwoCurrentHP - totalDamage
 
+        if pTwoInfo['regeneration'] != 0 and pTwoCurrentHP < pTwoTotalHP:
+            msg.append(pTwoInfo['name'] + " has regenerated " + str(pTwoInfo['regeneration']) +" hp.")
+            pTwoCurrentHP += pTwoInfo['regeneration']
+
         # Print the scoreboard
-        msg.append(pOneInfo['name'] + ": [color=red]" + str(pOneCurrentHP) + "[/color]/" +
-                   str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": [color=red]" +
-                   str(pTwoCurrentHP) + "[/color]/" + str(pTwoTotalHP) + " \n" +
-                   pTwoInfo['name'] + "'s turn. Type: [color=pink]!usefeat <feat>[/color]"
+        msg.append(pOneInfo['name'] + ": " + str(pOneCurrentHP) + "/" +
+                   str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": " +
+                   str(pTwoCurrentHP) + "/" + str(pTwoTotalHP) + " \n" +
+                   pTwoInfo['name'] + "'s turn. Type: !usefeat <feat>"
                                       " if you wish to use a feat.")
+
         count += 1
         featToken = 0
         pOnepMod = 0
@@ -687,14 +726,13 @@ def message_8_deflect(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
         msg.append(
             "You are either not in the fight, or it's not your turn. Either way, Don't do it again.")
 
-    msg.append("This command is only available in the Arena.")
     return msg, bGameTimer, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken, \
            count, token, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, \
            pOnedMod, pOnemMod, pOneQuickDamage, pTwoQuickDamage, pTwoDeflect, pOneDeflect, iddqd
 
 def message_8_pattack(user, points, game, playerOne, playerTwo, pOneInfo, pTwoInfo, token, pOnepMod, pTwopMod, pOneLevel, pTwoLevel):
     msg = []
-
+    points = int(points)
     # make sure that this command cannot be ran if a fight is taking place.
     try:
         if game == 1:
@@ -702,27 +740,26 @@ def message_8_pattack(user, points, game, playerOne, playerTwo, pOneInfo, pTwoIn
             # spamming commands.
             if user == playerOne and token == 1:
                 if 'power attack' in pOneInfo['feats taken']:
-                    mod = int(message[9:])
-                    if pOneLevel <= 4 and mod == 1:
+                    if pOneLevel <= 4 and points == 1:
                         pOnepMod = 1
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(mod) + "[/color] points in [color=yellow]'power attack'[/color]")
-                    elif 4 < pOneLevel <= 8 and mod == 2:
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'power attack'")
+                    elif 4 < pOneLevel <= 8 and points == 2:
                         pOnepMod = 2
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(mod) + "[/color] points in [color=yellow]'power attack'[/color]")
-                    elif 8 < pOneLevel <= 12 and mod == 3:
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'power attack'")
+                    elif 8 < pOneLevel <= 12 and points == 3:
                         pOnepMod = 3
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(mod) + "[/color] points in [color=yellow]'power attack'[/color]")
-                    elif 12 < pOneLevel <= 16 and mod == 4:
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'power attack'")
+                    elif 12 < pOneLevel <= 16 and points == 4:
                         pOnepMod = 4
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(mod) + "[/color] points in [color=yellow]'power attack'[/color]")
-                    elif 16 < pOneLevel <= 20 and mod == 5:
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'power attack'")
+                    elif 16 < pOneLevel <= 20 and points == 5:
                         pOnepMod = 5
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(mod) + "[/color] points in [color=yellow]'power attack'[/color]")
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'power attack'")
                     else:
                         msg.append("You are not high enough level to invest that many points.")
                 else:
@@ -733,24 +770,24 @@ def message_8_pattack(user, points, game, playerOne, playerTwo, pOneInfo, pTwoIn
                 if 'power attack' in pTwoInfo['feats taken']:
                     if pTwoLevel <= 4 and points == 1:
                         pTwopMod = 1
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'power attack'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'power attack'")
                     elif 4 < pTwoLevel <= 8 and points == 2:
                         pTwopMod = 2
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'power attack'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'power attack'")
                     elif 8 < pTwoLevel <= 12 and points == 3:
                         pTwopMod = 3
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'power attack'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'power attack'")
                     elif 12 < pTwoLevel <= 16 and points == 4:
                         pTwopMod = 4
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'power attack'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'power attack'")
                     elif 16 < pTwoLevel <= 20 and points == 5:
                         pTwopMod = 5
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'power attack'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'power attack'")
                     else:
                         msg.append("You are not high enough level to invest that many points.")
                 else:
@@ -765,61 +802,62 @@ def message_8_pattack(user, points, game, playerOne, playerTwo, pOneInfo, pTwoIn
 
 def message_8_dfight(user, points, game, playerOne, playerTwo, pOneInfo, pTwoInfo, token, pOnedMod, pTwodMod, pOneLevel, pTwoLevel):
     msg = []
+    points = int(points)
     # make sure that this command cannot be ran if a fight is taking place.
     try:
         if game == 1:
             # ensures the command can only be used by player one, when it is their turn. To prevent trolls from
             # spamming commands.
-            if character.lower() == playerOne and token == 1:
+            if user == playerOne and token == 1:
                 if 'defensive fighting' in pOneInfo['feats taken']:
                     if pOneLevel <= 4 and points == 1:
                         pOnedMod = 1
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'defensive fighting'[/color]")
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'defensive fighting'")
                     elif 4 < pOneLevel <= 8 and points == 2:
                         pOnedMod = 2
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'defensive fighting'[/color]")
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'defensive fighting'")
                     elif 8 < pOneLevel <= 12 and points == 3:
                         pOnedMod = 3
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'defensive fighting'[/color]")
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'defensive fighting'")
                     elif 12 < pOneLevel <= 16 and points == 4:
                         pOnedMod = 4
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'defensive fighting'[/color]")
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'defensive fighting'")
                     elif 16 < pOneLevel <= 20 and points == 5:
                         pOnedMod = 5
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'defensive fighting'[/color]")
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'defensive fighting'")
                     else:
                         msg.append("You are not high enough level to invest that many points.")
                 else:
                     msg.append("You do not have this feat.")
             # ensures the command can only be used by player two, when it is their turn. To prevent trolls from
             # spamming commands.
-            elif character.lower() == playerTwo and token == 2:
+            elif user == playerTwo and token == 2:
                 if 'defensive fighting' in pTwoInfo['feats taken']:
                     if pTwoLevel <= 4 and points == 1:
                         pTwodMod = 1
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'defensive fighting'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'defensive fighting'")
                     elif 4 < pTwoLevel <= 8 and points == 2:
                         pTwodMod = 2
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'defensive fighting'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'defensive fighting'")
                     elif 8 < pTwoLevel <= 12 and points == 3:
                         pTwodMod = 3
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'defensive fighting'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'defensive fighting'")
                     elif 12 < pTwoLevel <= 16 and points == 4:
                         pTwodMod = 4
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'defensive fighting'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'defensive fighting'")
                     elif 16 < pTwoLevel <= 20 and points == 5:
                         pTwodMod = 5
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'defensive fighting'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'defensive fighting'")
                     else:
                         msg.append("You are not high enough level to invest that many points.")
                 else:
@@ -841,54 +879,54 @@ def message_8_dfight(user, points, game, playerOne, playerTwo, pOneInfo, pTwoInf
 #                if game == 1:
 #                    # ensures the command can only be used by player one, when it is their turn. To prevent trolls from
 #                    # spamming commands.
-#                    if character.lower() == playerOne and token == 1:
+#                    if user == playerOne and token == 1:
 #                        mod = int(message[9:])
-#                        if pOneLevel <= 4 and mod == 1:
+#                        if pOneLevel <= 4 and points == 1:
 #                            pOnecMod = 1
-#                            msg.append(pOneInfo['name'] + " invested [color=red]"
-#                                        + str(mod) + "[/color] points in [color=yellow]'combat expertise'[/color]")
-#                        elif 4 < pOneLevel <= 8 and mod == 2:
+#                            msg.append(pOneInfo['name'] + " invested "
+#                                        + str(points) + " points in 'combat expertise'")
+#                        elif 4 < pOneLevel <= 8 and points == 2:
 #                            pOnecMod = 2
-#                            msg.append(pOneInfo['name'] + " invested [color=red]"
-#                                        + str(mod) + "[/color] points in [color=yellow]'combat expertise'[/color]")
-#                        elif 8 < pOneLevel <= 12 and mod == 3:
+#                            msg.append(pOneInfo['name'] + " invested "
+#                                        + str(points) + " points in 'combat expertise'")
+#                        elif 8 < pOneLevel <= 12 and points == 3:
 #                            pOnecMod = 3
-#                            msg.append(pOneInfo['name'] + " invested [color=red]"
-#                                        + str(mod) + "[/color] points in [color=yellow]'combat expertise'[/color]")
-#                        elif 12 < pOneLevel <= 16 and mod == 4:
+#                            msg.append(pOneInfo['name'] + " invested "
+#                                        + str(points) + " points in 'combat expertise'")
+#                        elif 12 < pOneLevel <= 16 and points == 4:
 #                            pOnecMod = 4
-#                            msg.append(pOneInfo['name'] + " invested [color=red]"
-#                                        + str(mod) + "[/color] points in [color=yellow]'combat expertise'[/color]")
-#                        elif 16 < pOneLevel <= 20 and mod == 5:
+#                            msg.append(pOneInfo['name'] + " invested "
+#                                        + str(points) + " points in 'combat expertise'")
+#                        elif 16 < pOneLevel <= 20 and points == 5:
 #                            pOnecMod = 5
-#                            msg.append(pOneInfo['name'] + " invested [color=red]"
-#                                        + str(mod) + "[/color] points in [color=yellow]'combat expertise'[/color]")
+#                            msg.append(pOneInfo['name'] + " invested "
+#                                        + str(points) + " points in 'combat expertise'")
 #                        else:
 #                            msg.append("You are not high enough level to invest that many points.")
 #                    # ensures the command can only be used by player two, when it is their turn. To prevent trolls from
 #                    # spamming commands.
-#                    elif character.lower() == playerTwo and token == 2:
+#                    elif user == playerTwo and token == 2:
 #                        mod = int(message[9:])
-#                        if pTwoLevel <= 4 and mod == 1:
+#                        if pTwoLevel <= 4 and points == 1:
 #                            pTwocMod = 1
-#                            msg.append(pTwoInfo['name'] + " invested [color=red]"
-#                                        + str(mod) + "[/color] points in [color=yellow]'combat expertise'[/color]")
-#                        elif 4 < pTwoLevel <= 8 and mod == 2:
+#                            msg.append(pTwoInfo['name'] + " invested "
+#                                        + str(points) + " points in 'combat expertise'")
+#                        elif 4 < pTwoLevel <= 8 and points == 2:
 #                            pTwocMod = 2
-#                            msg.append(pTwoInfo['name'] + " invested [color=red]"
-#                                        + str(mod) + "[/color] points in [color=yellow]'combat expertise'[/color]")
-#                        elif 8 < pTwoLevel <= 12 and mod == 3:
+#                            msg.append(pTwoInfo['name'] + " invested "
+#                                        + str(points) + " points in 'combat expertise'")
+#                        elif 8 < pTwoLevel <= 12 and points == 3:
 #                            pTwocMod = 3
-#                            msg.append(pTwoInfo['name'] + " invested [color=red]"
-#                                        + str(mod) + "[/color] points in [color=yellow]'combat expertise'[/color]")
-#                        elif 12 < pTwoLevel <= 16 and mod == 4:
+#                            msg.append(pTwoInfo['name'] + " invested "
+#                                        + str(points) + " points in 'combat expertise'")
+#                        elif 12 < pTwoLevel <= 16 and points == 4:
 #                            pTwocMod = 4
-#                            msg.append(pTwoInfo['name'] + " invested [color=red]"
-#                                        + str(mod) + "[/color] points in [color=yellow]'combat expertise'[/color]")
-#                        elif 16 < pTwoLevel <= 20 and mod == 5:
+#                            msg.append(pTwoInfo['name'] + " invested "
+#                                        + str(points) + " points in 'combat expertise'")
+#                        elif 16 < pTwoLevel <= 20 and points == 5:
 #                            pTwocMod = 5
-#                            msg.append(pTwoInfo['name'] + " invested [color=red]"
-#                                        + str(mod) + "[/color] points in [color=yellow]'combat expertise'[/color]")
+#                            msg.append(pTwoInfo['name'] + " invested "
+#                                        + str(points) + " points in 'combat expertise'")
 #                        else:
 #                            msg.append("You are not high enough level to invest that many points.")
 #
@@ -904,64 +942,64 @@ def message_8_dfight(user, points, game, playerOne, playerTwo, pOneInfo, pTwoInf
 
 def message_10_masochist(user, points, game, playerOne, playerTwo, pOneInfo, pTwoInfo, token, pOnemMod, pTwomMod, pOneLevel, pTwoLevel):
     msg = []
-
+    points = int(points)
     # make sure that this command cannot be ran if a fight is taking place.
     try:
         if game == 1:
             # ensures the command can only be used by player one, when it is their turn. To prevent trolls from
             # spamming commands.
-            if character.lower() == playerOne and token == 1:
+            if user == playerOne and token == 1:
                 if 'masochist' in pOneInfo['feats taken']:
                     if pOneLevel <= 4 and points == 1:
 
                         pOnemMod = 1
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'masochist'[/color]")
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'masochist'")
                     elif 4 < pOneLevel <= 8 and points == 2:
                         pOnemMod = 2
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'masochist'[/color]")
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'masochist'")
                     elif 8 < pOneLevel <= 12 and points == 3:
                         pOnemMod = 3
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'masochist'[/color]")
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'masochist'")
                     elif 12 < pOneLevel <= 16 and points == 4:
                         pOnemMod = 4
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'masochist'[/color]")
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'masochist'")
                     elif 16 < pOneLevel <= 20 and points == 5:
                         pOnemMod = 5
-                        msg.append(pOneInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'masochist'[/color]")
+                        msg.append(pOneInfo['name'] + " invested "
+                                   + str(points) + " points in 'masochist'")
                     else:
                         msg.append("You are not high enough level to invest that many points.")
                 else:
                     msg.append("You do not have this feat.")
             # ensures the command can only be used by player two, when it is their turn. To prevent trolls from
             # spamming commands.
-            elif character.lower() == playerTwo and token == 2:
+            elif user == playerTwo and token == 2:
                 if 'masochist' in pTwoInfo['feats taken']:
                     if pTwoLevel <= 4 and points == 1:
 
                         pTwomMod = 1
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'masochist'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'masochist'")
                     elif 4 < pTwoLevel <= 8 and points == 2:
                         pTwomMod = 2
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'masochist'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'masochist'")
                     elif 8 < pTwoLevel <= 12 and points == 3:
                         pTwomMod = 3
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'masochist'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'masochist'")
                     elif 12 < pTwoLevel <= 16 and points == 4:
                         pTwomMod = 4
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'masochist'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'masochist'")
                     elif 16 < pTwoLevel <= 20 and points == 5:
                         pTwomMod = 5
-                        msg.append(pTwoInfo['name'] + " invested [color=red]"
-                                   + str(points) + "[/color] points in [color=yellow]'masochist'[/color]")
+                        msg.append(pTwoInfo['name'] + " invested "
+                                   + str(points) + " points in 'masochist'")
                     else:
                         msg.append("You are not high enough level to invest that many points.")
                 else:

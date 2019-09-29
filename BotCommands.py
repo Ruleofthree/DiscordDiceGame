@@ -5,7 +5,8 @@ from discord.ext import commands
 
 token = open("token.txt", "r").read()
 
-client = commands.Bot(command_prefix = '!')
+client = commands.Bot(command_prefix = '!', self_bot=True)
+client.remove_command('help')
 
 @client.command()
 async def load(ctx, extension):
