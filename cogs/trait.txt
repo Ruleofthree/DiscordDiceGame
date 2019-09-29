@@ -1,0 +1,24 @@
+[
+  {
+    "regeneration": {
+      "desc": "Gain +2 Regeneration at level 1, 5, 10, 15, and 20",
+      "bonus": [2, 4, 6, 8, 10]
+    },
+    "brawler": {
+      "desc": "Gain +1 Strength at level 1, 5, 10, 15, and 20",
+      "bonus": [1, 2, 3, 4, 5]
+    },
+    "hearty": {
+      "desc": "Gain +1 Constitution at level 1, 5, 10, 15, and 20",
+      "bonus": [1, 2, 3, 4, 5]
+    },
+    "nimble": {
+      "desc": "Gain +1 Dexterity at level 1, 5, 10, 15, and 20",
+      "bonus": [1, 2, 3, 4, 5]
+    },
+    "thickskinned": {
+      "desc": "Gain +2 DR at level 1, and +1 additional at 5, 10, 15, and 20",
+      "bonus": [2, 3, 4, 5, 6]
+    }
+  }
+]
