@@ -691,6 +691,12 @@ class Combat(commands.Cog):
                     await ctx.send(msg_item)
                     if bGameTimer:
                        self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
+                    else:
+                        self.gameTimer.cancel()
+                        path = os.getcwd()
+                        gameFolder = os.path.join(path + "/gamelogic/")
+                        whichRoom = ctx.channel.id
+                        onMSGUtil.soft_reset(gameFolder, whichRoom)
 
                 gameStatDump(playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical,\
            bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod,\

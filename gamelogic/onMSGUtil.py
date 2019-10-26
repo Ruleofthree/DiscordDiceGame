@@ -249,6 +249,59 @@ def message_5_name(charFile, charFolder, name, player):
                    "to see your secrets, would we?")
     return msg
 
+def soft_reset(gameFolder,vwhichRoom):
+    with open(gameFolder + whichRoom + '.txt', 'r+') as file:
+        gameData = json.load(file)
+        gameData["playerOneID"] = ""
+        gameData["playerTwoID"] = ""
+        gameData["winner"] = ""
+        gameData["quitter"] = ""
+        gameData["pOneInfo"] = {}
+        gameData["pTwoInfo"] = {}
+        gameData["featToken"] = 0
+        gameData["game"] = 0
+        gameData["count"] = 0
+        gameData["token"] = 0
+        gameData["critical"] = 0
+        gameData["bonusHurt"] = 0
+        gameData["nerveDamage"] = 0
+        gameData["totalDamage"] = 0
+        gameData["pOneTotalHP"] = 0
+        gameData["pTwoTotalHP"] = 0
+        gameData["pOneCurrentHP"] = 0
+        gameData["pTwoCurrentHP"] = 0
+        gameData["pOnepMod"] = 0
+        gameData["pOnecMod"] = 0
+        gameData["pOnedMod"] = 0
+        gameData["pOnemMod"] = 0
+        gameData["pOneEvade"] = 1
+        gameData["pOneDeflect"] = 1
+        gameData["pOneRiposte"] = 0
+        gameData["pOneQuickDamage"] = 0
+        gameData["pOneFeatInfo"] = None
+        gameData["pOneSpentFeat"] = []
+        gameData["pTwopMod"] = 0
+        gameData["pTwocMod"] = 0
+        gameData["pTwodMod"] = 0
+        gameData["pTwomMod"] = 0
+        gameData["pTwoEvade"] = 1
+        gameData["pTwoDeflect"] = 1
+        gameData["pTwoRiposte"] = 0
+        gameData["pTwoQuickDamage"] = 0
+        gameData["pTwoFeatInfo"] = None
+        gameData["pTwoSpentFeat"] = []
+        gameData["pOneLevel"] = 0
+        gameData["pTwoLevel"] = 0
+        gameData["xp"] = 0
+        gameData["currentPlayerXP"] = 0
+        gameData["nextLevel"] = 0
+        gameData["levelUp"] = 0
+        gameData["iddqd"] = 0
+        file.seek(0)
+        file.write(json.dumps(gameData, ensure_ascii=False, indent=2))
+        file.truncate()
+        file.close()
+
 def message_6_reset(gameFolder, whichRoom):
     whichRoom = str(whichRoom)
     with open(gameFolder + whichRoom + '.txt', 'r+') as file:
