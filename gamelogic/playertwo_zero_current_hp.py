@@ -36,7 +36,8 @@ def playertwo_currentHP_less_zero(msg, pTwoInfo, pOneInfo, playerTwo, playerOne,
         msg.append("As the level difference was greater than 10, no XP was awarded.")
 
     msg.append(pTwoInfo['name'] + " has earned: " + str(xp) + " experience points and" +
-               str(gold) + " gold.\n " + pOneInfo['name'] + " has earned: " + str(int(xp / 2)) + "")
+               str(gold) + " gold.\n " + pOneInfo['name'] + " has earned: " + str(int(xp / 2)) + " experience points and"
+               + str(int(gold / 2)) + " gold.")
     pTwoXP = int(pTwoInfo['currentxp'] + xp)
     pTwoGold = int(pTwoInfo['gold'] + gold)
     pOneXP = int(pOneInfo['currentxp'] + (xp / 2))

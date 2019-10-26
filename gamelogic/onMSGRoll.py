@@ -15,8 +15,7 @@ def evasionTimer(self):
     pass
 
 
-def message_roll(user, charFolder, \
-                 opponent, playerOne, playerTwo, winner, pOneInfo, pTwoInfo, featToken, game, \
+def message_roll(user, charFolder, playerOne, playerTwo, winner, pOneInfo, pTwoInfo, featToken, game, \
                  count, token, critical, bonusHurt, totalDamage, pOneTotalHP, pTwoTotalHP, \
                  pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, pOnedMod, pOnemMod, pOneEvade, pOneDeflect, \
                  pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod, pTwodMod, \
@@ -135,7 +134,7 @@ def message_roll(user, charFolder, \
     else:
         msg.append("This command does nothing right now. No combat is taking place.")
 
-    return msg, bEvasion, bDeflect, bGameTimer, opponent, playerOne, playerTwo, winner, pOneInfo, pTwoInfo, featToken, game, \
+    return msg, bEvasion, bDeflect, bGameTimer, playerOne, playerTwo, winner, pOneInfo, pTwoInfo, featToken, game, \
            count, token, critical, bonusHurt, totalDamage, pOneTotalHP, pTwoTotalHP, \
            pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, pOnedMod, pOnemMod, pOneEvade, pOneDeflect, \
            pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod, pTwodMod, \

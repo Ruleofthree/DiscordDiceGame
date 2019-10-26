@@ -1,11 +1,15 @@
 import discord
 import os
+import json
 
 from discord.ext import commands
 
-token = open("token.txt", "r").read()
+with open('token.txt', 'r+') as file:
+    stuff = json.load(file)
+    file.close()
+token = stuff["token"]
 
-client = commands.Bot(command_prefix = '!', self_bot=True)
+client = commands.Bot(command_prefix = '!')
 client.remove_command('help')
 
 @client.command()

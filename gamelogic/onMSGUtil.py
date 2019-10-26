@@ -179,7 +179,7 @@ def message_7_player(player):
                   "on how you justify a person that has never entered combat yet."
     return msg
 
-def message_5_name(charFile, charFolder, name, player, game):
+def message_5_name(charFile, charFolder, name, player):
     msg = []
     if charFile.is_file():
         msg.append("You've already created a character.")
@@ -235,6 +235,7 @@ def message_5_name(charFile, charFolder, name, player, game):
         characterFile["gold"] = 0
         file = open(charFolder + player + ".txt", "w", encoding="utf-8")
         json.dump(characterFile, file, ensure_ascii=False, indent=2)
+        file.close()
 
         with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
             playerDatabase = json.loads(file2.read())
@@ -246,6 +247,65 @@ def message_5_name(charFile, charFolder, name, player, game):
 
         msg.append("PM me with '!stats <str> <dex> <con>' to set your abilities. Wouldn't want everyone "
                    "to see your secrets, would we?")
+    return msg
+
+def message_6_reset(gameFolder, whichRoom):
+    whichRoom = str(whichRoom)
+    with open(gameFolder + whichRoom + '.txt', 'r+') as file:
+        gameData = json.load(file)
+        if gameData["game"] == 1:
+            gameData["playerOneID"] = ""
+            gameData["playerTwoID"] = ""
+            gameData["winner"] = ""
+            gameData["quitter"] = ""
+            gameData["pOneInfo"] = {}
+            gameData["pTwoInfo"] = {}
+            gameData["featToken"] = 0
+            gameData["game"] = 0
+            gameData["count"] = 0
+            gameData["token"] = 0
+            gameData["critical"] = 0
+            gameData["bonusHurt"] = 0
+            gameData["nerveDamage"] = 0
+            gameData["totalDamage"] = 0
+            gameData["pOneTotalHP"] = 0
+            gameData["pTwoTotalHP"] = 0
+            gameData["pOneCurrentHP"] = 0
+            gameData["pTwoCurrentHP"] = 0
+            gameData["pOnepMod"] = 0
+            gameData["pOnecMod"] = 0
+            gameData["pOnedMod"] = 0
+            gameData["pOnemMod"] = 0
+            gameData["pOneEvade"] = 1
+            gameData["pOneDeflect"] = 1
+            gameData["pOneRiposte"] = 0
+            gameData["pOneQuickDamage"] = 0
+            gameData["pOneFeatInfo"] = None
+            gameData["pOneSpentFeat"] = []
+            gameData["pTwopMod"] = 0
+            gameData["pTwocMod"] = 0
+            gameData["pTwodMod"] = 0
+            gameData["pTwomMod"] = 0
+            gameData["pTwoEvade"] = 1
+            gameData["pTwoDeflect"] = 1
+            gameData["pTwoRiposte"] = 0
+            gameData["pTwoQuickDamage"] = 0
+            gameData["pTwoFeatInfo"] = None
+            gameData["pTwoSpentFeat"] = []
+            gameData["pOneLevel"] = 0
+            gameData["pTwoLevel"] = 0
+            gameData["xp"] = 0
+            gameData["currentPlayerXP"] = 0
+            gameData["nextLevel"] = 0
+            gameData["levelUp"] = 0
+            gameData["iddqd"] = 0
+            file.seek(0)
+            file.write(json.dumps(gameData, ensure_ascii=False, indent=2))
+            file.truncate()
+            file.close()
+            msg = "Show's over folks. Nothing to see here."
+        else:
+            msg = "There isn't a game to reset."
     return msg
 
 def message_7_erase(player):
@@ -295,7 +355,7 @@ def message_10_challenge(challenger, opponent, charFolder, game):
             playerDatabase = json.loads(file.read())
             file.close()
 
-        opponentID = 0
+        opponentID = ""
 
         for item in playerDatabase.items():
             if item[0].lower() == opponent.lower():
@@ -311,13 +371,13 @@ def message_10_challenge(challenger, opponent, charFolder, game):
             pOneInfo = json.load(charSheet)
             charSheet.close()
 
-            playerOne = challenger
+            playerOne = pOneInfo['name']
             msg = pOneInfo['name'] + " is challenging " + opponent + " (Type '!accept') "
             new_game = 0.5
             timeout = 60
             bTimer = True
 
-    return msg, opponentID, pOneInfo, new_game, bTimer, playerOne
+    return msg, opponentID, pOneInfo, new_game, bTimer, playerOne, opponent
 
 def message_8_usefeat(answer, charFolder, user, game, playerOne, playerTwo, token, featToken, pOneInfo, pOneSpentFeat,
                       pTwoSpentFeat, pTwoInfo):
@@ -364,7 +424,7 @@ def message_8_usefeat(answer, charFolder, user, game, playerOne, playerTwo, toke
                 # information to provide benefits/debuffs.
                 elif pOneLastFeat in pOneInfo['feats taken']:
                     featToken_new = 1
-                    pOneSpentFeat = pOneLastFeat
+                    pOneSpentFeat.append(pOneLastFeat)
                     pOneFeatInfo = [pOneLastFeat, featDictionary[0][pOneLastFeat]['action']]
                     msg.append(pOneInfo['name'] + " has used  " + pOneSpentFeat +
                                "")
@@ -408,7 +468,7 @@ def message_8_usefeat(answer, charFolder, user, game, playerOne, playerTwo, toke
                 # information to provide benefits/debuffs.
                 elif pTwoLastFeat in pTwoInfo['feats taken']:
                     featToken_new = 1
-                    pTwoSpentFeat = pTwoLastFeat
+                    pTwoSpentFeat.append(pTwoLastFeat)
                     pTwoFeatInfo = [pTwoLastFeat, featDictionary[0][pTwoLastFeat]['action']]
                     msg.append(pTwoInfo['name'] + " has used " + pTwoLastFeat +
                                "")
@@ -504,18 +564,18 @@ def message_8_evasion(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
             if pOneEvade == 1 and word == "evasion":
                 totalDamage = int(totalDamage * 0.5)
                 pOneEvade = 0
-                msg.append(playerOne + " used '" + word + "',"
+                msg.append(pOneInfo['name'] + " used '" + word + "',"
                                        " reducing damage taken to " + str(totalDamage) + ". \n")
             elif pOneEvade == 1 and word == "improved evasion":
                 totalDamage = int(totalDamage * 0.25)
                 pOneEvade = 0
-                msg.append(playerOne + " used '" + word + "',"
+                msg.append(pOneInfo['name'] + " used '" + word + "',"
                                                                         " reducing damage taken to " + str(
                     totalDamage) + ". \n")
             elif pOneEvade == 1 and word == "greater evasion":
                 totalDamage = 0
                 pTwoEvade = 0
-                msg.append(playerOne + " used '" + word + "',"
+                msg.append(pOneInfo['name'] + " used '" + word + "',"
                                                                         " reducing damage taken to " + str(
                     totalDamage) + ". \n")
 
@@ -526,9 +586,9 @@ def message_8_evasion(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
         else:
             pOneCurrentHP = pOneCurrentHP - totalDamage
 
-        if pOneInfo['regeneration'] != 0 and pOneCurrentHP < pOneTotalHP:
-            msg.append(pOneInfo['name'] + " has regenerated " + str(pOneInfo['regeneration']) +" hp.")
-            pOneCurrentHP += pOneInfo['regeneration']
+        if pTwoInfo['regeneration'] != 0 and pTwoCurrentHP < pTwoTotalHP:
+            msg.append(pTwoInfo['name'] + " has regenerated " + str(pTwoInfo['regeneration']) +" hp.")
+            pTwoCurrentHP += pTwoInfo['regeneration']
 
         # Print the scoreboard
         msg.append(pOneInfo['name'] + ": " + str(pOneCurrentHP) + "/" +
@@ -545,25 +605,24 @@ def message_8_evasion(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
         iddqd = 0
         bGameTimer = True
 
-
     elif token == 1 and user == playerTwo:
         for word in pTwoInfo['feats taken']:
             if pTwoEvade == 1 and word == "evasion":
                 totalDamage = int(totalDamage * 0.75)
                 pTwoEvade = 0
-                msg.append(playerTwo + " used '" + word + "',"
+                msg.append(pTwoInfo['name'] + " used '" + word + "',"
                                                                         " reducing damage taken to " + str(
                     totalDamage) + ". \n")
             elif pTwoEvade == 1 and word == "improved evasion":
                 totalDamage = int(totalDamage * 0.5)
                 pTwoEvade = 0
-                msg.append(playerTwo + " used '" + str(totalDamage) + "',"
+                msg.append(pTwoInfo['name'] + " used '" + str(totalDamage) + "',"
                                                                                     " reducing damage taken to " + str(
                     total) + ". \n")
             elif pTwoEvade == 1 and word == "greater evasion":
                 totalDamage = 0
                 pTwoEvade = 0
-                msg.append(playerTwo + " used '" + word + "',"
+                msg.append(pTwoInfo['name'] + " used '" + word + "',"
                                                                         " reducing damage taken to " + str(
                     totalDamage) + ". \n")
 
@@ -574,9 +633,9 @@ def message_8_evasion(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
         else:
             pTwoCurrentHP = pTwoCurrentHP - totalDamage
 
-        if pTwoInfo['regeneration'] != 0 and pTwoCurrentHP < pTwoTotalHP:
-            msg.append(pTwoInfo['name'] + " has regenerated " + str(pTwoInfo['regeneration']) +" hp.")
-            pTwoCurrentHP += pTwoInfo['regeneration']
+        if pOneInfo['regeneration'] != 0 and pOneCurrentHP < pOneTotalHP:
+            msg.append(pOneInfo['name'] + " has regenerated " + str(pOneInfo['regeneration']) +" hp.")
+            pOneCurrentHP += pOneInfo['regeneration']
 
         # Print the scoreboard
         msg.append(pOneInfo['name'] + ": " + str(pOneCurrentHP) + "/" +
@@ -646,9 +705,9 @@ def message_8_deflect(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
         else:
             pOneCurrentHP = pOneCurrentHP - totalDamage
 
-        if pOneInfo['regeneration'] != 0 and pOneCurrentHP < pOnetotalHP:
-            msg.append(pOneInfo['name'] + " has regenerated " + str(pOneInfo['regeneration']) +" hp.")
-            pOneCurrentHP += pOneInfo['regeneration']
+        if pTwoInfo['regeneration'] != 0 and pTwoCurrentHP < pTwoTotalHP:
+            msg.append(pTwoInfo['name'] + " has regenerated " + str(pTwoInfo['regeneration']) +" hp.")
+            pTwoCurrentHP += pTwoInfo['regeneration']
 
         # Print the scoreboard
         msg.append(pOneInfo['name'] + ": " + str(pOneCurrentHP) + "/" +
@@ -704,9 +763,9 @@ def message_8_deflect(user, playerOne, playerTwo, pOneInfo, pTwoInfo, featToken,
         else:
             pTwoCurrentHP = pTwoCurrentHP - totalDamage
 
-        if pTwoInfo['regeneration'] != 0 and pTwoCurrentHP < pTwoTotalHP:
-            msg.append(pTwoInfo['name'] + " has regenerated " + str(pTwoInfo['regeneration']) +" hp.")
-            pTwoCurrentHP += pTwoInfo['regeneration']
+        if pOneInfo['regeneration'] != 0 and pOneCurrentHP < pOneTotalHP:
+            msg.append(pOneInfo['name'] + " has regenerated " + str(pOneInfo['regeneration']) +" hp.")
+            pOneCurrentHP += pOneInfo['regeneration']
 
         # Print the scoreboard
         msg.append(pOneInfo['name'] + ": " + str(pOneCurrentHP) + "/" +

@@ -39,22 +39,21 @@ def Not_True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwoc
     elif hit == 1:
         msg.append(pOneInfo['name'] + " has critically missed.")
 
-    # Notify that Player One is getting the hit benefit from 'riposte'
+    # Notify that defender is getting the hit benefit from 'riposte'
     if pOneRiposte == 1:
-        msg.append(pOneInfo['name'] +
-                   " benefits from +5 hit bonus effect from "
-                   "riposte.")
+        msg.append(pOneInfo['name'] + " benefits from +5 hit bonus effect from riposte.")
 
     # calculate the total after modifiers
     total = int(hit + pOneToHit - pMod + cMod - dMod + mMod + pOneRiposte)
-    # Ensures Player One benefits from hit bonus of Riposte only once.
+
+    # Ensures defender benefits from hit bonus of Riposte only once.
     pOneRiposte = 0
 
     # if any version of crippling blow was used, tack on the penalty to the above total
     if pTwoFeatUsed[0] == "crippling blow" or pTwoFeatUsed[0] == "improved crippling blow" or \
-            pTwoFeatUsed[0] == "greater crippling blow":
-        msg.append(pTwoInfo['name'] + " Used '" + str(pTwoFeatUsed[0]) + "', Giving " + pOneInfo['name'] +
-                   " a " + str(pTwoFeatUsed[1]) + " to their attack.")
+       pTwoFeatUsed[0] == "greater crippling blow":
+        msg.append(pTwoInfo['name'] + " Used '" + str(pTwoFeatUsed[0]) + "', Giving " +
+                   pOneInfo['name'] + " a " + str(pTwoFeatUsed[1]) + " to their attack.")
         total = total + pTwoFeatUsed[1]
 
     # # testing data to see that modifiers are carrying over correctly. Comment out
@@ -75,7 +74,14 @@ def Not_True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwoc
                    "(Base Roll: " + str(hit) + ") \n" + pTwoInfo['name'] + "'s turn. Type: !usefeat <feat> "
                    "if you wish to use a feat.")
 
-        if pOneInfo['regeneration'] != 0 and pOneCurrentHP < pOneTotalHP:
+        # If it is the end of Player One's turn, and they have regeneration:
+        if token == 1 and pOneInfo['regeneration'] != 0 and pOneCurrentHP < pOneTotalHP:
+            msg.append(pOneInfo['name'] + " has regenerated " + str(pOneInfo['regeneration']) + " hp.")
+            pOneCurrentHP += pOneInfo['regeneration']
+
+        # If it is the end of Player Two's turn, and they have regeneration:
+        elif token == 2 and pOneInfo['regeneration'] != 0 and pOneCurrentHP < pOneTotalHP:
+            print("Cholmos should not have regenerated")
             msg.append(pOneInfo['name'] + " has regenerated " + str(pOneInfo['regeneration']) + " hp.")
             pOneCurrentHP += pOneInfo['regeneration']
 
@@ -90,18 +96,17 @@ def Not_True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwoc
         bGameTimer = True
         pTwoFeatInfo = None
 
+    # Determine if attacker hit:
     elif total >= totalAC or hit == 20:
-        msg.append(pOneInfo['name'] + " rolled a " + str(total) +
-                   " to hit an AC " + str(totalAC) + " and was "
-                                                                          "successful. (Base Roll: " + str(
-            hit) + ")")
+        msg.append(pOneInfo['name'] + " rolled a " + str(total) + " to hit an AC " +
+                   str(totalAC) + " and was successful. (Base Roll: " + str(hit) + ")")
         pTwodMod = 0
         pTwomMod = 0
         pTwoRiposte = 0
         iddqd = 0
 
-        # ------------------------------------PLAYER ONE DAMAGE--------------------------------------
-        # Obtain Player One's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat defense'
+        # -------------------------------------------DAMAGE-------------------------------------------------------------
+        # Obtain attacker's base damage and base modifier, assign 'power attack' and 'combat defense'
         # modifiers to variables, and roll damage.
         pOneBaseDamage = pOneInfo['base damage']
         pOneModifier = pOneInfo['tdamage']
@@ -110,29 +115,30 @@ def Not_True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwoc
         cMod = pOnecMod
         damage = random.randint(int(pOneMinimum), int(pOneMaximum))
         base = damage
+
         # if critical counter is a value of 1, double the damage done, then reset counter to 0.
         if critical == 1:
             damage = damage * 2
             critical = 0
-        # if Player One used feat 'titan blow', apply 50% bonus damage.
+
+        # if attacker used feat 'titan blow', apply 50% bonus damage.
         if pOneFeatUsed[0] == "titan blow":
-            msg.append(pOneInfo['name'] + " used the feat "
-                                          "'titan blow'. Applying a "
-                                          "50% bonus to damage rolled.")
+            msg.append(pOneInfo['name'] + " used the feat 'titan blow'. Applying a 50% bonus to damage rolled.")
             damage = damage * float(pOneFeatUsed[1])
 
-        # if Player Two use 'staggering blow' half damage done.
+        # if attacker used 'staggering blow' half damage done.
         if pTwoFeatUsed[0] == "staggering blow":
-            msg.append(pTwoInfo['name'] + " used the feat "
-                                          "'staggering blow', halving " +
-                       pOneInfo['name'] + "'s damage roll")
-            damage = damage * float(pTwoFeatUsed[1])
+            baseDamage = damage
+            damage = int(damage * float(pTwoFeatUsed[1]))
+            msg.append(pTwoInfo['name'] + " used the feat 'staggering blow', halving " +
+                       pOneInfo['name'] + "'s damage roll from " + str(baseDamage) + " to " + str(damage) + ".")
+
 
         # ensure that no matter what, raw damage can not fall below 1, then assign total damage to variable, and in turn
         # assign it to variable to be accessed for scoreboard.
         if damage < 1:
             damage = 1
-        # If Player One has Nerve Strike, Improved Nerve Strike, Greater Nerve Strike, or Never Damage
+        # If attacker has Nerve Strike, Improved Nerve Strike, Greater Nerve Strike, or Never Damage
         # apply damage bonuses.
         if 'nerve strike' in pOneInfo['feats taken']:
             if total >= (totalAC + 3) or hit == 20:
@@ -155,94 +161,78 @@ def Not_True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwoc
                 msg.append(pOneInfo['name'] + " managed to strike a nerve, doing an additional " +
                            str(nerveDamage) + " to their opponent.")
 
-        # If Player One has Hurt Me, Improved Hurt Me, and Greater Hurt Me, check hit points, and apply
+        # If attacker has Hurt Me, Improved Hurt Me, and Greater Hurt Me, check hit points, and apply
         # bonuses.
         number = (pOneCurrentHP / pOneTotalHP) * 100
         percentage = int(number)
         if 'hurt me' in pOneInfo['feats taken']:
             if 33 < percentage <= 66:
                 bonusHurt = 1
-                msg.append(pOneInfo['name'] + " has become enraged because of "
-                                              "'hurt me', and are getting a +" + str(bonusHurt) +
-                           "  bonus to their damage.")
+                msg.append(pOneInfo['name'] + " has become enraged because of 'hurt me', and are getting a +" +
+                           str(bonusHurt) + "  bonus to their damage.")
             elif percentage <= 33:
                 bonusHurt = 2
-                msg.append(pOneInfo['name'] + " has become further enraged because of "
-                                              "'hurt me', and are getting a +" + str(bonusHurt) +
-                           "  bonus to their damage.")
+                msg.append(pOneInfo['name'] + " has become further enraged because of 'hurt me', and are getting a +" +
+                           str(bonusHurt) + "  bonus to their damage.")
         elif 'improved hurt me' in pOneInfo['feats taken']:
             if 33 < percentage <= 66:
                 bonusHurt = 2
-                msg.append(pOneInfo['name'] + " has become enraged because of "
-                                              "'hurt me', and are getting a +" + str(bonusHurt) +
-                           "  bonus to their damage.")
+                msg.append(pOneInfo['name'] + " has become enraged because of 'hurt me', and are getting a +" +
+                           str(bonusHurt) + "  bonus to their damage.")
             elif percentage <= 33:
                 bonusHurt = 3
-                msg.append(pOneInfo['name'] + " has become enraged because of "
-                                              "'hurt me', and are getting a +" + str(bonusHurt) +
-                           "  bonus to their damage.")
+                msg.append(pOneInfo['name'] + " has become enraged because of 'hurt me', and are getting a +" +
+                           str(bonusHurt) + "  bonus to their damage.")
         elif 'greater hurt me' in pOneInfo['feats taken']:
             if 33 < percentage <= 66:
                 bonusHurt = 2
-                msg.append(pOneInfo['name'] + " has become enraged because of "
-                                              "'hurt me', and are getting a +" + str(bonusHurt) +
-                           "  bonus to their damage.")
+                msg.append(pOneInfo['name'] + " has become enraged because of 'hurt me', and are getting a +" +
+                           str(bonusHurt) + "  bonus to their damage.")
             elif percentage <= 33:
                 bonusHurt = 4
-                msg.append(pOneInfo['name'] + " has become further enraged because of "
-                                              "'hurt me', and are getting a +" + str(bonusHurt) +
-                           "  bonus to their damage.")
+                msg.append(pOneInfo['name'] + " has become further enraged because of 'hurt me', and are getting a +" +
+                           str(bonusHurt) + "  bonus to their damage.")
         elif 'hurt me more' in pOneInfo['feats taken']:
             if 50 < percentage <= 75:
                 bonusHurt = 2
-                msg.append(pOneInfo['name'] + " has become enraged because of "
-                                              "'hurt me', and are getting a +" + str(bonusHurt) +
-                           "  bonus to their damage.")
+                msg.append(pOneInfo['name'] + " has become enraged because of 'hurt me', and are getting a +" +
+                           str(bonusHurt) + "  bonus to their damage.")
             elif 25 < percentage <= 50:
                 bonusHurt = 4
-                msg.append(pOneInfo['name'] + " has become further enraged because of "
-                                              "'hurt me', and are getting a +" + str(bonusHurt) +
-                           "  bonus to their damage.")
+                msg.append(pOneInfo['name'] + " has become further enraged because of 'hurt me', and are getting a +" +
+                           str(bonusHurt) + "  bonus to their damage.")
             elif percentage <= 25:
                 bonusHurt = 6
-                msg.append(pOneInfo['name'] + " has become further enraged because of "
-                                              "'hurt me', and are getting a +" + str(bonusHurt) +
-                           "  bonus to their damage.")
+                msg.append(pOneInfo['name'] + " has become further enraged because of'hurt me', and are getting a +" +
+                           str(bonusHurt) + "  bonus to their damage.")
 
         total = int(damage + pOneModifier + pMod - cMod - pTwoInfo['dr'] + bonusHurt + nerveDamage)
-        if pTwoInfo['dr'] != 0:
-            msg.append(pTwoInfo['name'] + " has thick skin, and has aborbed " +
-                       str(pTwoInfo['dr']) + " hp of damage from opponent's roll.")
-        # if Plaer One has 'reckless abandon' apply bonus damage
+
+        # if player has 'reckless abandon' apply bonus damage
         if pOneFeatUsed[0] == "reckless abandon":
             damageToPTwo = random.randint(1, 4)
             damageToPOne = random.randint(1, 2)
             pOneCurrentHP = pOneCurrentHP - damageToPOne
             total = total + damageToPTwo
-            msg.append(pOneInfo['name'] + " did " + str(damageToPOne) + ""
-                                                                                   " damage to themself, to deal an additional " + str(
-                damageToPTwo) +
-                       " damage to their opponent.")
+            msg.append(pOneInfo['name'] + " did " + str(damageToPOne) + " damage to themself, to deal an additional " +
+                       str(damageToPTwo) + " damage to their opponent.")
 
         elif pOneFeatUsed[0] == "improved reckless abandon":
             damageToPTwo = random.randint(1, 8)
             damageToPOne = random.randint(1, 4)
             pOneCurrentHP = pOneCurrentHP - damageToPOne
             total = total + damageToPTwo
-            msg.append(pOneInfo['name'] + " did " + str(damageToPOne) + ""
-                                                                                   " damage to themself, to deal an additional " + str(
-                damageToPTwo) +
-                       " damage to their opponent.")
+            msg.append(pOneInfo['name'] + " did " + str(damageToPOne) + " damage to themself, to deal an additional " +
+                       str(damageToPTwo) + " damage to their opponent.")
 
         elif pOneFeatUsed[0] == "greater reckless abandon":
             damageToPTwo = random.randint(1, 6)
             damageToPOne = random.randint(1, 12)
             pOneCurrentHP = pOneCurrentHP - damageToPOne
             total = total + damageToPTwo
-            msg.append(pOneInfo['name'] + " did " + str(damageToPOne) + ""
-                                                                                   " damage to themself, to deal an additional " + str(
-                damageToPTwo) +
-                       " damage to their opponent.")
+            msg.append(pOneInfo['name'] + " did " + str(damageToPOne) + " damage to themself, to deal an additional "
+                       + str(damageToPTwo) + " damage to their opponent.")
+
         # if Player Two used 'quick strike', 'improved quick strike', or 'greater quick strike', apply the return
         # damage here
         pTwoBaseDamage = pTwoInfo['base damage']
@@ -254,8 +244,8 @@ def Not_True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwoc
         if pTwoFeatUsed[0] == "quick strike":
             # Roll damage for Player Two, and multiply it by desired amount.
             damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
-            total = (damage * float(pTwoFeatUsed[1]))
-            quickDamage = int(total + pTwoModifier + pMod - cMod)
+            modifier = (pTwomodifier + pMod - cMod)
+            quickDamage = int(damage * float(pTwoFeatused[1]) + modifier)
             # Ensure damage is always at least 1hp and print out result
             if quickDamage < 1:
                 quickDamage = 1
@@ -267,8 +257,8 @@ def Not_True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwoc
         elif pTwoFeatUsed[0] == "improved quick strike":
             # Roll damage for Player one, and multiply it by desired amount.
             damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
-            total = (damage * float(pTwoFeatUsed[1]))
-            quickDamage = int(total + pTwoModifier + pMod - cMod)
+            modifier = (pTwomodifier + pMod - cMod)
+            quickDamage = int(damage * float(pTwoFeatused[1]) + modifier)
             # Ensure damage is always at least 1hp and print out result
             if quickDamage < 1:
                 quickDamage = 1
@@ -280,31 +270,28 @@ def Not_True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwoc
         elif pTwoFeatUsed[0] == "greater quick strike":
             # roll damage for player One, and multiply it by desired amount
             damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
-            total = (damage + pTwoModifier + pMod - cMod)
-            quickDamage = int(total * float(pTwoFeatUsed[1]))
+            modifier = (pTwoModifier + pMod - cMod)
+            quickDamage = int(damage * float(pTwoFeatUsed[1]) + modifier)
             # Ensure damage is always at least 1hp and print out result
             if quickDamage < 1:
                 quickDamage = 1
             pTwoQuickDamage = quickDamage
             pOneCurrentHP = pOneCurrentHP - pTwoQuickDamage
-            msg.append(pTwoInfo['name'] + " used 'quick strike,'"
-                                          " managing to do an additional "
+            msg.append(pTwoInfo['name'] + " used 'quick strike,'managing to do an additional "
                        + str(pTwoQuickDamage) + " hp of damage.")
 
         elif pTwoFeatUsed[0] == "riposte":
             # roll damage for player One, and multiply it by desired amount
             damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
-            total = (damage + pTwoModifier + pMod - cMod)
-            quickDamage = int(total * float(pTwoFeatUsed[1][0]))
+            modifier = (pTwoModifier + pMod - cMod)
+            quickDamage = int(modifier * float(pTwoFeatUsed[1][0]) + modifier)
             # Ensure damage is always at least 1hp and print out result
             if quickDamage < 1:
                 quickDamage = 1
             pTwoQuickDamage = quickDamage
             pOneCurrentHP = pOneCurrentHP - pTwoQuickDamage
-            msg.append(pTwoInfo['name'] + " used 'riposte,'"
-                                          " managing to do an additional "
+            msg.append(pTwoInfo['name'] + " used 'riposte,'managing to do an additional "
                        + str(pTwoQuickDamage) + " hp of damage.")
-            pTwoRiposte = 1
 
         if total < 1:
             total = 1
@@ -317,6 +304,12 @@ def Not_True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwoc
                   " points of damage." + " (Base Roll: " + str(base) + ")")
         pOnepMod = 0
         pOnecMod = 0
+
+        # Determine if opponnet has DR
+        if pTwoInfo['dr'] != 0:
+            msg.append(pTwoInfo['name'] + " has thick skin, and has aborbed " + str(pTwoInfo['dr']) +
+                       " hp of damage from opponent's roll.")
+
         # check to see if player has evasion.
         if "evasion" in pTwoInfo['feats taken'] and pTwoEvade == 1:
             bEvasion = True
@@ -354,16 +347,32 @@ def Not_True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwoc
 
                 pTwoCurrentHP = pTwoCurrentHP - totalDamage
 
-                if pOneInfo['regeneration'] != 0 and pOneCurrentHP < pOneTotalHP:
+                # If it is the end of Player One's turn, and they have regeneration:
+                if token == 1 and pOneInfo['regeneration'] != 0 and pOneCurrentHP < pOneTotalHP:
                     msg.append(pOneInfo['name'] + " has regenerated " + str(pOneInfo['regeneration']) + " hp.")
                     pOneCurrentHP += pOneInfo['regeneration']
 
-                # Print the scoreboard
-                msg.append(pOneInfo['name'] + ": " + str(pOneCurrentHP) + "/" +
-                           str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": " +
-                           str(pTwoCurrentHP) + "/" + str(pTwoTotalHP) + " \n" +
-                           pTwoInfo['name'] + "'s turn. Type: !usefeat <feat>"
-                                              " if you wish to use a feat.")
+                # If it is the end of Player Two's turn, and they have regeneration:
+                elif token == 2 and pOneInfo['regeneration'] != 0 and pOneCurrentHP < pOneTotalHP:
+                    msg.append(pOneInfo['name'] + " has regenerated " + str(pOneInfo['regeneration']) + " hp.")
+                    pOneCurrentHP += pOneInfo['regeneration']
+
+                # Print the scoreboard. In order to keep the scoreboard to display the same way, determine which turn
+                # we are currently on.
+                # If Player One finished their turn:
+                if token == 1:
+                    msg.append(pOneInfo['name'] + ": " + str(pOneCurrentHP) + "/" +
+                               str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": " +
+                               str(pTwoCurrentHP) + "/" + str(pTwoTotalHP) + " \n" +
+                               pTwoInfo['name'] + "'s turn. Type: !usefeat <feat>"
+                                                  " if you wish to use a feat.")
+                # If Player Two finished their turn:
+                else:
+                    msg.append(pTwoInfo['name'] + ": " + str(pTwoCurrentHP) + "/" +
+                               str(pTwoTotalHP) + "  ||  " + pOneInfo['name'] + ": " +
+                               str(pOneCurrentHP) + "/" + str(pOneTotalHP) + " \n" +
+                               pOneInfo['name'] + "'s turn. Type: !usefeat <feat>"
+                                                  " if you wish to use a feat.")
 
                 if pTwoFeatUsed[0] == "riposte":
                     pTwoRiposte = 5

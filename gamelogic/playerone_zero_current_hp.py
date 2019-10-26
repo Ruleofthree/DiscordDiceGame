@@ -39,10 +39,12 @@ def playerone_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne, playerTwo,
         msg.append("As the level difference was greater than 10, no XP was awarded.")
 
     msg.append(pOneInfo['name'] + " has earned: " + str(xp) + " experience points and " + str(gold)
-               +" gold.\n " + pTwoInfo['name'] + " has earned: " + str(xp / 2) + "")
+               +" gold.\n " + pTwoInfo['name'] + " has earned: " + str(int(xp / 2)) + " experience points and "
+               +  str(int(gold / 2)) + " gold.")
     pOneXP = int(pOneInfo['currentxp'] + xp)
     pOneGold = int(pOneInfo['gold'] + gold)
     pTwoXP = int(pTwoInfo['currentxp'] + (xp / 2))
+    pTwoGold = int(pTwoInfo['gold'] + (gold / 2))
     nextLevel = pOneInfo['nextlevel']
     winner = playerOne
     loser = playerTwo
@@ -64,6 +66,7 @@ def playerone_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne, playerTwo,
     with open(charFolder + loser + '.txt', 'r+') as file:
         pTwoInfo = json.load(file)
         pTwoInfo['currentxp'] = pTwoXP
+        pTwoInfo['gold'] = pTwoGold
         pTwoInfo['losses'] += 1
         file.seek(0)
         file.write(json.dumps(pTwoInfo, ensure_ascii=False, indent=2))
@@ -153,6 +156,7 @@ def playerone_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne, playerTwo,
             charData['damage'] = int(levelDict[newLevel][5])
             charData['ac'] = int(levelDict[newLevel][6])
             charData['currentxp'] = pTwoXP
+            charData['gold'] = pTwoGold
             charData['nextlevel'] = int(levelDict[newLevel][7])
             file.seek(0)
             file.write(json.dumps(charData, ensure_ascii=False, indent=2))
