@@ -8,6 +8,8 @@ from threading import Timer
 
 def message_accept(charFolder, accepted, game, opponentID, pOneInfo):
     msg = []
+    print(opponentID)
+    print(accepted)
     pTwoInfo = None
     new_game = None
     bTimer = False
@@ -74,7 +76,7 @@ def message_accept(charFolder, accepted, game, opponentID, pOneInfo):
 
 
                 elif playerOneMod < playerTwoMod:
-                    msg.append(pOneInfo['name'] + "Type !usefeat <feat> to use a feat, or spend points for your a passive,"
+                    msg.append(pTwoInfo['name'] + "Type !usefeat <feat> to use a feat, or spend points for your a passive,"
                                " such as !pattack. (use !feathelp in DM with Fight Bot for more help)")
                     token = 2
 
@@ -91,7 +93,7 @@ def message_accept(charFolder, accepted, game, opponentID, pOneInfo):
 
                     else:
                         msg.append(
-                            pOneInfo['name'] + "Type !usefeat <feat> to use a feat, or spend points for your a passive,"
+                            pTwoInfo['name'] + "Type !usefeat <feat> to use a feat, or spend points for your a passive,"
                                                " such as !pattack. (use !feathelp in DM with Fight Bot for more help)")
                         token = 2
             bGameTimer = True

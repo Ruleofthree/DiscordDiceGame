@@ -13,6 +13,17 @@ from gamelogic import onMSGAccept, onMSGRoll, onMSGUtil, onPRIUtil, playerone_ze
 
 # a simple function designed to open up the feats json, and parse out all the keys into a separate list. Intended for
 # ease of use in other modules. Works as intended in charFeats.py
+
+def roomID():
+    path = os.getcwd()
+    charFolder = os.path.join(path + "/DiscordDiceGame/")
+    file = open("token.txt", "r", encoding="utf-8")
+    stuff = json.load(file)
+    file.close()
+    arena = stuff["arena"]
+    devroom = stuff["devroom"]
+    return arena, devroom
+
 def featDict():
     # Open up the json object containing the list of feats.
     path = os.getcwd()
@@ -41,10 +52,133 @@ def traitDict():
         traitList.append(keys)
     return traitDictonary, traitList
 
+def gameStatLoad(channel):
+    channel = str(channel)
+    path = os.getcwd()
+    gameFolder = os.path.join(path + "/gamelogic/")
+    with open(gameFolder + channel + '.txt', 'r+') as file:
+        gameData = json.load(file)
+    file.close()
+    playerOneID = gameData["playerOneID"]
+    playerTwoID = gameData["playerTwoID"]
+    winner = gameData["winner"]
+    quitter = gameData["quitter"]
+    pOneInfo = gameData["pOneInfo"]
+    pTwoInfo = gameData["pTwoInfo"]
+    featToken = gameData["featToken"]
+    game = gameData["game"]
+    count = gameData["count"]
+    token = gameData["token"]
+    critical = gameData["critical"]
+    bonusHurt = gameData["bonusHurt"]
+    nerveDamage = gameData["nerveDamage"]
+    totalDamage = gameData["totalDamage"]
+    pOneTotalHP = gameData["pOneTotalHP"]
+    pTwoTotalHP = gameData["pTwoTotalHP"]
+    pOneCurrentHP = gameData["pOneCurrentHP"]
+    pTwoCurrentHP = gameData["pTwoCurrentHP"]
+    pOnepMod = gameData["pOnepMod"]
+    pOnecMod = gameData["pOnecMod"]
+    pOnedMod = gameData["pOnedMod"]
+    pOnemMod = gameData["pOnemMod"]
+    pOneEvade = gameData["pOneEvade"]
+    pOneDeflect = gameData["pOneDeflect"]
+    pOneRiposte = gameData["pOneRiposte"]
+    pOneQuickDamage = gameData["pOneQuickDamage"]
+    pOneFeatInfo = gameData["pOneFeatInfo"]
+    pOneSpentFeat = gameData["pOneSpentFeat"]
+    pTwopMod = gameData["pTwopMod"]
+    pTwocMod = gameData["pTwocMod"]
+    pTwodMod = gameData["pTwodMod"]
+    pTwomMod = gameData["pTwomMod"]
+    pTwoEvade = gameData["pTwoEvade"]
+    pTwoDeflect = gameData["pTwoDeflect"]
+    pTwoRiposte = gameData["pTwoRiposte"]
+    pTwoQuickDamage = gameData["pTwoQuickDamage"]
+    pTwoFeatInfo = gameData["pTwoFeatInfo"]
+    pTwoSpentFeat =gameData["pTwoSpentFeat"]
+    pOneLevel = gameData["pOneLevel"]
+    pTwoLevel = gameData["pTwoLevel"]
+    xp = gameData["xp"]
+    currentPlayerXP = gameData["currentPlayerXP"]
+    nextLevel = gameData["nextLevel"]
+    levelUp = gameData["levelUp"]
+    iddqd = gameData["iddqd"]
+    bEvasion = gameData["bEvasion"]
+    bDeflect = gameData["bDeflect"]
+    return playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical,\
+           bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod,\
+           pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod,\
+           pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel,\
+           pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect
+
+def gameStatDump(playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical,\
+           bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod,\
+           pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod,\
+           pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel,\
+           pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect, channel):
+    channel = str(channel)
+    path = os.getcwd()
+    gameFolder = os.path.join(path + "/gamelogic/")
+    with open(gameFolder + channel + '.txt', 'r+') as file:
+        gameData = json.load(file)
+        gameData["playerOneID"] = playerOneID
+        gameData["playerTwoID"] = playerTwoID
+        gameData["winner"] = winner
+        gameData["quitter"] = quitter
+        gameData["pOneInfo"] = pOneInfo
+        gameData["pTwoInfo"] = pTwoInfo
+        gameData["featToken"] = featToken
+        gameData["game"] = game
+        gameData["count"] = count
+        gameData["token"] = token
+        gameData["critical"] = critical
+        gameData["bonusHurt"] = bonusHurt
+        gameData["nerveDamage"] = nerveDamage
+        gameData["totalDamage"] = totalDamage
+        gameData["pOneTotalHP"] = pOneTotalHP
+        gameData["pTwoTotalHP"] = pTwoTotalHP
+        gameData["pOneCurrentHP"] = pOneCurrentHP
+        gameData["pTwoCurrentHP"] = pTwoCurrentHP
+        gameData["pOnepMod"] = pOnepMod
+        gameData["pOnecMod"] = pOnecMod
+        gameData["pOnedMod"] = pOnedMod
+        gameData["pOnemMod"] = pOnemMod
+        gameData["pOneEvade"] = pOneEvade
+        gameData["pOneDeflect"] = pOneDeflect
+        gameData["pOneRiposte"] = pOneRiposte
+        gameData["pOneQuickDamage"] = pOneQuickDamage
+        gameData["pOneFeatInfo"] = pOneFeatInfo
+        gameData["pOneSpentFeat"] = pOneSpentFeat
+        gameData["pTwopMod"] = pTwopMod
+        gameData["pTwocMod"] = pTwocMod
+        gameData["pTwodMod"] = pTwodMod
+        gameData["pTwomMod"] = pTwomMod
+        gameData["pTwoEvade"] = pTwoEvade
+        gameData["pTwoDeflect"] = pTwoDeflect
+        gameData["pTwoRiposte"] = pTwoRiposte
+        gameData["pTwoQuickDamage"] = pTwoQuickDamage
+        gameData["pTwoFeatInfo"] = pTwoFeatInfo
+        gameData["pTwoSpentFeat"] = pTwoSpentFeat
+        gameData["pOneLevel"] = pOneLevel
+        gameData["pTwoLevel"] = pTwoLevel
+        gameData["xp"] = xp
+        gameData["currentPlayerXP"] = currentPlayerXP
+        gameData["nextLevel"] = nextLevel
+        gameData["levelUp"] = levelUp
+        gameData["iddqd"] = iddqd
+        gameData["bEvasion"] = bEvasion
+        gameData["bDeflect"] = bDeflect
+        file.seek(0)
+        file.write(json.dumps(gameData, ensure_ascii=False, indent=2))
+        file.truncate()
+        file.close()
+
 class Combat(commands.Cog):
 
     def __init__(self, client):
 
+        self.testname = ""
         self.opponent = ""
         self.client = client
         # STRINGS
@@ -111,16 +245,34 @@ class Combat(commands.Cog):
         print("Bot is Online")
 
     async def challengeTimeout(self, ctx):
-        print("Am I here?")
         await asyncio.sleep(60)
-        self.game = 0
+        path = os.getcwd()
+        gameFolder = os.path.join(path + "/gamelogic/")
+        whichRoom = ctx.channel.id
+        msg = onMSGUtil.message_6_reset(gameFolder, whichRoom)
         await ctx.send("Challenge was not accepted. Challenge reset.")
 
     async def gameTimeout(self, ctx):
         await asyncio.sleep(3600)
-        await ctx.send("!reset")
+        client = self.client
+        channelID = [587115270703808526, 598727316893597709]
+
+        self.gameTimer.cancel()
+        path = os.getcwd()
+        gameFolder = os.path.join(path + "/gamelogic/")
+        whichRoom = ctx.channel.id
+        msg = onMSGUtil.message_6_reset(gameFolder, whichRoom)
+        await ctx.send(msg)
+
 
 #---------------------------------------------CHATROOM COMMANDS---------------------------------------------------------
+    #!test - A test command
+    @commands.command()
+    @commands.guild_only()
+    async def test(self, ctx):
+        arena, devroom = roomID()
+        await ctx.send(arena)
+
     #!start
     @commands.command()
     @commands.guild_only()
@@ -203,7 +355,7 @@ class Combat(commands.Cog):
         charFile = Path(charFolder + player + ".txt")
 
         # make sure that this command cannot be ran if a fight is taking place.
-        msg = onMSGUtil.message_5_name(charFile, charFolder, name, player, self.game)
+        msg = onMSGUtil.message_5_name(charFile, charFolder, name, player)
         for msg_item in msg:
             await ctx.send(msg_item)
 
@@ -283,65 +435,17 @@ class Combat(commands.Cog):
     @commands.guild_only()
     @commands.has_role("Admin")
     async def reset(self, ctx):
-
-        if self.game == 1:
-            self.opponent = ""
-            self.playerOne = ""
-            self.playerTwo = ""
-            self.winner = ""
-            self.loser = ""
-            self.pOneUsername = None
-            self.pTwoUsername = None
-            # PLAYER INFO
-            self.pOneInfo = {}
-            self.pTwoInfo = {}
-            # HP AND TURN COUNTERS
-            self.gameTimer.cancel()
-            self.gameTimer = 0
-            self.count = 0
-            self.base = 0
-            self.token = 0
-            self.game = 0
-            self.critical = 0
-            self.bonusHurt = 0
-            self.nerveDamage = 0
-            self.totalDamage = 0
-            self.pOneTotalHP = 0
-            self.pTwoTotalHP = 0
-            self.pOneCurrentHP = 0
-            self.pTwoCurrentHP = 0
-            # PLAYER ONE FEAT COUNTERS
-            self.pOnepMod = 0
-            self.pOnecMod = 0
-            self.pOnedMod = 0
-            self.pOnemMod = 0
-            self.pOneEvade = 1
-            self.pTwoDeflect = 1
-            self.pOneRiposte = 0
-            self.pOneQuickDamage = 0
-            self.pOneFeatInfo = None
-            self.pOneSpentFeat = []
-            # PLAYER TWO FEAT COUNTERS
-            self.pTwopMod = 0
-            self.pTwocMod = 0
-            self.pTwodMod = 0
-            self.pTwomMod = 0
-            self.pTwoEvade = 1
-            self.pTwoDeflect = 1
-            self.pTwoRiposte = 0
-            self.pTwoQuickDamage = 0
-            self.pTwoFeatInfo = None
-            self.pTwoSpentFeat = []
-            # XP AND LEVEL COUNTERS
-            self.pOneLevel = 0
-            self.pTwoLevel = 0
-            self.xp = 0
-            self.currentPlayerXP = 0
-            self.nextLevel = 0
-            self.levelUp = 0
-            await ctx.send("Show's over folks. Nothing to see here.")
+        client = self.client
+        channelID = [587115270703808526, 598727316893597709]
+        
+        path = os.getcwd()
+        gameFolder = os.path.join(path + "/gamelogic/")
+        if ctx.channel.id in channelID:
+            whichRoom = ctx.channel.id
+            msg = onMSGUtil.message_6_reset(gameFolder, whichRoom)
+            await ctx.send(msg)
         else:
-            await ctx.send("There isn't a game to reset.")
+            await ctx.send("This command can not be used here.")
 
     @reset.error
     async def reset_error(self, ctx, error):
@@ -387,25 +491,47 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def challenge(self, ctx, opponent):
         challenger = str(ctx.message.author.id)
+
         path = os.getcwd()
         charFolder = os.path.join(path + "/characters/")
-        msg, opponentID, pOneInfo, new_game, bTimer, playerOne = onMSGUtil.message_10_challenge(challenger, opponent, charFolder,
-                                                                                    self.game)
-        if self.game == 0:
-            await ctx.send(msg)
-            if opponent is not "":
-                self.opponent = opponentID
-            if pOneInfo is not None:
-                self.pOneInfo = pOneInfo
-                self.pOneTotalHP = self.pOneInfo['thp']
-                self.pOneCurrentHP = self.pOneInfo['thp']
-                self.pOneLevel = self.pOneInfo['level']
-            if new_game != 0:
-                self.game = new_game
-            if bTimer is True:
-                self.timer = asyncio.create_task(self.challengeTimeout(ctx))
-            if playerOne is not "":
-                self.playerOne = playerOne
+
+        arena, devroom = roomID()
+        channelID = [arena, devroom]
+        if ctx.channel.id in channelID:
+            channel = ctx.channel.id
+
+            playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical, \
+            bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, \
+            pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod, \
+            pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, \
+            pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect = gameStatLoad(channel)
+
+            msg, playerTwoID, pOneInfo, new_game, bTimer, playerOneID, opponent \
+                = onMSGUtil.message_10_challenge(challenger, opponent, charFolder, game)
+            playerOneID = challenger
+            print(playerTwoID)
+            if game == 0:
+                await ctx.send(msg)
+                if opponent is not "":
+                    opponent = opponent
+                if pOneInfo is not None:
+                    # pOneInfo = pOneInfo
+                    pOneTotalHP = pOneInfo['thp']
+                    pOneCurrentHP = pOneInfo['thp']
+                    pOneLevel = pOneInfo['level']
+                if new_game != 0:
+                    game = new_game
+                if bTimer is True:
+                    self.timer = asyncio.create_task(self.challengeTimeout(ctx))
+                if playerOneID is not "":
+                    playerOneID = playerOneID
+
+                gameStatDump(playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical,\
+           bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod,\
+           pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod,\
+           pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel,\
+           pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect, channel)
+
         else:
             await ctx.send("A challenge has already been issued. Please wait until it has expired, or their fight is complete.")
 
@@ -425,30 +551,46 @@ class Combat(commands.Cog):
         accepted = str(ctx.message.author.id)
         path = os.getcwd()
         charFolder = os.path.join(path + "/characters/")
-        msg, pTwoInfo, new_game, playerTwo, bTimer, bGameTimer, new_oppenent, token = onMSGAccept.message_accept(charFolder, accepted,
-                                                                                                     self.game,
-                                                                                                     self.opponent,
-                                                                                                     self.pOneInfo)
 
-        if new_game is not None:
-            self.game = new_game
-        if pTwoInfo is not None:
-            self.pTwoInfo = pTwoInfo
-            self.pTwoTotalHP = self.pTwoInfo['thp']
-            self.pTwoCurrentHP = self.pTwoInfo['thp']
-            self.pTwoLevel = self.pTwoInfo['level']
-        if bTimer:
-            self.timer.cancel()
-        if bGameTimer:
-            self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
-        if new_oppenent is not None:
-            self.opponent = new_oppenent
-        if playerTwo is not None:
-            self.playerTwo = playerTwo
-        if token is not None:
-            self.token = token
-        for msg_item in msg:
-            await ctx.send(msg_item)
+        arena, devroom = roomID()
+        channelID = [arena, devroom]
+
+        if ctx.channel.id in channelID:
+            channel = ctx.channel.id
+            playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical, \
+            bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, \
+            pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod, \
+            pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, \
+            pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect = gameStatLoad(channel)
+
+            msg, pTwoInfo, new_game, playerTwoID, bTimer, bGameTimer, new_oppenent, token \
+                = onMSGAccept.message_accept(charFolder, accepted, game, playerTwoID, pOneInfo)
+
+            if new_game is not None:
+                game = new_game
+            if pTwoInfo is not None:
+                # pTwoInfo = pTwoInfo
+                pTwoTotalHP = pTwoInfo['thp']
+                pTwoCurrentHP = pTwoInfo['thp']
+                pTwoLevel = pTwoInfo['level']
+            if bTimer:
+                self.timer.cancel()
+            if bGameTimer:
+                self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
+            if new_oppenent is not None:
+                opponent = new_oppenent
+            if playerTwoID is not None:
+                playerTwoID = playerTwoID
+            if token is not None:
+                token = token
+            for msg_item in msg:
+                await ctx.send(msg_item)
+
+            gameStatDump(playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical,\
+           bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod,\
+           pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod,\
+           pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel,\
+           pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect, channel)
 
     @accept.error
     async def accept_error(self, ctx, error):
@@ -461,31 +603,42 @@ class Combat(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def usefeat(self, ctx, *, answer):
-        user = str(ctx.message.author.id)
         path = os.getcwd()
         charFolder = os.path.join(path + "/characters/")
-        msg, featToken_new, pOneSpentFeat, pOneFeatInfo, pTwoSpentFeat, pTwoFeatInfo = onMSGUtil.message_8_usefeat(answer, charFolder,
-                                                                                                         user, self.game,
-                                                                                                         self.playerOne, \
-                                                                                                         self.playerTwo,
-                                                                                                         self.token,
-                                                                                                         self.featToken,
-                                                                                                         self.pOneInfo,
-                                                                                                         self.pOneSpentFeat,
-                                                                                                         self.pTwoSpentFeat,
-                                                                                                         self.pTwoInfo)
-        for msg_item in msg:
-            await ctx.send(msg_item)
-        if featToken_new is not None:
-            self.featToken = featToken_new
-        if pOneSpentFeat is not None:
-            self.pOneSpentFeat.append(pOneSpentFeat)
-        if pOneFeatInfo is not None:
-            self.pOneFeatInfo = pOneFeatInfo
-        if pTwoSpentFeat is not None:
-            self.pTwoSpentFeat.append(pTwoSpentFeat)
-        if pTwoFeatInfo is not None:
-            self.pTwoFeatInfo = pTwoFeatInfo
+
+        user = str(ctx.message.author.id)
+        arena, devroom = roomID()
+        channelID = [arena, devroom]
+
+        if ctx.channel.id in channelID:
+            channel = ctx.channel.id
+            playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical, \
+            bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, \
+            pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod, \
+            pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, \
+            pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect = gameStatLoad(channel)
+
+            msg, featToken_new, pOneSpentFeat, pOneFeatInfo, pTwoSpentFeat, pTwoFeatInfo = \
+                onMSGUtil.message_8_usefeat(answer, charFolder, user, game, playerOneID, playerTwoID, token, featToken,
+                                            pOneInfo, pOneSpentFeat, pTwoSpentFeat, pTwoInfo)
+            for msg_item in msg:
+                await ctx.send(msg_item)
+            # if featToken_new is not None:
+            #     self.featToken = featToken_new
+            # if pOneSpentFeat is not None:
+            #     self.pOneSpentFeat.append(pOneSpentFeat)
+            # if pOneFeatInfo is not None:
+            #     self.pOneFeatInfo = pOneFeatInfo
+            # if pTwoSpentFeat is not None:
+            #     self.pTwoSpentFeat.append(pTwoSpentFeat)
+            # if pTwoFeatInfo is not None:
+            #     self.pTwoFeatInfo = pTwoFeatInfo
+
+            gameStatDump(playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical,\
+           bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod,\
+           pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod,\
+           pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel,\
+           pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect, channel)
 
     @usefeat.error
     async def usefeat_error(self, ctx, error):
@@ -501,1070 +654,58 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def roll(self, ctx):
         user = str(ctx.message.author.id)
-        print("Am I here?")
+
         path = os.getcwd()
         charFolder = os.path.join(path + "/characters/")
-        try:
 
-            self.gameTimer.cancel()
-            msg, self.bEvasion, self.bDeflect, bGameTimer, self.opponent, self.playerOne, self.playerTwo, self.winner, \
-            self.pOneInfo, self.pTwoInfo, self.featToken, self.game, self.count, self.token, self.critical, \
-            self.bonusHurt, self.totalDamage, self.pOneTotalHP, self.pTwoTotalHP, self.pOneCurrentHP, self.pTwoCurrentHP,\
-            self.pOnepMod, self.pOnecMod, self.pOnedMod, self.pOnemMod, self.pOneEvade, self.pOneDeflect, \
-            self.pOneRiposte, self.pOneQuickDamage, self.pOneFeatInfo, self.pOneSpentFeat, self.pTwopMod, self.pTwocMod, self.pTwodMod, \
-            self.pTwomMod, self.pTwoEvade, self.pTwoDeflect, self.pTwoRiposte, self.pTwoQuickDamage, self.pTwoFeatInfo, \
-            self.pTwoSpentFeat, self.pOneLevel, self.pTwoLevel, self.xp, self.currentPlayerXP, self.nextLevel, \
-            self.levelUp, self.iddqd = onMSGRoll.message_roll(user, charFolder,
-                                                    self.opponent, self.playerOne, self.playerTwo, self.winner,
-                                                    self.pOneInfo, self.pTwoInfo, self.featToken, self.game, \
-                                                    self.count, self.token, self.critical, self.bonusHurt,
-                                                    self.totalDamage, self.pOneTotalHP, self.pTwoTotalHP, self.pOneCurrentHP,
-                                                    self.pTwoCurrentHP, self.pOnepMod, self.pOnecMod, self.pOnedMod,
-                                                    self.pOnemMod, self.pOneEvade, self.pOneDeflect, self.pOneRiposte,
-                                                    self.pOneQuickDamage, self.pOneFeatInfo, self.pOneSpentFeat, self.pTwopMod,
-                                                    self.pTwocMod, self.pTwodMod, self.pTwomMod, self.pTwoEvade, self.pTwoDeflect,
-                                                    self.pTwoRiposte, self.pTwoQuickDamage, self.pTwoFeatInfo, self.pTwoSpentFeat,
-                                                    self.pOneLevel, self.pTwoLevel, self.xp, self.currentPlayerXP,
-                                                    self.nextLevel, self.levelUp, self.iddqd)
-            for msg_item in msg:
-                await ctx.send(msg_item)
-                if bGameTimer:
-                   self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
-        except AttributeError:
-            await ctx.send("Either a fight is not taking place, or it isn't your turn.")
+        arena, devroom = roomID()
+        channelID = [arena, devroom]
 
-                # # assign both player's feat selections to variables
-                # pOneFeatUsed = self.pOneFeatInfo
-                # pTwoFeatUsed = self.pTwoFeatInfo
-                #
-                # # If the feat used was 'true strike' forgo rolling to see if player hit opponent, and go
-                # # straight to damage.
-                # if pOneFeatUsed[0] == "true strike":
-                #     await ctx.send(self.pOneInfo['name'] +
-                #                 " used the feat 'True Strike.' And forgoes the need to determine if hit was success.")
-                #
-                #     # Obtain Player One's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat defense'
-                #     # modifiers to variables, and roll damage.
-                #     pOneBaseDamage = self.pOneInfo['base damage']
-                #     pOneModifier = self.pOneInfo['damage']
-                #     pOneMinimum, pOneMaximum = pOneBaseDamage.split('d')
-                #     pMod = self.pOnepMod
-                #     cMod = self.pOnecMod
-                #     damage = random.randint(int(pOneMinimum), int(pOneMaximum))
-                #
-                #     # if critical counter is a value of 1, double the damage done, then reset counter to 0.
-                #     if self.critical == 1:
-                #         damage = damage * 2
-                #         self.critical = 0
-                #     # if Player One used feat 'titan blow', apply 50% bonus damage.
-                #     if pOneFeatUsed[0] == "titan blow":
-                #         await ctx.send(self.pOneInfo['name'] + " used the feat 'titan blow'.")
-                #         damage = damage * float(pOneFeatUsed[1])
-                #     # if Player Two use 'staggering blow' half damage done.
-                #     if pTwoFeatUsed[0] == "staggering blow":
-                #         await ctx.send(
-                #                     self.pTwoInfo['name'] + " used the feat 'staggering blow', halving " +
-                #                     self.pOneInfo['name'] + "'s damage roll")
-                #         damage = damage * float(pTwoFeatUsed[1])
-                #
-                #     # ensure that no matter what, raw damage can not fall below 1, then assign total damage to variable, and in turn
-                #     # assign it to variable to be accessed for scoreboard.
-                #     if damage < 1:
-                #         damage = 1
-                #     total = int(damage + pOneModifier + pMod - cMod)
-                #
-                #     # if Player Two used 'quick strike', 'improved quick strike', or 'greater quick strike', apply the return
-                #     # damage here
-                #     pTwoBaseDamage = self.pTwoInfo['base damage']
-                #     pTwoModifier = self.pTwoInfo['damage']
-                #     pTwoMinimum, pTwoMaximum = pTwoBaseDamage.split('d')
-                #     pMod = self.pTwopMod
-                #     cMod = self.pTwocMod
-                #
-                #     # apply the damage from 'quick strike', 'improved quick strike', or 'greater quick strike' if such feats were
-                #     # used
-                #     if pTwoFeatUsed[0] == "quick strike":
-                #
-                #         # Roll damage for Player One, and multiply it by desired amount.
-                #         damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
-                #         total = (damage + pTwoModifier + pMod - cMod)
-                #         quickDamage = int(total * float(pTwoFeatUsed[1]))
-                #
-                #         # Ensure damage is always at least 1hp and print out result
-                #         if quickDamage < 1:
-                #             quickDamage = 1
-                #         self.pTwoQuickDamage = quickDamage
-                #         self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                #         await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
-                #                        + str(self.pTwoQuickDamage) + "hp of damage.")
-                #
-                #     elif pTwoFeatUsed[0] == "improved quick strike":
-                #         # Roll damage for Player one, and multiply it by desired amount.
-                #         damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
-                #         total = (damage + pTwoModifier + pMod - cMod)
-                #         quickDamage = int(total * float(pTwoFeatUsed[1]))
-                #         # Ensure damage is always at least 1hp and print out result
-                #         if quickDamage < 1:
-                #             quickDamage = 1
-                #         self.pTwoQuickDamage = quickDamage
-                #         self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                #         await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
-                #                        + str(self.pTwoQuickDamage) + "hp of damage.")
-                #
-                #     elif pTwoFeatUsed[0] == "greater quick strike":
-                #
-                #         # roll damage for player One, and multiply it by desired amount
-                #         damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
-                #         total = (damage + pTwoModifier + pMod - cMod)
-                #         quickDamage = int(total * float(pTwoFeatUsed[1]))
-                #         # Ensure damage is always at least 1hp and print out result
-                #         if quickDamage < 1:
-                #             quickDamage = 1
-                #         self.pTwoQuickDamage = quickDamage
-                #         self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                #         await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
-                #                        + str(self.pTwoQuickDamage) + "hp of damage.")
-                #
-                #     elif pTwoFeatUsed[0] == "riposte":
-                #         # roll damage for player One, and multiply it by desired amount
-                #         damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
-                #         total = (damage + pTwoModifier + pMod - cMod)
-                #         quickDamage = int(total * float(pTwoFeatUsed[1][0]))
-                #         # Ensure damage is always at least 1hp and print out result
-                #         if quickDamage < 1:
-                #             quickDamage = 1
-                #         self.pTwoQuickDamage = quickDamage
-                #         self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                #         await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
-                #                        + str(self.pTwoQuickDamage) + "hp of damage.")
-                #         self.pTwoRiposte = 1
-                #
-                #     # If Player Two has Evasion, Improved Evasion, or Greater Evasion, give them the option to use it.
-                #     for word in self.pTwoInfo['feats taken']:
-                #         answer = ""
-                #         if self.pTwoEvade == 1 and word == "evasion":
-                #             while answer != "yes" and answer != "no":
-                #                 answer = await ctx.send(
-                #                     self.pTwoInfo['name'] + ", do you wish to evade? ").lower()
-                #                 if answer == "yes" and character == self.pTwoUsername:
-                #                     total = int(total * 0.75)
-                #                     self.totalDamage = total
-                #                     self.pTwoEvade = 0
-                #                 elif answer == "no" and character == self.pTwoUsername:
-                #                     pass
-                #                 else:
-                #                     await ctx.send("You aren't " + self.pTwoUsername )
-                #     #     elif self.pTwoEvade == 1 and word == "improved evasion":
-                #     #         while answer != "yes" and answer != "no":
-                #     #             answer = await ctx.send(
-                #     #                 self.pTwoInfo['name'] + ", do you wish to evade? ").lower()
-                #     #             if answer == "yes":
-                #     #                 total = int(total * 0.5)
-                #     #                 self.totalDamage = total
-                #     #                 self.pTwoEvade = 0
-                #     #             elif answer == "no":
-                #     #                 pass
-                #     #             else:
-                #     #                 await ctx.send("Answer 'yes' or 'no'")
-                #     #     elif self.pTwoEvade == 1 and word == "greater evasion":
-                #     #         while answer != "yes" and answer != "no":
-                #     #             answer = await ctx.send(
-                #     #                 self.pTwoInfo['name'] + ", do you wish to evade? ").lower()
-                #     #             if answer == "yes":
-                #     #                 total = 0
-                #     #                 self.totalDamage = total
-                #     #                 self.pTwoEvade = 0
-                #     #             elif answer == "no":
-                #     #                 pass
-                #     #             else:
-                #     #                 await ctx.send("Answer 'yes' or 'no'")
-                #     # If Player Two used 'async deflect', 'improved async deflect', or 'greater async deflect', apply damage mitigation here
-                #     if pTwoFeatUsed[0] == "deflect":
-                #         await ctx.send(self.pTwoInfo['name'] + " used async deflect to lessen the blow.")
-                #         total = int(total * float(pTwoFeatUsed[1]))
-                #     elif pTwoFeatUsed[0] == "improved deflect":
-                #         await ctx.send(self.pTwoInfo['name'] + " used async deflect to lessen the blow")
-                #         total = int(total * float(pTwoFeatUsed[1]))
-                #     elif pTwoFeatUsed[0] == "greater deflect":
-                #         await ctx.send(self.pTwoInfo['name'] + " used deflect to lessen the blow")
-                #         total = int(total * float(pTwoFeatUsed[1]))
-                #     self.totalDamage = total
-                #     # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-                #     await ctx.send("Roll: " + str(damage) + " Modifier: " + str(pOneModifier) + " PA: " + str(
-                #                     pMod) + " CE: " + str(cMod))
-                #     # display total damage done, and reset passive feat counters (power attack and combat defense)
-                #     await ctx.send(self.pOneInfo['name'] + " did " + str(total) + " points of damage.")
-                #     self.pOnepMod = 0
-                #     self.pOnecMod = 0
-                #     self.token = 2
-                #
-                # # Otherwise, continue on with the bulk of this method.
-                # else:
-                #     pOneToHit = self.pOneInfo['hit']
-                #     pTwoAC = self.pTwoInfo['ac']
-                #
-                #     pMod = self.pOnepMod
-                #     cMod = self.pOnecMod
-                #     dMod = self.pOnedMod
-                #     mMod = self.pOnemMod
-                #     pTwodMod = self.pTwodMod
-                #     pTwomMod = self.pTwomMod
-                #
-                #     hit = random.randint(1, 20)
-                #
-                #     # if the raw result is equal to 20, count the critical counter up to 1.
-                #     if hit == 20:
-                #         self.critical = 1
-                #         await ctx.send(self.pOneInfo['name'] + " has critically hit.")
-                #
-                #     # If Player One has Hurt Me, Improved Hurt Me, and Greater Hurt Me, check hit points, and apply
-                #     # bonuses.
-                #     for word in self.pOneInfo['feats taken']:
-                #         percentage = int((self.pOneCurrentHP / self.pOneTotalHP) * 100)
-                #         if word == 'hurt me':
-                #             if percentage < 66:
-                #                 self.bonusHurt = 1
-                #             elif percentage < 33:
-                #                 self.bonusHurt = 2
-                #         elif word == 'improved hurt me':
-                #             if percentage < 66:
-                #                 self.bonusHurt = 2
-                #             elif percentage < 33:
-                #                 self.bonusHurt = 3
-                #         elif word == 'greater hurt me':
-                #             if percentage < 66:
-                #                 self.bonusHurt = 2
-                #             elif percentage < 33:
-                #                 self.bonusHurt = 4
-                #         elif word == 'hurt me more':
-                #             if percentage < 75:
-                #                 self.bonusHurt = 2
-                #             elif percentage < 50:
-                #                 self.bonusHurt = 4
-                #             elif percentage < 25:
-                #                 self.bonusHurt = 6
-                #
-                #     # Notify that Player One is getting the hit benefit from 'riposte'
-                #     if self.pOneRiposte == 5:
-                #         await ctx.send(self.pOneInfo['name'] +
-                #                     " benefits from +5 hit bonus effect from riposte.")
-                #
-                #     # calculate the total after modifiers
-                #     total = int(hit + pOneToHit - pMod + cMod - dMod + mMod + self.pOneRiposte + self.bonusHurt)
-                #
-                #     # Ensures Player One benefits from hit bonus of Riposte only once.
-                #     self.pOneRiposte = 0
-                #
-                #     # Reset Hurt Me bonuses, so it doesn't bleed over to player two.
-                #     self.bonusHurt = 0
-                #
-                #     # if any version of crippling blow was used, tack on the penalty to the above total
-                #     if pTwoFeatUsed[0] == "crippling blow" or pTwoFeatUsed[0] == "improved crippling blow" or \
-                #             pTwoFeatUsed[0] == "greater crippling blow":
-                #         await ctx.send(self.pTwoInfo['name'] + " Used " + str(pTwoFeatUsed[0]) + ", Giving "
-                #                        + self.pOneInfo['name'] + " a " + str(pTwoFeatUsed[1]) + " To their attack.")
-                #         total = total + pTwoFeatUsed[1]
-                #
-                #     # testing data to see that modifiers are carrying over correctly. Comment out
-                #     # when project is finished.
-                #     await ctx.send("Roll: " + str(hit) + " Base: " + str(pOneToHit) + " PA: "
-                #                    + str(pMod) + " CE: " + str(cMod) + " DF: " + str(dMod) + " MC: "
-                #                    + str(mMod) + " Riposte: " + str(self.pOneRiposte) + " Hurt Me: " + str(self.bonusHurt))
-                #
-                #     # find Player One's total AC
-                #     totalAC = pTwoAC + pTwodMod - pTwomMod
-                #
-                #     # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-                #     await ctx.send("P2 AC: " + str(pTwoAC) + " DF: " + str(pTwodMod) + " MC: " + str(pTwomMod))
-                #
-                #     # determine if the total roll, after all modifiers have been included, is a successful hit or not. then
-                #     # head to the appropriate method
-                #     if total >= totalAC:
-                #         await ctx.send(self.pOneInfo['name'] + " rolled a " + str(total) + " to hit an AC " + str(
-                #                        totalAC) + " and was successful.")
-                #         self.pTwodMod = 0
-                #         self.pTwomMod = 0
-                #         self.pTwoRiposte = 0
-                #
-                #         # Obtain Player One's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat defense'
-                #         # modifiers to variables, and roll damage.
-                #         pOneBaseDamage = self.pOneInfo['base damage']
-                #         pOneModifier = self.pOneInfo['damage']
-                #         pOneMinimum, pOneMaximum = pOneBaseDamage.split('d')
-                #         pMod = self.pOnepMod
-                #         cMod = self.pOnecMod
-                #         damage = random.randint(int(pOneMinimum), int(pOneMaximum))
-                #         # if critical counter is a value of 1, double the damage done, then reset counter to 0.
-                #         if self.critical == 1:
-                #             damage = damage * 2
-                #             self.critical = 0
-                #         # if Player One used feat 'titan blow', apply 50% bonus damage.
-                #         if pOneFeatUsed[0] == "titan blow":
-                #             await ctx.send(self.pOneInfo['name'] + " used the feat 'titan blow'.")
-                #             damage = damage * float(pOneFeatUsed[1])
-                #         # if Player Two use 'staggering blow' half damage done.
-                #         if pTwoFeatUsed[0] == "staggering blow":
-                #             await ctx.send(self.pTwoInfo['name'] + " used the feat 'staggering blow', halving "
-                #                            + self.pOneInfo['name'] + "'s damage roll")
-                #             damage = damage * float(pTwoFeatUsed[1])
-                #         # ensure that no matter what, raw damage can not fall below 1, then assign total damage to variable, and in turn
-                #         # assign it to variable to be accessed for scoreboard.
-                #         if damage < 1:
-                #             damage = 1
-                #         total = int(damage + pOneModifier + pMod - cMod)
-                #         # if Player Two used 'quick strike', 'improved quick strike', or 'greater quick strike', apply the return
-                #         # damage here
-                #         pTwoBaseDamage = self.pTwoInfo['base damage']
-                #         pTwoModifier = self.pTwoInfo['damage']
-                #         pTwoMinimum, pTwoMaximum = pTwoBaseDamage.split('d')
-                #         pMod = self.pTwopMod
-                #         cMod = self.pTwocMod
-                #         # apply the damage from 'quick strike', 'improved quick strike', or 'greater quick strike' if such feats were
-                #         # used
-                #         if pTwoFeatUsed[0] == "quick strike":
-                #             # Roll damage for Player One, and multiply it by desired amount.
-                #             damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
-                #             total = (damage + pTwoModifier + pMod - cMod)
-                #             quickDamage = int(total * float(pTwoFeatUsed[1]))
-                #             # Ensure damage is always at least 1hp and print out result
-                #             if quickDamage < 1:
-                #                 quickDamage = 1
-                #             self.pTwoQuickDamage = quickDamage
-                #             self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                #             await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
-                #                            + str(self.pTwoQuickDamage) + "hp of damage.")
-                #         elif pTwoFeatUsed[0] == "improved quick strike":
-                #             # Roll damage for Player one, and multiply it by desired amount.
-                #             damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
-                #             total = (damage + pTwoModifier + pMod - cMod)
-                #             quickDamage = int(total * float(pTwoFeatUsed[1]))
-                #             # Ensure damage is always at least 1hp and print out result
-                #             if quickDamage < 1:
-                #                 quickDamage = 1
-                #             self.pTwoQuickDamage = quickDamage
-                #             self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                #             await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
-                #                            + str(self.pTwoQuickDamage) + "hp of damage.")
-                #         elif pTwoFeatUsed[0] == "greater quick strike":
-                #             # roll damage for player One, and multiply it by desired amount
-                #             damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
-                #             total = (damage + pTwoModifier + pMod - cMod)
-                #             quickDamage = int(total * float(pTwoFeatUsed[1]))
-                #             # Ensure damage is always at least 1hp and print out result
-                #             if quickDamage < 1:
-                #                 quickDamage = 1
-                #             self.pTwoQuickDamage = quickDamage
-                #             self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                #             await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
-                #                            + str(self.pTwoQuickDamage) + "hp of damage.")
-                #         elif pTwoFeatUsed[0] == "riposte":
-                #             # roll damage for player One, and multiply it by desired amount
-                #             damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
-                #             total = (damage + pTwoModifier + pMod - cMod)
-                #             quickDamage = int(total * float(pTwoFeatUsed[1][0]))
-                #             # Ensure damage is always at least 1hp and print out result
-                #             if quickDamage < 1:
-                #                 quickDamage = 1
-                #             self.pTwoQuickDamage = quickDamage
-                #             self.pOneCurrentHP = self.pOneCurrentHP - self.pTwoQuickDamage
-                #             await ctx.send(self.pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
-                #                            + str(self.pTwoQuickDamage) + "hp of damage.")
-                #         # # If Player Two has Evasion, Improved Evasion, or Greater Evasion, give them the option to use it.
-                #
-                #         for word in self.pTwoInfo['feats taken']:
-                #
-                #             answer = ""
-                #             if self.pTwoEvade == 1 and word == "evasion":
-                #                 while answer != "yes" and answer != "no":
-                #                     answer = await ctx.send(
-                #                         self.pTwoInfo['name'] + ", do you wish to evade? ").lower()
-                #                     if answer == "yes" and character == self.pTwoUsername:
-                #                         total = int(total * 0.75)
-                #                         self.totalDamage = total
-                #                         self.pTwoEvade = 0
-                #                     elif answer == "no" and character == self.pTwoUsername:
-                #                         pass
-                #                     else:
-                #                         await ctx.send("You aren't " + self.pTwoUsername)
-                #         #     elif self.pTwoEvade == 1 and word == "improved evasion":
-                #         #         while answer != "yes" and answer != "no":
-                #         #             answer = await ctx.send(
-                #         #                 self.pTwoInfo['name'] + ", do you wish to evade? ").lower()
-                #         #             if answer == "yes":
-                #         #                 total = int(total * 0.5)
-                #         #                 self.totalDamage = total
-                #         #                 self.pTwoEvade = 0
-                #         #             elif answer == "no":
-                #         #                 pass
-                #         #             else:
-                #         #                 await ctx.send("Answer 'yes' or 'no'")
-                #         #     elif self.pTwoEvade == 1 and word == "greater evasion":
-                #         #         while answer != "yes" and answer != "no":
-                #         #             answer = await ctx.send(
-                #         #                 self.pTwoInfo['name'] + ", do you wish to evade? ").lower()
-                #         #             if answer == "yes":
-                #         #                 total = 0
-                #         #                 self.totalDamage = total
-                #         #                 self.pTwoEvade = 0
-                #         #             elif answer == "no":
-                #         #                 pass
-                #         #             else:
-                #         #                 await ctx.send("Answer 'yes' or 'no'")
-                #         # If Player Two used 'async deflect', 'improved async deflect', or 'greater async deflect', apply damage mitigation here
-                #         if pTwoFeatUsed[0] == "deflect":
-                #             await ctx.send(self.pTwoInfo['name'] + " used deflect to lessen the blow.")
-                #             total = int(total * float(pTwoFeatUsed[1]))
-                #         elif pTwoFeatUsed[0] == "improved deflect":
-                #             await ctx.send(self.pTwoInfo['name'] + " used deflect to lessen the blow")
-                #             total = int(total * float(pTwoFeatUsed[1]))
-                #         elif pTwoFeatUsed[0] == "greater deflect":
-                #             await ctx.send(self.pTwoInfo['name'] + " used deflect to lessen the blow")
-                #             total = int(total * float(pTwoFeatUsed[1]))
-                #         self.totalDamage = total
-                #         # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-                #         await ctx.send("Roll: " + str(damage) + " Modifier: " + str(pOneModifier) + " PA: "
-                #                        + str(pMod) + " CD: " + str(cMod))
-                #         # display total damage done, and reset passive feat counters (power attack and combat defense)
-                #         await ctx.send(self.pOneInfo['name'] + " did " + str(total) + " points of damage.")
-                #         self.pOnepMod = 0
-                #         self.pOnecMod = 0
-                #         self.token = 2
-                #     else:
-                #         await ctx.send(self.pOneInfo['name'] + " rolled a " + str(total) + " to hit an AC " + str(
-                #             totalAC) + " and missed.")
-                #         self.pTwodMod = 0
-                #         self.pTwomMod = 0
-                #         self.token = 2
-                #
-                #         if pTwoFeatUsed[0] == "riposte":
-                #             self.pTwoRiposte = 5
-                #
-                # # Determine HP at end of round.
-                # if self.pTwoQuickDamage != 0:
-                #     self.pTwoCurrentHP = self.pTwoCurrentHP - self.totalDamage - self.pOneQuickDamage
-                #     self.pOneQuickDamage = 0
-                #     self.count += 1
-                # else:
-                #     self.pTwoCurrentHP = self.pTwoCurrentHP - self.totalDamage
-                #
-                # # Print the scoreboard.
-                # await ctx.send(self.pOneInfo['name'] + ": " + str(self.pOneCurrentHP) + "/" + str(
-                #     self.pOneTotalHP) + "  ||  " + self.pTwoInfo['name'] + ": " + str(
-                #     self.pTwoCurrentHP) + "/" + str(self.pTwoTotalHP) + " \n" +
-                #             self.pTwoInfo['name'] + "'s turn. Type: !usefeat <feat> if you wish to use a feat.")
-                #
-                # # If Player Two is dead, state such, and how many rounds it took to win. Calculate and distribute xp.
-                # # reset game and token counters back to 0.
-                # if self.pTwoCurrentHP <= 0:
-                #     self.game = 0
-                #     self.token = 0
-                #     await ctx.send(self.pOneInfo['name'] + " won in " + str(int(self.count / 2)) + " rounds")
-                #     level = abs(self.pOneLevel - self.pTwoLevel)
-                #     if level == 0:
-                #         level = 1
-                #     if level <= 3:
-                #         levelDiff = level * self.pOneLevel
-                #         differHP = abs(self.pOneCurrentHP - self.pTwoCurrentHP)
-                #         self.xp = 10 * levelDiff + differHP
-                #         await ctx.send(self.pOneInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
-                #     elif 3 > level < 6:
-                #         levelDiff = level * self.pOneLevel
-                #         differHP = abs(self.pOneCurrentHP - self.pTwoCurrentHP)
-                #         self.xp = 7 * levelDiff + differHP
-                #         await ctx.send(self.pOneInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
-                #     elif 7 > level < 10:
-                #         levelDiff = level * self.pOneLevel
-                #         differHP = abs(self.pOneCurrentHP - self.pTwoCurrentHP)
-                #         self.xp = 5 * levelDiff + differHP
-                #         await ctx.send(
-                #                     self.pOneInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
-                #     else:
-                #         await ctx.send("As the level difference was greater than 10, no XP was awarded.")
-                #     await ctx.send(self.pOneInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
-                #     self.currentPlayerXP = self.pOneInfo['currentxp'] + self.xp
-                #     self.nextLevel = self.pOneInfo['nextlevel']
-                #     self.winner = self.pOneUsername
-                #     self.loser = self.pTwoUsername
-                #     self.levelUp = self.pOneInfo['level']
-                #     path = os.getcwd()
-                #     charFolder = os.path.join(path + "/characters/")
-                #
-                #     with open(charFolder + self.winner + '.txt', 'r+') as file:
-                #         charData = json.load(file)
-                #         charData['currentxp'] = self.currentPlayerXP
-                #         charData['wins'] += 1
-                #         file.seek(0)
-                #         file.write(json.dumps(charData, ensure_ascii=False, indent=2))
-                #         file.truncate()
-                #         file.close()
-                #
-                #     with open(charFolder + self.loser + '.txt', 'r+') as file:
-                #         charData = json.load(file)
-                #         charData['losses'] += 1
-                #         file.seek(0)
-                #         file.write(json.dumps(charData, ensure_ascii=False, indent=2))
-                #         file.truncate()
-                #         file.close()
-                #     if self.currentPlayerXP >= self.nextLevel:
-                #         newLevel = self.levelUp + 1
-                #         newLevel = str(newLevel)
-                #         await ctx.send(self.winner.capitalize() + " has reached level " + newLevel + "!")
-                #         levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
-                #         levelDict = json.load(levelFile)
-                #         levelFile.close()
-                #         with open(charFolder + self.winner + '.txt', 'r+') as file:
-                #             charData = json.load(file)
-                #             charData['level'] = int(newLevel)
-                #             charData['hitpoints'] = int(levelDict[newLevel][0])
-                #             charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(
-                #                 levelDict[newLevel][2])
-                #             if charData['total feats'] == levelDict[newLevel][4]:
-                #                 charData['total feats'] = levelDict[newLevel][4]
-                #             else:
-                #                 await ctx.send("You have a new feat slot to fill. Use the !feat command to select new feat.")
-                #                 charData['total feats'] = levelDict[newLevel][4]
-                #                 charData['remaining feats'] = 1
-                #             if charData['total ap'] == levelDict[newLevel][3]:
-                #                 charData['total ap'] = levelDict[newLevel][3]
-                #             else:
-                #                 await ctx.send("You have a new ability point to spend. the !add command.")
-                #             charData['hit'] = int(levelDict[newLevel][5])
-                #             charData['damage modifier'] = int(levelDict[newLevel][5])
-                #             charData['ac'] = int(levelDict[newLevel][6])
-                #             charData['currentxp'] = int(self.currentPlayerXP)
-                #             charData['nextlevel'] = int(levelDict[newLevel][7])
-                #             file.seek(0)
-                #             file.write(json.dumps(charData, ensure_ascii=False, indent=2))
-                #             file.truncate()
-                #             file.close()
-                #
-                #     else:
-                #         pass
-            # ensures the command can only be used by player two, when it is their turn. To prevent trolls from
-            # spamming commands.
-                # # assign both player's feat selections to variables
-                # pOneFeatUsed = self.pOneFeatInfo
-                # pTwoFeatUsed = self.pTwoFeatInfo
-                #
-                # # If a feat wasn't used by a player, assign it async default values.
-                # if pOneFeatUsed is None:
-                #     pOneFeatUsed = ["none", 0]
-                # if pTwoFeatUsed is None:
-                #     pTwoFeatUsed = ["none", 0]
-                #
-                # # If the feat used was 'true strike' forgo rolling to see if player hit opponent, and go straight to damage.
-                # if pTwoFeatUsed[0] == "true strike":
-                #     await ctx.send(self.pTwoInfo['name'] +
-                #                 " used the feat 'True Strike.' And forgoes the need to determine if hit was success.")
-                #
-                #     # Obtain Player Two's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat defense'
-                #     # modifiers to variables, and roll damage.
-                #     pTwoBaseDamage = self.pTwoInfo['base damage']
-                #     pTwoModifier = self.pTwoInfo['damage']
-                #     pTwoMinimum, pTwoMaximum = pTwoBaseDamage.split('d')
-                #     pMod = self.pTwopMod
-                #     cMod = self.pTwocMod
-                #     damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
-                #     # if critical counter is a value of 1, double the damage done, then reset counter to 0.
-                #     if self.critical == 1:
-                #         damage = damage * 2
-                #         self.critical = 0
-                #     # if Player Two used feat 'titan blow', apply 50% bonus damage.
-                #     if pTwoFeatUsed[0] == "titan blow":
-                #         await ctx.send(self.pTwoInfo['name'] + " used the feat 'titan blow'.")
-                #         damage = damage * float(pTwoFeatUsed[1])
-                #     # if Player One use 'staggering blow' half damage done.
-                #     if pOneFeatUsed[0] == "staggering blow":
-                #         await ctx.send(
-                #                     self.pOneInfo['name'] + " used the feat 'staggering blow', halving " +
-                #                     self.pTwoInfo['name'] + "'s damage roll")
-                #         damage = damage * float(pOneFeatUsed[1])
-                #     # ensure that no matter what, raw damage can not fall below 1, then assign total damage to variable, and in turn
-                #     # assign it to variable to be accessed for scoreboard.
-                #     if damage < 1:
-                #         damage = 1
-                #     total = int(damage + pTwoModifier + pMod - cMod)
-                #     # if Player One used 'quick strike', 'improved quick strike', or 'greater quick strike', apply the return
-                #     # damage here
-                #     pOneBaseDamage = self.pOneInfo['base damage']
-                #     pOneModifier = self.pOneInfo['damage']
-                #     pOneMinimum, pOneMaximum = pOneBaseDamage.split('d')
-                #     pMod = self.pOnepMod
-                #     cMod = self.pOnecMod
-                #     # apply the damage from 'quick strike', 'improved quick strike', or 'greater quick strike' if such feats were
-                #     # used
-                #     if pOneFeatUsed[0] == "quick strike":
-                #         # Roll damage for Player One, and multiply it by desired amount.
-                #         damage = random.randint(int(pOneMinimum), int(pOneMaximum))
-                #         total = (damage + pOneModifier + pMod - cMod)
-                #         quickDamage = int(total * float(pOneFeatUsed[1]))
-                #         # Ensure damage is always at least 1hp and print out result
-                #         if quickDamage < 1:
-                #             quickDamage = 1
-                #         self.pOneQuickDamage = quickDamage
-                #         self.pTwoCurrentHP = self.pTwoCurrentHP - self.pOneQuickDamage
-                #         await ctx.send(
-                #                     self.pOneInfo[
-                #                         'name'] + " used 'quick strike,' managing to do an additional " + str(
-                #                         self.pOneQuickDamage) + "hp of damage.")
-                #     if pOneFeatUsed[0] == "improved quick strike":
-                #         # Roll damage for Player one, and multiply it by desired amount.
-                #         damage = random.randint(int(pOneMinimum), int(pOneMaximum))
-                #         total = (damage + pOneModifier + pMod - cMod)
-                #         quickDamage = int(total * float(pOneFeatUsed[1]))
-                #         # Ensure damage is always at least 1hp and print out result
-                #         if quickDamage < 1:
-                #             quickDamage = 1
-                #         self.pOneQuickDamage = quickDamage
-                #         self.pTwoCurrentHP = self.pTwoCurrentHP - self.pOneQuickDamage
-                #         await ctx.send(
-                #                     self.pOneInfo[
-                #                         'name'] + " used 'quick strike,' managing to do an additional " + str(
-                #                         self.pOneQuickDamage) + "hp of damage.")
-                #     if pOneFeatUsed[0] == "greater quick strike":
-                #         # roll damage for player One, and multiply it by desired amount
-                #         damage = random.randint(int(pOneMinimum), int(pOneMaximum))
-                #         total = (damage + pOneModifier + pMod - cMod)
-                #         quickDamage = int(total * float(pOneFeatUsed[1]))
-                #         # Ensure damage is always at least 1hp and print out result
-                #         self.pOneQuickDamage = quickDamage
-                #         self.pTwoCurrentHP = self.pTwoCurrentHP - self.pOneQuickDamage
-                #         await ctx.send(
-                #                     self.pOneInfo[
-                #                         'name'] + " used 'quick strike,' managing to do an additional " + str(
-                #                         self.pOneQuickDamage) + "hp of damage.")
-                #     elif pOneFeatUsed[0] == "riposte":
-                #         # roll damage for player One, and multiply it by desired amount
-                #         damage = random.randint(int(pOneMinimum), int(pOneMaximum))
-                #         total = (damage + pOneModifier + pMod - cMod)
-                #         quickDamage = int(total * float(pOneFeatUsed[1][0]))
-                #         # Ensure damage is always at least 1hp and print out result
-                #         if quickDamage < 1:
-                #             quickDamage = 1
-                #         self.pOneQuickDamage = quickDamage
-                #         self.pTwoCurrentHP = self.pTwoCurrentHP - self.pTwoQuickDamage
-                #         await ctx.send(
-                #                     self.pOneInfo[
-                #                         'name'] + " used 'quick strike,' managing to do an additional " + str(
-                #                         self.pOneQuickDamage) + "hp of damage.")
-                #         self.pOneRiposte = 1
-                #     # If Player One has Evasion, Improved Evasion, or Greater Evasion, give them the option to use it.
-                #     # for word in self.pOneInfo['feats taken']:
-                #     #     answer = ""
-                #     #     if self.pOneEvade == 1 and word == "evasion":
-                #     #         while answer != "yes" and answer != "no":
-                #     #             answer = await ctx.send(
-                #     #                 self.pOneInfo['name'] + ", do you wish to evade? ").lower()
-                #     #             if answer == "yes":
-                #     #                 total = int(total * 0.5)
-                #     #                 self.totalDamage = total
-                #     #                 self.pTwoEvade = 0
-                #     #             elif answer == "no":
-                #     #                 pass
-                #     #             else:
-                #     #                 await ctx.send("Answer 'yes' or 'no'")
-                #     #     elif self.pOneEvade == 1 and word == "improved evasion":
-                #     #         while answer != "yes" and answer != "no":
-                #     #             answer = await ctx.send(
-                #     #                 self.pOneInfo['name'] + ", do you wish to evade? ").lower()
-                #     #             if answer == "yes":
-                #     #                 total = int(total * 0.5)
-                #     #                 self.totalDamage = total
-                #     #                 self.pTwoEvade = 0
-                #     #             elif answer == "no":
-                #     #                 pass
-                #     #             else:
-                #     #                 await ctx.send("Answer 'yes' or 'no'")
-                #     #     elif self.pOneEvade == 1 and word == "greater evasion":
-                #     #         while answer != "yes" and answer != "no":
-                #     #             answer = await ctx.send(
-                #     #                 self.pTwoInfo['name'] + ", do you wish to evade? ").lower()
-                #     #             if answer == "yes":
-                #     #                 total = int(total * 0.5)
-                #     #                 self.totalDamage = total
-                #     #                 self.pTwoEvade = 0
-                #     #             elif answer == "no":
-                #     #                 pass
-                #     #             else:
-                #     #                 await ctx.send("Answer 'yes' or 'no'")
-                #     # If Player One used 'deflect', 'improved async deflect', or 'greater async deflect', apply damage mitigation here
-                #     if pOneFeatUsed[0] == "deflect":
-                #         await ctx.send(self.pOneInfo['name'] + " used async deflect to lessen the blow.")
-                #         total = int(total * float(pOneFeatUsed[1]))
-                #     elif pOneFeatUsed[0] == "improved deflect":
-                #         await ctx.send(self.pOneInfo['name'] + " used async deflect to lessen the blow")
-                #         total = int(total * float(pOneFeatUsed[1]))
-                #     elif pOneFeatUsed[0] == "greater deflect":
-                #         await ctx.send(self.pOneInfo['name'] + " used async deflect to lessen the blow")
-                #         await ctx.send(pOneFeatUsed[1])
-                #         await ctx.send(total)
-                #         total = int(total * float(pOneFeatUsed[1]))
-                #         await ctx.send(total)
-                #     self.totalDamage = total
-                #     # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-                #     await ctx.send(
-                #                 "Roll: " + str(damage) + " Modifier: " + str(pTwoModifier) + " PA: " + str(
-                #                     pMod) + " CD: " + str(cMod))
-                #     # display total damage done, and reset passive feat counters (power attack and combat defense).
-                #     await ctx.send(self.pTwoInfo['name'] + " did " + str(total) + " points of damage.")
-                #     self.pTwopMod = 0
-                #     self.pTwocMod = 0
-                #     self.token = 1
-                #
-                # # Otherwise, continue on with the bulk of this method.
-                # else:
-                #     pTwoToHit = self.pTwoInfo['hit']
-                #     pOneAC = self.pOneInfo['ac']
-                #
-                #     pMod = self.pTwopMod
-                #     cMod = self.pTwocMod
-                #     dMod = self.pTwodMod
-                #     mMod = self.pTwomMod
-                #     pOnedMod = self.pOnedMod
-                #     pOnemMod = self.pOnemMod
-                #
-                #     # determine the roll of the 1d20.
-                #     hit = random.randint(1, 20)
-                #
-                #
-                #     # If Player Two has Hurt Me, Improved Hurt Me, and Greater Hurt Me, check hit points, and apply
-                #     # bonuses.
-                #     for word in self.pOneInfo['feats taken']:
-                #         percentage = int((self.pTwoCurrentHP / self.pTwoTotalHP) * 100)
-                #         if word == 'hurt me':
-                #             if percentage < 66:
-                #                 self.bonusHurt = 1
-                #             elif percentage < 33:
-                #                 self.bonusHurt = 2
-                #         elif word == 'improved hurt me':
-                #             if percentage < 66:
-                #                 self.bonusHurt = 2
-                #             elif percentage < 33:
-                #                 self.bonusHurt = 3
-                #         elif word == 'greater hurt me':
-                #             if percentage < 66:
-                #                 self.bonusHurt = 2
-                #             elif percentage < 33:
-                #                 self.bonusHurt = 4
-                #         elif word == 'hurt me more':
-                #             if percentage < 75:
-                #                 self.bonusHurt = 2
-                #             elif percentage < 50:
-                #                 self.bonusHurt = 4
-                #             elif percentage < 25:
-                #                 self.bonusHurt = 6
-                #
-                #     # if the raw result is equal to 20, count the critical counter up to 1.
-                #     if hit == 20:
-                #         self.critical = 1
-                #         await ctx.send(self.pTwoInfo['name'] + " has critically hit.")
-                #
-                #     if self.pTwoRiposte == 5:
-                #         await ctx.send(
-                #                     self.pTwoInfo['name'] + "Benefits from +5 hit bonus effect from riposte.")
-                #
-                #     # calculate the total after modifiers
-                #     total = int(hit + pTwoToHit - pMod + cMod - dMod + mMod + self.pTwoRiposte + self.hurtBonus)
-                #
-                #     # Ensures Player Two benefits from hit bonus of Riposte only once.
-                #     self.pTwoRiposte = 0
-                #
-                #     # Reset Hurt Me bonuses to ensure it doesn't bleed over to Player One.
-                #     self.hurtBonus = 0
-                #
-                #     # if Player Two used riposte, and
-                #     # if any version of crippling blow was used, tack on the penalty to the above total
-                #     if pOneFeatUsed[0] == "crippling blow" or pOneFeatUsed[0] == "improved crippling blow" or \
-                #             pOneFeatUsed[0] == "greater crippling blow":
-                #         await ctx.send(
-                #                     self.pOneInfo['name'] + " Used " + str(pOneFeatUsed[0]) + ", Giving " + self.pTwoInfo[
-                #                         'name'] + " a " + str(pOneFeatUsed[1]) + " To their attack.")
-                #         total = total + pOneFeatUsed[1]
-                #
-                #     # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-                #     await ctx.send(
-                #                 "Roll: " + str(hit) + " Base: " + str(pTwoToHit) + " PA: " + str(pMod) + " CE: "
-                #                 + str(cMod) + " DF: " + str(dMod) + " MC: " + str(mMod) +
-                #                 " Riposte: " + str(self.pTwoRiposte) + " Hurt Me: " + str(self.bonusHurt))
-                #
-                #     # find Player One's total AC
-                #     totalAC = int(pOneAC + pOnedMod - pOnemMod)
-                #
-                #     # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-                #     await ctx.send(" P1 AC: " + str(pOneAC) + " DF: " + str(pOnedMod) + " MC: " + str(pOnemMod))
-                #
-                #     # determine if the total roll, after all modifiers have been included, is a successful hit or not. then
-                #     # head to the appropriate method
-                #     if total >= pOneAC:
-                #
-                #         await ctx.send(
-                #                     self.pTwoInfo['name'] + " rolled a " + str(total) + " to hit an AC " + str(
-                #                         totalAC) + " and was successful.")
-                #         self.pOnedMod = 0
-                #         self.pOnemMod = 0
-                #         self.pOneRiposte = 0
-                #
-                #         # Obtain Player Two's base damage and base modifier, and roll damage. Assign 'power attack' and 'combat defense'
-                #         # modifiers to variables, and roll damage.
-                #         pTwoBaseDamage = self.pTwoInfo['base damage']
-                #         pTwoModifier = self.pTwoInfo['damage']
-                #         pTwoMinimum, pTwoMaximum = pTwoBaseDamage.split('d')
-                #         pMod = self.pTwopMod
-                #         cMod = self.pTwocMod
-                #         damage = random.randint(int(pTwoMinimum), int(pTwoMaximum))
-                #         # if critical counter is a value of 1, double the damage done, then reset counter to 0.
-                #         if self.critical == 1:
-                #             damage = damage * 2
-                #             self.critical = 0
-                #         # if Player Two used feat 'titan blow', apply 50% bonus damage.
-                #         if pTwoFeatUsed[0] == "titan blow":
-                #             await ctx.send(self.pTwoInfo['name'] + " used the feat 'titan blow'.")
-                #             damage = damage * float(pTwoFeatUsed[1])
-                #         # if Player One use 'staggering blow' half damage done.
-                #         if pOneFeatUsed[0] == "staggering blow":
-                #             await ctx.send(
-                #                         self.pOneInfo['name'] + " used the feat 'staggering blow', halving " +
-                #                         self.pTwoInfo['name'] + "'s damage roll")
-                #             damage = damage * float(pOneFeatUsed[1])
-                #         # ensure that no matter what, raw damage can not fall below 1, then assign total damage to variable, and in turn
-                #         # assign it to variable to be accessed for scoreboard.
-                #         if damage < 1:
-                #             damage = 1
-                #         total = int(damage + pTwoModifier + pMod - cMod)
-                #         # if Player One used 'quick strike', 'improved quick strike', or 'greater quick strike', apply the return
-                #         # damage here
-                #         pOneBaseDamage = self.pOneInfo['base damage']
-                #         pOneModifier = self.pOneInfo['damage']
-                #         pOneMinimum, pOneMaximum = pOneBaseDamage.split('d')
-                #         pMod = self.pOnepMod
-                #         cMod = self.pOnecMod
-                #         # apply the damage from 'quick strike', 'improved quick strike', or 'greater quick strike' if such feats were
-                #         # used
-                #         if pOneFeatUsed[0] == "quick strike":
-                #             # Roll damage for Player One, and multiply it by desired amount.
-                #             damage = random.randint(int(pOneMinimum), int(pOneMaximum))
-                #             total = (damage + pOneModifier + pMod - cMod)
-                #             quickDamage = int(total * float(pOneFeatUsed[1]))
-                #             # Ensure damage is always at least 1hp and print out result
-                #             if quickDamage < 1:
-                #                 quickDamage = 1
-                #             self.pOneQuickDamage = quickDamage
-                #             self.pTwoCurrentHP = self.pTwoCurrentHP - self.pOneQuickDamage
-                #             await ctx.send(
-                #                         self.pOneInfo['name'] + " used 'quick strike,' managing to do an additional " + str(
-                #                             self.pOneQuickDamage) + "hp of damage.")
-                #         if pOneFeatUsed[0] == "improved quick strike":
-                #             # Roll damage for Player one, and multiply it by desired amount.
-                #             damage = random.randint(int(pOneMinimum), int(pOneMaximum))
-                #             total = (damage + pOneModifier + pMod - cMod)
-                #             quickDamage = int(total * float(pOneFeatUsed[1]))
-                #             # Ensure damage is always at least 1hp and print out result
-                #             if quickDamage < 1:
-                #                 quickDamage = 1
-                #             self.pOneQuickDamage = quickDamage
-                #             self.pTwoCurrentHP = self.pTwoCurrentHP - self.pOneQuickDamage
-                #             await ctx.send(
-                #                         self.pOneInfo['name'] + " used 'quick strike,' managing to do an additional " + str(
-                #                             self.pOneQuickDamage) + "hp of damage.")
-                #         if pOneFeatUsed[0] == "greater quick strike":
-                #             # roll damage for player One, and multiply it by desired amount
-                #             damage = random.randint(int(pOneMinimum), int(pOneMaximum))
-                #             total = (damage + pOneModifier + pMod - cMod)
-                #             quickDamage = int(total * float(pOneFeatUsed[1]))
-                #             # Ensure damage is always at least 1hp and print out result
-                #             self.pOneQuickDamage = quickDamage
-                #             self.pTwoCurrentHP = self.pTwoCurrentHP - self.pOneQuickDamage
-                #             await ctx.send(
-                #                         self.pOneInfo['name'] + " used 'quick strike,' managing to do an additional " + str(
-                #                             self.pOneQuickDamage) + "hp of damage.")
-                #         if pOneFeatUsed[0] == "riposte":
-                #             # roll damage for player One, and multiply it by desired amount
-                #             damage = random.randint(int(pOneMinimum), int(pOneMaximum))
-                #             total = (damage + pOneModifier + pMod - cMod)
-                #             quickDamage = int(total * float(pOneFeatUsed[1][0]))
-                #             # Ensure damage is always at least 1hp and print out result
-                #             if quickDamage < 1:
-                #                 quickDamage = 1
-                #             self.pOneQuickDamage = quickDamage
-                #             self.pTwoCurrentHP = self.pTwoCurrentHP - self.pTwoQuickDamage
-                #             await ctx.send(
-                #                         self.pOneInfo['name'] + " used 'quick strike,' managing to do an additional " + str(
-                #                             self.pOneQuickDamage) + "hp of damage.")
-                #             self.pOneRiposte = 1
-                #         # If Player One has Evasion, Improved Evasion, or Greater Evasion, give them the option to use it.
-                #         # for word in self.pOneInfo['feats taken']:
-                #         #     answer = ""
-                #         #     if self.pOneEvade == 1 and word == "evasion":
-                #         #         while answer != "yes" and answer != "no":
-                #         #             answer = await ctx.send(
-                #         #                 self.pOneInfo['name'] + ", do you wish to evade? ").lower()
-                #         #             if answer == "yes":
-                #         #                 total = int(total * 0.5)
-                #         #                 self.totalDamage = total
-                #         #                 self.pTwoEvade = 0
-                #         #             elif answer == "no":
-                #         #                 pass
-                #         #             else:
-                #         #                 await ctx.send("Answer 'yes' or 'no'")
-                #         #     elif self.pOneEvade == 1 and word == "improved evasion":
-                #         #         while answer != "yes" and answer != "no":
-                #         #             answer = await ctx.send(
-                #         #                 self.pOneInfo['name'] + ", do you wish to evade? ").lower()
-                #         #             if answer == "yes":
-                #         #                 total = int(total * 0.5)
-                #         #                 self.totalDamage = total
-                #         #                 self.pTwoEvade = 0
-                #         #             elif answer == "no":
-                #         #                 pass
-                #         #             else:
-                #         #                 await ctx.send("Answer 'yes' or 'no'")
-                #         #     elif self.pOneEvade == 1 and word == "greater evasion":
-                #         #         while answer != "yes" and answer != "no":
-                #         #             answer = await ctx.send(
-                #         #                 self.pTwoInfo['name'] + ", do you wish to evade? ").lower()
-                #         #             if answer == "yes":
-                #         #                 total = int(total * 0.5)
-                #         #                 self.totalDamage = total
-                #         #                 self.pTwoEvade = 0
-                #         #             elif answer == "no":
-                #         #                 pass
-                #         #             else:
-                #         #                 await ctx.send("Answer 'yes' or 'no'")
-                #         # If Player One used 'deflect', 'improved async deflect', or 'greater async deflect', apply damage mitigation here
-                #         if pOneFeatUsed[0] == "deflect":
-                #             await ctx.send(self.pOneInfo['name'] + " used async deflect to lessen the blow.")
-                #             total = int(total * float(pOneFeatUsed[1]))
-                #         elif pOneFeatUsed[0] == "improved deflect":
-                #             await ctx.send(self.pOneInfo['name'] + " used async deflect to lessen the blow")
-                #             total = int(total * float(pOneFeatUsed[1]))
-                #         elif pOneFeatUsed[0] == "greater deflect":
-                #             await ctx.send(self.pOneInfo['name'] + " used async deflect to lessen the blow")
-                #             await ctx.send(pOneFeatUsed[1])
-                #             await ctx.send(total)
-                #             total = int(total * float(pOneFeatUsed[1]))
-                #             await ctx.send(total)
-                #         self.totalDamage = total
-                #         # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
-                #         await ctx.send(
-                #                     "Roll: " + str(damage) + " Modifier: " + str(pTwoModifier) + " PA: " + str(
-                #                         pMod) + " CD: " + str(cMod))
-                #         # display total damage done, and reset passive feat counters (power attack and combat defense).
-                #         await ctx.send(self.pTwoInfo['name'] + " did " + str(total) + " points of damage.")
-                #         self.pTwopMod = 0
-                #         self.pTwocMod = 0
-                #         self.token = 1
-                #     else:
-                #         await ctx.send(
-                #                     self.pTwoInfo['name'] + " rolled a " + str(total) + " to hit an AC " + str(
-                #                         totalAC) + " and missed.")
-                #         self.pOnedMod = 0
-                #         self.pOnemMod = 0
-                #         self.token = 1
-                #         if pOneFeatUsed[0] == "riposte":
-                #             self.pOneRiposte = 5
-                #
-                # # Determine HP at end of round.
-                # if self.pOneQuickDamage != 0:
-                #     self.pOneCurrentHP = self.pOneCurrentHP - self.totalDamage - self.pOneQuickDamage
-                #     self.pOneQuickDamage = 0
-                #     self.count += 1
-                # else:
-                #     self.pOneCurrentHP = self.pOneCurrentHP - self.totalDamage
-                #
-                # # Print the scoreboard
-                # await ctx.send(self.pOneInfo['name'] + ": " + str(self.pOneCurrentHP) + "/" +
-                #             str(self.pOneTotalHP) + "  ||  " + self.pTwoInfo['name'] + ": " +
-                #             str(self.pTwoCurrentHP) + "/" + str(self.pTwoTotalHP) + " \n" +
-                #             self.pOneInfo['name'] + "'s turn. Type: !usefeat <feat> if you wish to use a feat.")
-                #
-                # # If Player One is dead, state such, and how many rounds it took to win. Calculate and distribute xp.
-                # # reset game and token counters back to 0.
-                # if self.pOneCurrentHP <= 0:
-                #     self.game = 0
-                #     self.token = 0
-                #     await ctx.send(self.pTwoInfo['name'] + " won in " + str(int(self.count / 2)) + " rounds")
-                #     level = abs(self.pOneLevel - self.pTwoLevel)
-                #     if level == 0:
-                #         level = 1
-                #     if level <= 3:
-                #         levelDiff = level * self.pOneLevel
-                #         differHP = abs(self.pOneCurrentHP - self.pTwoCurrentHP)
-                #         self.xp = 10 * levelDiff + differHP
-                #
-                #     elif 3 > level < 6:
-                #         levelDiff = level * self.pOneLevel
-                #         differHP = abs(self.pOneCurrentHP - self.pTwoCurrentHP)
-                #         self.xp = 7 * levelDiff + differHP
-                #
-                #     elif 7 > level < 10:
-                #         levelDiff = level * self.pOneLevel
-                #         differHP = abs(self.pOneCurrentHP - self.pTwoCurrentHP)
-                #         self.xp = 5 * levelDiff + differHP
-                #
-                #     else:
-                #         await ctx.send("As the level difference was greater than 10, no XP was awarded.")
-                #     await ctx.send(self.pTwoInfo['name'] + " has earned: " + str(self.xp) + " experience points.")
-                #     self.currentPlayerXP = self.pTwoInfo['currentxp'] + self.xp
-                #     self.nextLevel = self.pTwoInfo['nextlevel']
-                #     self.winner = self.pTwoUsername
-                #     self.loser = self.pOneUsername
-                #     self.levelUp = self.pTwoInfo['level']
-                #     path = os.getcwd()
-                #     charFolder = os.path.join(path + "/characters/")
-                #
-                #     with open(charFolder + self.winner + '.txt', 'r+') as file:
-                #         charData = json.load(file)
-                #         charData['currentxp'] = self.currentPlayerXP
-                #         charData['wins'] += 1
-                #         file.seek(0)
-                #         file.write(json.dumps(charData, ensure_ascii=False, indent=2))
-                #         file.truncate()
-                #         file.close()
-                #
-                #     with open(charFolder + self.loser + '.txt', 'r+') as file:
-                #         charData = json.load(file)
-                #         charData['losses'] += 1
-                #         file.seek(0)
-                #         file.write(json.dumps(charData, ensure_ascii=False, indent=2))
-                #         file.truncate()
-                #         file.close()
-                #
-                #     if self.currentPlayerXP >= self.nextLevel:
-                #         newLevel = self.levelUp + 1
-                #         newLevel = str(newLevel)
-                #         await ctx.send(self.winner.capitalize() + " has reached level " + newLevel + "!")
-                #         levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
-                #         levelDict = json.load(levelFile)
-                #         levelFile.close()
-                #         with open(charFolder + self.winner + '.txt', 'r+') as file:
-                #             charData = json.load(file)
-                #             charData['level'] = int(newLevel)
-                #             charData['hitpoints'] = int(levelDict[newLevel][0])
-                #             charData['base damage'] = str(levelDict[newLevel][1]) + "d" + str(
-                #                 levelDict[newLevel][2])
-                #             if charData['total feats'] == levelDict[newLevel][4]:
-                #                 charData['total feats'] = levelDict[newLevel][4]
-                #             else:
-                #                 await ctx.send(
-                #                     "You have a new feat slot to fill. Use the !feat command to select new feat.")
-                #                 charData['total feats'] = levelDict[newLevel][4]
-                #                 charData['remaining feats'] = 1
-                #             if charData['total ap'] == levelDict[newLevel][3]:
-                #                 charData['total ap'] = levelDict[newLevel][3]
-                #             else:
-                #                 await ctx.send("You have a new ability point to spend. the !add command.")
-                #             charData['hit'] = int(levelDict[newLevel][5])
-                #             charData['damage modifier'] = int(levelDict[newLevel][5])
-                #             charData['ac'] = int(levelDict[newLevel][6])
-                #             charData['currentxp'] = int(self.currentPlayerXP)
-                #             charData['nextlevel'] = int(levelDict[newLevel][7])
-                #             file.seek(0)
-                #             file.write(json.dumps(charData, ensure_ascii=False, indent=2))
-                #             file.truncate()
-                #             file.close()
-                #
-                #     else:
-                #         pass
+        if ctx.channel.id in channelID:
+            channel = ctx.channel.id
+            playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical, \
+            bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, \
+            pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod, \
+            pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, \
+            pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect = gameStatLoad(channel)
+            try:
+                self.gameTimer.cancel()
+                msg, bEvasion, bDeflect, bGameTimer, playerOneID, playerTwoID, winner, pOneInfo, pTwoInfo, \
+                featToken, game, count, token, critical, bonusHurt, totalDamage, pOneTotalHP, pTwoTotalHP, \
+                pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, pOnedMod, pOnemMod, pOneEvade, pOneDeflect, \
+                pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod, pTwodMod, pTwomMod, \
+                pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, pTwoLevel,\
+                xp, currentPlayerXP, nextLevel, levelUp, iddqd = onMSGRoll.message_roll(user, charFolder,
+                                                        playerOneID, playerTwoID, winner,
+                                                        pOneInfo, pTwoInfo, featToken, game, \
+                                                        count, token, critical, bonusHurt,
+                                                        totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP,
+                                                        pTwoCurrentHP, pOnepMod, pOnecMod, pOnedMod,
+                                                        pOnemMod, pOneEvade, pOneDeflect, pOneRiposte,
+                                                        pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod,
+                                                        pTwocMod, pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect,
+                                                        pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat,
+                                                        pOneLevel, pTwoLevel, xp, currentPlayerXP,
+                                                        nextLevel, levelUp, iddqd)
+                for msg_item in msg:
+                    await ctx.send(msg_item)
+                    if bGameTimer:
+                       self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
+                    else:
+                        self.gameTimer.cancel()
+                        path = os.getcwd()
+                        gameFolder = os.path.join(path + "/gamelogic/")
+                        whichRoom = ctx.channel.id
+                        onMSGUtil.soft_reset(gameFolder, whichRoom)
+
+                gameStatDump(playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical,\
+           bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod,\
+           pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod,\
+           pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel,\
+           pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect, channel)
+
+            except AttributeError:
+                await ctx.send("Either a fight is not taking place, or it isn't your turn.")
 
     @roll.error
     async def roll_error(self, ctx, error):
@@ -1578,29 +719,39 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def evasion(self, ctx):
         user = str(ctx.message.author.id)
-        msg, bGameTimer, self.playerOne, self.playerTwo, self.pOneInfo, self.pTwoInfo, self.featToken, \
-        self.count, self.token, self.totalDamage, self.pOneTotalHP, self.pTwoTotalHP, \
-        self.pOneCurrentHP, self.pTwoCurrentHP, self.pOnepMod, self.pOnecMod, self.pOnedMod,\
-        self.pOnemMod, self.pOneQuickDamage, self.pTwoQuickDamage, \
-        self.pTwoEvade, self.pOneEvade, self.iddqd = onMSGUtil.message_8_evasion(user, self.playerOne, self.playerTwo,
-                                                                       self.pOneInfo, self.pTwoInfo, self.featToken, \
-                                                                       self.count, self.token, self.critical,
-                                                                       self.bonusHurt, self.totalDamage,
-                                                                       self.pOneTotalHP, self.pTwoTotalHP,
-                                                                       self.pOneCurrentHP, self.pTwoCurrentHP,
-                                                                       self.pOnepMod, self.pOnecMod, self.pOnedMod,
-                                                                       self.pOnemMod, self.pOneQuickDamage,
-                                                                       self.pTwoQuickDamage, self.pTwoEvade,
-                                                                       self.pOneEvade, self.iddqd)
-        for msg_item in msg:
-            await ctx.send(msg_item)
-        if bGameTimer:
-            gametimeout = 3600
-            self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
-        if self.bEvasion is True:
-            self.bEvasion = False
-        if self.bDeflect is True:
-            self.bDeflect = False
+        arena, devroom = roomID()
+        channelID = [arena, devroom]
+
+        if ctx.channel.id in channelID:
+            channel = ctx.channel.id
+
+            playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical, \
+            bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, \
+            pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod, \
+            pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, \
+            pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect = gameStatLoad(channel)
+
+            msg, bGameTimer, playerOneID, playerTwoID, pOneInfo, pTwoInfo, featToken, count, token, totalDamage, pOneTotalHP, \
+            pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, pOnedMod, pOnemMod, pOneQuickDamage, pTwoQuickDamage, \
+            pTwoEvade, pOneEvade, iddqd = onMSGUtil.message_8_evasion(user, playerOneID, playerTwoID, pOneInfo, pTwoInfo, featToken, \
+                                                                      count, token, critical, bonusHurt, totalDamage, pOneTotalHP,
+                                                                      pTwoTotalHP, pOneCurrentHP,  pTwoCurrentHP,
+                                                                      pOnepMod, pOnecMod, pOnedMod, pOnemMod, pOneQuickDamage,
+                                                                      pTwoQuickDamage, pTwoEvade, pOneEvade, iddqd)
+            for msg_item in msg:
+                await ctx.send(msg_item)
+            if bGameTimer:
+                self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
+            if bEvasion is True:
+                bEvasion = False
+            if bDeflect is True:
+                bDeflect = False
+
+            gameStatDump(playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical,\
+           bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod,\
+           pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod,\
+           pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel,\
+           pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect, channel)
     
     @evasion.error
     async def evasion_error(self, ctx,error):
@@ -1614,29 +765,39 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def deflect(self, ctx):
         user = str(ctx.message.author.id)
-        msg, bGameTimer, self.playerOne, self.playerTwo, self.pOneInfo, self.pTwoInfo, self.featToken, \
-        self.count, self.token, self.totalDamage, self.pOneTotalHP, self.pTwoTotalHP, \
-        self.pOneCurrentHP, self.pTwoCurrentHP, self.pOnepMod, self.pOnecMod, self.pOnedMod,\
-        self.pOnemMod, self.pOneQuickDamage, self.pTwoQuickDamage, \
-        self.pTwoDeflect, self.pOneDeflect, self.iddqd = onMSGUtil.message_8_deflect(user, self.playerOne, self.playerTwo,
-                                                                           self.pOneInfo, self.pTwoInfo, self.featToken, \
-                                                                           self.count, self.token, self.critical,
-                                                                           self.bonusHurt, self.totalDamage,
-                                                                           self.pOneTotalHP, self.pTwoTotalHP,
-                                                                           self.pOneCurrentHP, self.pTwoCurrentHP,
-                                                                           self.pOnepMod, self.pOnecMod, self.pOnedMod,
-                                                                           self.pOnemMod, self.pOneQuickDamage,
-                                                                           self.pTwoQuickDamage, self.pTwoDeflect,
-                                                                           self.pOneDeflect, self.iddqd)
-        for msg_item in msg:
-            await ctx.send(msg_item)
-        if bGameTimer:
-            gametimeout = 3600
-            self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
-        if self.bDeflect is True:
-            self.bDeflect = False
-        if self.bEvasion is True:
-            self.bEvasion = False
+        arena, devroom = roomID()
+        channelID = [arena, devroom]
+
+        if ctx.channel.id in channelID:
+            channel = ctx.channel.id
+
+            playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical, \
+            bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, \
+            pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod, \
+            pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, \
+            pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect = gameStatLoad(channel)
+
+            msg, bGameTimer, playerOneID, playerTwoID, pOneInfo, pTwoInfo, featToken, count, token, totalDamage, pOneTotalHP, \
+            pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, pOnedMod, pOnemMod, pOneQuickDamage, pTwoQuickDamage, \
+            pTwoEvade, pOneEvade, iddqd = onMSGUtil.message_8_deflect(user, playerOneID, playerTwoID, pOneInfo, pTwoInfo, featToken, \
+                                                                      count, token, critical, bonusHurt, totalDamage, pOneTotalHP,
+                                                                      pTwoTotalHP, pOneCurrentHP,  pTwoCurrentHP,
+                                                                      pOnepMod, pOnecMod, pOnedMod, pOnemMod, pOneQuickDamage,
+                                                                      pTwoQuickDamage, pTwoEvade, pOneEvade, iddqd)
+            for msg_item in msg:
+                await ctx.send(msg_item)
+            if bGameTimer:
+                self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
+            if bDeflect is True:
+               bDeflect = False
+            if bEvasion is True:
+               bEvasion = False
+
+            gameStatDump(playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical,\
+           bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod,\
+           pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod,\
+           pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel,\
+           pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect, channel)
 
     @deflect.error
     async def deflect_error(self, ctx,error):
@@ -1649,27 +810,41 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def permit(self, ctx):
         user = str(ctx.message.author.id)
-        msg, bGameTimer, self.playerOne, self.playerTwo, self.pOneInfo, self.pTwoInfo, self.featToken, \
-        self.count, self.token, self.critical, self.bonusHurt, self.totalDamage, self.pOneTotalHP, \
-        self.pTwoTotalHP, self.pOneCurrentHP, self.pTwoCurrentHP, self.pOnepMod, self.pOnecMod, self.pOnedMod,\
-        self.pOnemMod, self.pOneQuickDamage, self.pTwoQuickDamage, self.iddqd = onMSGUtil.message_7_permit(user, self.playerOne, self.playerTwo,
-                                                                                   self.pOneInfo, self.pTwoInfo, self.featToken,
-                                                                                   self.count, self.token, self.critical,
-                                                                                   self.bonusHurt, self.totalDamage, self.pOneTotalHP,
-                                                                                   self.pTwoTotalHP, self.pOneCurrentHP,
-                                                                                   self.pTwoCurrentHP, self.pOnepMod, self.pOnecMod,
-                                                                                   self.pOnedMod, self.pOnemMod,
-                                                                                   self.pOneQuickDamage, self.pTwoQuickDamage, self.iddqd)
-        for msg_item in msg:
-            await ctx.send(msg_item)
-        if bGameTimer:
-            gametimeout = 3600
-            self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
+        arena, devroom = roomID()
+        channelID = [arena, devroom]
 
-        if self.bEvasion is True:
-            self.bEvasion = False
-        if self.bDeflect is True:
-            self.bDeflect = False
+        if ctx.channel.id in channelID:
+            channel = ctx.channel.id
+
+
+            playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical, \
+            bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, \
+            pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod, \
+            pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, \
+            pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect = gameStatLoad(channel)
+
+            msg, bGameTimer, playerOneID, playerTwoID, pOneInfo, pTwoInfo, featToken, count, token, totalDamage, pOneTotalHP, \
+            pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, pOnedMod, pOnemMod, pOneQuickDamage, pTwoQuickDamage, \
+            pTwoEvade, pOneEvade, iddqd = onMSGUtil.message_8_evasion(user, playerOneID, playerTwoID, pOneInfo, pTwoInfo, featToken, \
+                                                                      count, token, critical, bonusHurt, totalDamage, pOneTotalHP,
+                                                                      pTwoTotalHP, pOneCurrentHP,  pTwoCurrentHP,
+                                                                      pOnepMod, pOnecMod, pOnedMod, pOnemMod, pOneQuickDamage,
+                                                                      pTwoQuickDamage, pTwoEvade, pOneEvade, iddqd)
+            for msg_item in msg:
+                await ctx.send(msg_item)
+            if bGameTimer:
+                self.gameTimer = asyncio.create_task(self.gameTimeout(ctx))
+
+            if bEvasion is True:
+                bEvasion = False
+            if self.bDeflect is True:
+                bDeflect = False
+
+            gameStatDump(playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical,\
+           bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod,\
+           pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneFeatInfo, pOneSpentFeat, pTwopMod, pTwocMod,\
+           pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel,\
+           pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect, channel)
 
     @permit.error
     async def permit_error(self, ctx, error):
@@ -1785,14 +960,29 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def pattack(self, ctx, *, points):
         user = str(ctx.message.author.id)
+        arena, devroom = roomID()
+        channelID = [arena, devroom]
 
-        msg, self.game, self.playerOne, self.playerTwo, self.pOneInfo, self.pTwoInfo, self.token, \
-        self.pOnepMod, self.pTwopMod, self.pOneLevel, self.pTwoLevel \
-            = onMSGUtil.message_8_pattack(user, points, self.game, self.playerOne,
-                                self.playerTwo, self.pOneInfo, self.pTwoInfo, self.token, self.pOnepMod, self.pTwopMod,
-                                self.pOneLevel, self.pTwoLevel)
-        for msg_item in msg:
-            await ctx.send(msg_item)
+        if ctx.channel.id in channelID:
+            channel = ctx.channel.id
+            playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical, \
+            bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, \
+            pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneSpentFeat, pTwopMod, pTwocMod, \
+            pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, \
+            pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect = gameStatLoad(channel)
+
+            msg, game, playerOneID, playerTwoID, pOneInfo, pTwoInfo, token, pOnepMod, pTwopMod, pOneLevel, pTwoLevel = \
+            onMSGUtil.message_8_pattack(user, points, game, playerOneID, playerTwoID, pOneInfo, pTwoInfo, token, pOnepMod, pTwopMod,
+                                        pOneLevel, pTwoLevel)
+            for msg_item in msg:
+                await ctx.send(msg_item)
+
+            gameStatDump(channel, playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game,
+                         count, token, critical, bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP,
+                         pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, pOnedMod, pOnemMod, pOneEvade, pOneDeflect,
+                         pOneRiposte, pOneQuickDamage, pOneSpentFeat, pTwopMod, pTwocMod, pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect,
+                         pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, pTwoLevel, xp,
+                         currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect, channel)
 
     @pattack.error
     async def pattack_error(self, ctx, error):
@@ -1809,14 +999,31 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def dfight(self, ctx, *, points):
         user = str(ctx.message.author.id)
-        msg, self.game, self.playerOne, self.playerTwo, self.pOneInfo, self.pTwoInfo, self.token, self.pOnedMod, \
-        self.pTwodMod, self.pOneLevel, self.pTwoLevel \
-            = onMSGUtil.message_8_dfight(user, points, self.game, self.playerOne,
-                               self.playerTwo,
-                               self.pOneInfo, self.pTwoInfo, self.token, self.pOnedMod, self.pTwodMod,
-                               self.pOneLevel, self.pTwoLevel)
-        for msg_item in msg:
-            await ctx.send(msg_item)
+        arena, devroom = roomID()
+        channelID = [arena, devroom]
+
+        if ctx.channel.id in channelID:
+            channel = ctx.channel.id
+            playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical, \
+            bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, \
+            pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneSpentFeat, pTwopMod, pTwocMod, \
+            pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, \
+            pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect = gameStatLoad(channel)
+
+            msg, game, playerOneID, playerTwoID, pOneInfo, pTwoInfo, token, pOnedMod, pTwodMod, pOneLevel, pTwoLevel \
+                = onMSGUtil.message_8_dfight(user, points, game, playerOneID, playerTwoID, pOneInfo, pTwoInfo, token, pOnedMod,
+                                             pTwodMod, pOneLevel, pTwoLevel)
+            for msg_item in msg:
+                await ctx.send(msg_item)
+
+            gameStatDump(channel, playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game,
+                         count, token, critical, bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP,
+                         pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, pOnedMod, pOnemMod, pOneEvade, pOneDeflect,
+                         pOneRiposte, pOneQuickDamage, pOneSpentFeat, pTwopMod, pTwocMod, pTwodMod, pTwomMod, pTwoEvade,
+                         pTwoDeflect,
+                         pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, pTwoLevel, xp,
+                         currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect, channel)
+
         # Allows for the use of the 'defensive fighting' passive feat. Makes sure it applies correct bonuses for correct
         # levels.
 
@@ -1890,15 +1097,30 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def masochist(self, ctx, *, points):
         user = str(ctx.message.author.id)
-        # make sure that this command cannot be ran if a fight is taking place.
-        msg, self.game, self.playerOne, self.playerTwo, self.pOneInfo, self.pTwoInfo, self.token, self.pOnemMod, \
-        self.pTwomMod, self.pOneLevel, self.pTwoLevel \
-            = onMSGUtil.message_10_masochist(character, channel, unspoiledArena, message, self.game, self.playerOne,
-                                   self.playerTwo,
-                                   self.pOneInfo, self.pTwoInfo, self.token, self.pOnemMod, self.pTwomMod,
-                                   self.pOneLevel, self.pTwoLevel)
-        for msg_item in msg:
-            await ctx.send(msg_item)
+        arena, devroom = roomID()
+        channelID = [arena, devroom]
+
+        if ctx.channel.id in channelID:
+            channel = ctx.channel.id
+            playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token, critical, \
+            bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, \
+            pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneQuickDamage, pOneSpentFeat, pTwopMod, pTwocMod, \
+            pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, \
+            pTwoLevel, xp, currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect = gameStatLoad(channel)
+
+            # make sure that this command cannot be ran if a fight is taking place.
+            msg, game, playerOneID, playerTwoID, pOneInfo, pTwoInfo, token, pOnemMod, pTwomMod, pOneLevel, pTwoLevel \
+                = onMSGUtil.message_10_masochist(user, points, game, playerOneID, playerTwoID, pOneInfo, pTwoInfo,
+                                                 token, pOnemMod, pTwomMod, pOneLevel, pTwoLevel)
+            for msg_item in msg:
+                await ctx.send(msg_item)
+
+            gameStatDump(channel, playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game,
+                         count, token, critical, bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP,
+                         pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod, pOnedMod, pOnemMod, pOneEvade, pOneDeflect,
+                         pOneRiposte, pOneQuickDamage, pOneSpentFeat, pTwopMod, pTwocMod, pTwodMod, pTwomMod, pTwoEvade,
+                         pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, pTwoLevel, xp,
+                         currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect, channel)
 
     @masochist.error
     async def masochist_error(self, ctx, error):
@@ -2001,6 +1223,7 @@ class Combat(commands.Cog):
     async def traithelp(self, ctx, answer):
         traitDictionary = traitDict()[0]
         traitList = traitDict()[1]
+        answer = answer.lower()
 
         if answer not in traitList:
             await ctx.send("Make sure you have spelled the feat correctly")
