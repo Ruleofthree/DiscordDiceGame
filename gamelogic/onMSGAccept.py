@@ -38,12 +38,15 @@ def message_accept(charFolder, accepted, game, opponentID, pOneInfo):
                        "highest dexterity modifier goes first. Should that tie as well, then fuck "
                        "it, coin flip. " + pOneInfo['name'] + " wins on a One.")
 
+            playerOneMod = int((pOneInfo['dexterity'] / 2) + pOneInfo['initiative'] + pOneInfo['potioninitiative'] +
+                               pOneInfo['armorinitiative'])
+            playerTwoMod = int((pTwoInfo['dexterity'] / 2) + pTwoInfo['initiative'] + pTwoInfo['potioninitiative'] +
+                               pTwoInfo['armorinitiative'])
+
             playerOneInit = random.randint(1, 20)
-            playerOneMod = int(pOneInfo['dexterity'] / 2)
             totalOne = playerOneInit + playerOneMod
 
             playerTwoInit = random.randint(1, 20)
-            playerTwoMod = int(pTwoInfo['dexterity'] / 2)
             totalTwo = playerTwoInit + playerTwoMod
 
             msg.append("\n" + pOneInfo['name'] + " rolled: " + str(playerOneInit) + " + " +

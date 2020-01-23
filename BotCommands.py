@@ -29,9 +29,4 @@ for filename in os.listdir("./cogs"):
     if filename.endswith('.py'):
         client.load_extension("cogs." + filename[:-3])
 
-
-@commands.Cog.listener()
-async def on_ready(self):
-    print("Bot is Online")
-
 client.run(token)
