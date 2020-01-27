@@ -1,4 +1,4 @@
-6,126 lines of code. (Including Comments)
+6,162 lines of code. (Including Comments)
 
 v 1.0 (7/20/19)
 - Went live
@@ -67,7 +67,7 @@ v 1.1.6 (10/25/19)
 - Adjusted HP and attack dice to allow for a bigger range of opponents to challenge, regardless of level
 - Adjusted experience point scale
 
-v 1.1.7 (11/2/19)
+v 1.2 (11/2/19)
 - Added a potion shop with following commands: !potionshop (shows potions in shop, and price), !potionbuy (buys potion requested, if enough renown is available.) (See shop dropdown for more information on potions)
 - Added in function that rotates potion stock on a weekly bases
 - Added in !givepotion, allowing a player to trade a potion to another player
@@ -77,7 +77,7 @@ v 1.1.7 (11/2/19)
 - Adjusted the 'Greater Hurt Me' feat to scale off of +60%/+80% of strength
 - Adjusted the 'Hurt Me More' feat to scale off of +60%/+80%/+100% of strength
 
-v 1.1.8 (11/25/19)
+v 1.2.1 (11/25/19)
 - Added Added an armor shop with following commands: !armorshop (shows armor in shop, and price), !armorbuy (buys armor requested, if enough renown is available.) (See shop dropdown for more information on armor)
 - Added in function that rotates armor stock on a weekly bases
 - Added in a inventory strictly to hold three pieces of armor. Players can only wear one piece at a time.
@@ -86,20 +86,20 @@ v 1.1.8 (11/25/19)
 - **Extended feature that deletes profiles that have been idle for 28 days to 112 days. PMing !viewchar to the bot refreshes this decay.**
 - Added in 'Nebulous' as a trait 
 
-v 1.1.9 (12/2/19)
+v 1.2.2 (12/2/19)
 - removed Iron Skin feat
 - Improved thick skin bonuses to 2/4/6
 - reduced damage from the Nerve Strike tree to 1d4/2d4/3d4/3d6
 - changed experience formula for combat
 - improved number of feats per level to increase every odd level. Max of 11 feats at 20.
 
-v 1.2 (12/4/19)
+v 1.2.3 (12/4/19)
 - Fixed a bug that allowed you to have more than one trait when using !respec
 - Fixed a bug that gave trait bonuses as if your character was level 1, even if character was level 5+
-- Fixed a bug that didn't line up armor properly, crashing the bot when attempting to buy armor with wrong price list
+- Fixed a bug that didn't line up armor properly in the shop list, crashing the bot when attempting to buy armor
 - Fixed a bug that crashed the bot when attempting to buy another set of armor after renaming the first one
 
-v 1.2.1 (12/6/19)
+v 1.2.4 (12/6/19)
 - Removed the Thick Skin feat tree
 - Reduced Thickskinned trait bonuses to 2/3/4/5/6
 - Added feat tree 'Centered Self'
