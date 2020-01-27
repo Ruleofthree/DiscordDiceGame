@@ -6,8 +6,8 @@ from pathlib import Path
 from threading import Timer
 
 # allows a player to reallocate points to their stats, pick a new trait, and select new feats
-def pri_7_respec(charData, charFolder, charFile, player):
-    file = open(charFolder + player.lower() + ".txt", "r", encoding="utf-8")
+def pri_7_respec(charFiles, player):
+    file = open(charFiles + player.lower() + ".txt", "r", encoding="utf-8")
     charData = json.load(file)
     file.close()
     reset = charData['reset']
@@ -15,7 +15,7 @@ def pri_7_respec(charData, charFolder, charFile, player):
 
     if reset != 0:
         reset -= 1
-        with open(charFolder + player.lower() + ".txt", "r+", encoding="utf-8") as file:
+        with open(charFiles + player.lower() + ".txt", "r+", encoding="utf-8") as file:
             charData = json.load(file)
             charData['strength'] = 0
             charData['dexterity'] = 0
@@ -41,7 +41,7 @@ def pri_7_respec(charData, charFolder, charFile, player):
             file.write(json.dumps(charData, ensure_ascii=False, indent=2))
             file.truncate()
             file.close()
-        msg = "your characters abilities, trait, and feats have been reset, please ue the !stats command to select" \
+        msg = "your characters abilities, trait, and feats have been reset, please use the !stats command to select" \
               " new stats, the !traitpick command to pick a new trait, and the !featpick command to select new feats." \
               " (you have " + str(reset) + " points remaining.)"
     else:
@@ -49,11 +49,11 @@ def pri_7_respec(charData, charFolder, charFile, player):
     return msg
 
 # sets up players beginning stats once creating a character
-def pri_6_stats(charFolder, player, strength, dexterity, constitution):
-    file = open(charFolder + player + ".txt", "r", encoding="utf-8")
+def pri_6_stats(charFiles, gameFiles, player, strength, dexterity, constitution):
+    file = open(charFiles + player + ".txt", "r", encoding="utf-8")
     charData = json.load(file)
     file.close()
-    charFile = Path(charFolder + player + ".txt")
+    charFile = Path(charFiles + player + ".txt")
     strength = int(strength)
     dexterity = int(dexterity)
     constitution = int(constitution)
@@ -98,7 +98,7 @@ def pri_6_stats(charFolder, player, strength, dexterity, constitution):
                        "description and use !traitpick <trait name> to select that trait.")
 
             # load the new data in the character's .json file.
-            with open(charFolder + player.lower() + ".txt", "r+", encoding="utf-8") as file:
+            with open(charFiles + player.lower() + ".txt", "r+", encoding="utf-8") as file:
                 charData = json.load(file)
                 charData["strength"] = int(strength)
                 charData["dexterity"] = int(dexterity)
@@ -114,7 +114,7 @@ def pri_6_stats(charFolder, player, strength, dexterity, constitution):
     return msg
 
 # allows a player to allocate a point to a stat at levels 5, 10, 15 and 20
-def pri_4_add(player, ability, path, charFolder):
+def pri_4_add(player, ability, charFiles):
     msg = []
     ability.lower()
     answer = ["str", "strength", "dex", "dexterity", "con", "constitution"]
@@ -123,10 +123,8 @@ def pri_4_add(player, ability, path, charFolder):
                    "Type '!add str' or '!add strength' for strength, and so on.")
     else:
         player = player.lower()
-        path = os.getcwd()
-        charFolder = os.path.join(path + "/characters/")
 
-        with open(charFolder + player + ".txt", "r+", encoding="utf-8") as file:
+        with open(charFiles + player + ".txt", "r+", encoding="utf-8") as file:
             charData = json.load(file)
             strength = charData['strength']
             dexterity = charData['dexterity']
@@ -154,26 +152,24 @@ def pri_4_add(player, ability, path, charFolder):
                     file.seek(0)
                     file.write(json.dumps(charData, ensure_ascii=False, indent=2))
                     file.truncate()
+                    msg.append("You have added an ability point to Constitution")
                 file.close()
             else:
                 msg.append("You do not have any more ability points to spend.")
     return msg
 
 # allows a player to see their character sheet
-def pri_viewchar(player):
+def pri_viewchar(player, gameFiles, charFiles):
     msg = []
-    path = os.getcwd()
-    charFolder = os.path.join(path + "/characters/")
-    charFile = Path(charFolder + player.lower() + ".txt")
-
+    charFile = Path(charFiles + player + ".txt")
     if not charFile.is_file():
         msg.append("You don't even have a character created yet. Type !name <name> in the room. "
-                   "Where <name> is your character's actual name. (Example: !name Joe")
+                   "Where <name> is your character's actual name. (Example: !name Joe)")
     # If it turns out the are not an idiot, and are using the command correctly. Display the character shit
     # as nicely as you can in F-list...which isn't nice at all.
     else:
         # try:
-        charSheet = open(charFolder + player.lower() + ".txt", "r+", encoding="utf-8")
+        charSheet = open(charFiles + player.lower() + ".txt", "r+", encoding="utf-8")
         charData = json.load(charSheet)
         charSheet.close()
         keyDict = []
@@ -280,7 +276,7 @@ def pri_viewchar(player):
                 centeredfeat = int(constitution / 2 * 0.2)
             elif feat == "improved centered self":
                 centeredfeat = int(constitution / 2 * 0.4)
-            else:
+            elif feat == "greater centered self":
                 centeredfeat = int(constitution / 2 * 0.6)
         # Calculate total bonus to hit
         thit = hit + feathit + armorhit + traitHit + centeredfeat +  int(strength / 2)
@@ -335,7 +331,7 @@ def pri_viewchar(player):
                    "Armor Inventory:         " + armorOne + ": (" + armorInvOne + "), " +
                    armorTwo + ": (" + armorInvTwo + "), " + armorThree + ": (" + armorInvThree + ")\n"
                    "Armor Equipped:          " + equip + "```")
-        with open(charFolder + player.lower() + ".txt", "r+", encoding="utf-8") as file:
+        with open(charFiles + player.lower() + ".txt", "r+", encoding="utf-8") as file:
             charData = json.load(file)
             charData["thp"] = thp
             charData["tac"] = tac
@@ -349,15 +345,11 @@ def pri_viewchar(player):
     return msg
 
 # gives the player a list of people at the level given
-def pri_9_wholevel(level):
-    path = os.getcwd()
-    charFolder = os.path.join(path + "/characters/")
-    files = os.listdir(charFolder)
-
+def pri_9_wholevel(level, gameFiles, charFiles):
     profile = []
     response = []
     msg = []
-    with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
+    with open(gameFiles + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
         playerDatabase = json.loads(file2.read())
         file2.close()
 
@@ -366,10 +358,10 @@ def pri_9_wholevel(level):
         profile.append(name)
     levelList = {}
     for player in profile:
-        with open(charFolder + player + ".txt", "r+", encoding="utf-8") as file:
+        with open(charFiles + player + ".txt", "r+", encoding="utf-8") as file:
             charData = json.load(file)
             file.close()
-        name = player
+        name = charData['name']
         level = charData['level']
         levelList[name] = level
     msg.append("Level " + str(level) + " characters:")
@@ -381,8 +373,8 @@ def pri_9_wholevel(level):
     return msg
 
 # allows the player to select a trait
-def pri_6_trait(charFolder, player, traitList, traitDictionary, trait):
-    file = open(charFolder + player + ".txt", 'r', encoding="utf-8")
+def pri_6_trait(gameFiles, charFiles, player, traitList, traitDictionary, trait):
+    file = open(charFiles + player + ".txt", 'r', encoding="utf-8")
     charData = json.load(file)
     file.close()
     regeneration = charData['regeneration']
@@ -404,223 +396,221 @@ def pri_6_trait(charFolder, player, traitList, traitDictionary, trait):
     #     pass
     if charData['trait'] != "":
         msg = "You've already selected a trait. If you wish to change it, you must !respec if you have the points."
-    elif strength >= 0 and dexterity >= 0 and constitution >= 0:
-        with open(charFolder + player.lower() + ".txt", "r+", encoding="utf-8") as file:
+    elif strength == 0 and dexterity == 0 and constitution == 0:
+        msg = "You need to set up your stats first, before selecting a trait. please use the !stats command."
+    else:
+        with open(charFiles + player.lower() + ".txt", "r+", encoding="utf-8") as file:
             charData = json.load(file)
             if trait in traitList:
                 level = charData['level']
                 charData['trait'] = trait
                 if trait == 'regeneration' and level == 1:
-                    regeneration += 2
+                    regeneration = 2
                     charData['regeneration'] = regeneration
                     msg = "The trait 'Regeneration' has been added to your character sheet."
                 elif trait == 'regeneration' and level < 5:
-                    regeneration += 4
+                    regeneration = 4
                     charData['regeneration'] = regeneration
                     msg = "The trait 'Regeneration' has been added to your character sheet."
                 elif trait == 'regeneration' and level < 10:
-                    regeneration += 6
+                    regeneration = 6
                     charData['regeneration'] = regeneration
                     msg = "The trait 'Regeneration' has been added to your character sheet."
                 elif trait == 'regeneration' and level < 15:
-                    regeneration += 8
+                    regeneration = 8
                     charData['regeneration'] = regeneration
                     msg = "The trait 'Regeneration' has been added to your character sheet."
                 elif trait == 'regeneration' and level >= 20:
-                    regeneration += 10
+                    regeneration = 10
                     charData['regeneration'] = regeneration
                     msg = "The trait 'Regeneration' has been added to your character sheet."
                 if trait == 'brawler' and level == 1:
-                    brawler += 1
+                    brawler = 1
                     charData['traithit'] = brawler
                     msg = "The trait 'Brawler' has been added to your character sheet."
                 elif trait == 'brawler' and level < 5:
-                    brawler += 2
+                    brawler = 2
                     charData['traithit'] = brawler
                     msg = "The trait 'Brawler' has been added to your character sheet."
                 elif trait == 'bralwer' and level < 10:
-                    brawler += 3
+                    brawler = 3
                     charData['traithit'] = brawler
                     msg = "The trait 'Brawler' has been added to your character sheet."
                 elif trait == 'brawler' and level < 15:
-                    brawler += 4
+                    brawler = 4
                     charData['traithit'] = brawler
                     msg = "The trait 'Brawler' has been added to your character sheet."
                 elif trait == 'brawler' and level >= 20:
-                    brawler += 5
+                    brawler = 5
                     charData['traithit'] = brawler
                     msg = "The trait 'Brawler' has been added to your character sheet."
                 if trait == 'thug' and level == 1:
-                    thug += 1
+                    thug = 1
                     charData['traitdamage'] = thug
                     msg = "The trait 'Thug' has been added to your character sheet."
                 elif trait == 'thug' and level < 5:
-                    thug += 2
+                    thug = 2
                     charData['traitdamage'] = thug
                     msg = "The trait 'Thug' has been added to your character sheet."
                 elif trait == 'thug' and level < 10:
-                    thug += 3
+                    thug = 3
                     charData['traitdamage'] = thug
                     msg = "The trait 'Thug' has been added to your character sheet."
                 elif trait == 'thug' and level < 15:
-                    thug += 4
+                    thug = 4
                     charData['traitdamage'] = thug
                     msg = "The trait 'Thug' has been added to your character sheet."
                 elif trait == 'thug' and level >= 20:
-                    thug += 5
+                    thug = 5
                     charData['traitdamage'] = thug
                     msg = "The trait 'Thug' has been added to your character sheet."
                 if trait == 'hearty' and level == 1:
-                    hearty += 5
+                    hearty = 5
                     charData['traithp'] = hearty
                     msg = "The trait 'Hearty' has been added to your character sheet."
                 elif trait == 'hearty' and level < 5:
-                    hearty += 10
+                    hearty = 10
                     charData['traithp'] = hearty
                     msg = "The trait 'Hearty' has been added to your character sheet."
                 elif trait == 'hearty' and level < 10:
-                    hearty += 15
+                    hearty = 15
                     charData['traithp'] = hearty
                     msg = "The trait 'Hearty' has been added to your character sheet."
                 elif trait == 'hearty' and level < 15:
-                    hearty += 20
+                    hearty = 20
                     charData['traithp'] = hearty
                     msg = "The trait 'Hearty' has been added to your character sheet."
                 elif trait == 'hearty' and level >= 20:
-                    hearty += 25
+                    hearty = 25
                     charData['traithp'] = hearty
                     msg = "The trait 'Hearty' has been added to your character sheet."
                 if trait == 'nimble' and level == 1:
-                    nimble += 1
+                    nimble = 1
                     charData['traitac'] = nimble
                     msg = "The trait 'Nimble' has been added to your character sheet."
                 elif trait == 'nimble' and level < 5:
-                    nimble += 2
+                    nimble = 2
                     charData['traitac'] = nimble
                     msg = "The trait 'Nimble' has been added to your character sheet."
                 elif trait == 'nimble' and level < 10:
-                    nimble += 3
+                    nimble = 3
                     charData['traitac'] = nimble
                     msg = "The trait 'Nimble' has been added to your character sheet."
                 elif trait == 'nimble' and level < 15:
-                    nimble += 4
+                    nimble = 4
                     charData['traitac'] = nimble
                     msg = "The trait 'Nimble' has been added to your character sheet."
                 elif trait == 'nimble' and level >= 20:
-                    nimble += 5
+                    nimble = 5
                     charData['traitac'] = nimble
                     msg = "The trait 'Nimble' has been added to your character sheet."
                 if trait == 'thickskinned' and level == 1:
-                    thickskinned += 2
+                    thickskinned = 2
                     charData['traitdr'] = thickskinned
                     msg = "The trait 'Thickskinned' has been added to your character sheet."
                 elif trait == 'thickskinned' and level < 5:
-                    thickskinned += 3
+                    thickskinned = 3
                     charData['traitdr'] = thickskinned
                     msg = "The trait 'Thickskinned' has been added to your character sheet."
                 elif trait == 'thickskinned' and level < 10:
-                    thickskinned += 4
+                    thickskinned = 4
                     charData['traitdr'] = thickskinned
                     msg = "The trait 'Thickskinned' has been added to your character sheet."
                 elif trait == 'thickskinned' and level < 15:
-                    thickskinned += 5
+                    thickskinned = 5
                     charData['traitdr'] = thickskinned
                     msg = "The trait 'Thickskinned' has been added to your character sheet."
                 elif trait == 'thickskinned' and level >= 20:
-                    thickskinned += 6
+                    thickskinned = 6
                     charData['traitdr'] = thickskinned
                     msg = "The trait 'Thickskinned' has been added to your character sheet."
                 if trait == 'opportunist' and level == 1:
-                    opportunist += 2
+                    opportunist = 2
                     charData['initiative'] = opportunist
                     msg = "The trait 'Opportunist' has been added to your character sheet."
                 elif trait == 'opportunist' and level < 5:
-                    opportunist += 3
+                    opportunist = 3
                     charData['initiative'] = opportunist
                     msg = "The trait 'Opportunist' has been added to your character sheet."
                 elif trait == 'opportunist' and level < 10:
-                    opportunist += 4
+                    opportunist = 4
                     charData['initiative'] = opportunist
                     msg = "The trait 'Opportunist' has been added to your character sheet."
                 elif trait == 'opportunist' and level < 15:
-                    opportunist += 5
+                    opportunist = 5
                     charData['initiative'] = opportunist
                     msg = "The trait 'Opportunist' has been added to your character sheet."
                 elif trait == 'opportunist' and level >= 20:
-                    opportunist += 6
+                    opportunist = 6
                     charData['initiative'] = opportunist
                     msg = "The trait 'Opportunist' has been added to your character sheet."
                 if trait == 'nebulous' and level == 1:
-                    nebulous += 1
+                    nebulous = 1
                     charData['blur'] = nebulous
                     msg = "The trait 'Nebulous' has been added to your character sheet."
                 elif trait == 'nebulous' and level < 5:
-                    nebulous += 2
+                    nebulous = 2
                     charData['blur'] = nebulous
                     msg = "The trait 'Nebulous' has been added to your character sheet."
                 elif trait == 'nebulous' and level < 10:
-                    nebulous += 3
+                    nebulous = 3
                     charData['blur'] = nebulous
                     msg = "The trait 'Nebulous' has been added to your character sheet."
                 elif trait == 'nebulous' and level < 15:
-                    nebulous += 4
+                    nebulous = 4
                     charData['blur'] = nebulous
                     msg = "The trait 'Nebulous' has been added to your character sheet."
                 elif trait == 'nebulous' and level >= 20:
-                    nebulous += 5
+                    nebulous = 5
                     charData['blur'] = nebulous
                     msg = "The trait 'Nebulous' has been added to your character sheet."
                 file.seek(0)
                 file.write(json.dumps(charData, ensure_ascii=False, indent=2))
                 file.truncate()
                 file.close()
-    else:
-        msg = "You need to set up your stats first, before selecting a trait. please use the !stats command."
+
+
     return msg
 
 # allows the player to select a feat
-def pri_10_feat_pick(answer, player, featList, featDictionary, charFolder):
+def pri_10_feat_pick(answer, player, featList, featDictionary, gameFiles, charFiles):
     msg = []
-    charFile = Path(charFolder + player.lower() + ".txt")
-    try:
-        charSheet = open(charFolder + player.lower() + ".txt", "r", encoding="utf-8")
-        charData = json.load(charSheet)
-        charSheet.close()
-        name = charData['name']
-        level = charData['level']
-        hp = charData['hp']
-        tFeats = charData['total feats']
-        baseDamage = charData['base damage']
-        hit = charData['hit']
-        damage = charData['damage']
-        ac = charData['ac']
-        xp = charData['currentxp']
-        nextLevel = charData['nextlevel']
-        strength = charData['strength']
-        dexterity = charData['dexterity']
-        constitution = charData['constitution']
-        remainingFeats = charData['remaining feats']
-        hasTaken = charData['feats taken']
-        hiddenTaken = charData['hfeats taken']
-        ap = charData['ap']
-        reset = charData['reset']
-        wins = charData['wins']
-        losses = charData['losses']
-        abhp = charData["abhp"]
-        abhit = charData["abhit"]
-        abdamage = charData["abdamage"]
-        abac = charData["abac"]
-        feathp = charData["feathp"]
-        feathit = charData["feathit"]
-        featdamage = charData["featdamage"]
-        featac = charData["featac"]
-        dexfighter = charData["dexfigher"]
-        thp = charData["thp"]
-        tac = charData["tac"]
-        thit = charData["thit"]
-        tdamage = charData["tdamage"]
-    except:
-        pass
+    charSheet = open(charFiles + player.lower() + ".txt", "r", encoding="utf-8")
+    charData = json.load(charSheet)
+    charSheet.close()
+    name = charData['name']
+    level = charData['level']
+    hp = charData['hp']
+    tFeats = charData['total feats']
+    baseDamage = charData['base damage']
+    hit = charData['hit']
+    damage = charData['damage']
+    ac = charData['ac']
+    xp = charData['currentxp']
+    nextLevel = charData['nextlevel']
+    strength = charData['strength']
+    dexterity = charData['dexterity']
+    constitution = charData['constitution']
+    remainingFeats = charData['remaining feats']
+    hasTaken = charData['feats taken']
+    hiddenTaken = charData['hfeats taken']
+    ap = charData['ap']
+    reset = charData['reset']
+    wins = charData['wins']
+    losses = charData['losses']
+    abhp = charData["abhp"]
+    abhit = charData["abhit"]
+    abdamage = charData["abdamage"]
+    abac = charData["abac"]
+    feathp = charData["feathp"]
+    feathit = charData["feathit"]
+    featdamage = charData["featdamage"]
+    featac = charData["featac"]
+    dexfighter = charData["dexfighter"]
+    thp = charData["thp"]
+    tac = charData["tac"]
+    thit = charData["thit"]
+    tdamage = charData["tdamage"]
 
     # Check to see if they even have an open feat slot to fill. If not, they are an idiot.
     if charData["remaining feats"] == 0:
@@ -669,7 +659,7 @@ def pri_10_feat_pick(answer, player, featList, featDictionary, charFolder):
             # and greater crushing blow) do NOT stack. So this ensures previous feat is 'popped out' of list
             # of feats taken, and replaced with upgraded feat.
 
-            with open(charFolder + player.lower() + ".txt", "r+", encoding="utf-8") as file:
+            with open(charFiles + player.lower() + ".txt", "r+", encoding="utf-8") as file:
                 charData = json.load(file)
                 switchHit = 0
                 acMod = 0
@@ -871,8 +861,8 @@ def pri_10_feat_pick(answer, player, featList, featDictionary, charFolder):
     return msg
 
 # allows a moderator to stock a new set of 20 potions in the market
-def pri_10_stockpotion(commonList, uncommonList, rareList, vrareList, relicList, itemFolder):
-    potionFile = open(itemFolder + "potions.txt", "r+", encoding="utf-8")
+def pri_10_stockpotion(commonList, uncommonList, rareList, vrareList, relicList, gameFiles):
+    potionFile = open(gameFiles + "potions.txt", "r+", encoding="utf-8")
     potionDictionary = json.load(potionFile)
     potionDictionary[0]['shoplist'] = []
     for num in range(1, 21):
@@ -913,8 +903,8 @@ def pri_10_stockpotion(commonList, uncommonList, rareList, vrareList, relicList,
 
 # allows a moderator to stock a 20 new sets of armor in the market
 def pri_11_stockarmor(catOneCommonList, catOneUncommonList, catOneRareList, catTwoCommonList, catTwoUncommonList,
-                      catTwoRareList, catThreeCommonList, catThreeUncommonList, catThreeRareList, itemFolder):
-    armorFile = open(itemFolder + "armor.txt", "r", encoding="utf-8")
+                      catTwoRareList, catThreeCommonList, catThreeUncommonList, catThreeRareList, gameFiles):
+    armorFile = open(gameFiles + "armor.txt", "r", encoding="utf-8")
     armorDictionary = json.load(armorFile)
     armorFile.close()
     num = 1
@@ -957,7 +947,7 @@ def pri_11_stockarmor(catOneCommonList, catOneUncommonList, catOneRareList, catT
                 randomAttribute = random.choice(catThreeRareList)
                 item.append(randomAttribute)
         armorDictionary[0]["armorlist"]["armor" + str(num)] = item
-    armorFile = open(itemFolder + "armor.txt", "r+", encoding="utf-8")
+    armorFile = open(gameFiles + "armor.txt", "r+", encoding="utf-8")
     armorFile.seek(0)
     armorFile.write(json.dumps(armorDictionary, ensure_ascii=False, indent=2))
     armorFile.truncate()
@@ -970,8 +960,8 @@ def pri_11_stockarmor(catOneCommonList, catOneUncommonList, catOneRareList, catT
     return msg
 
 # allows the player to view pieces of armor for sale
-def pri_10_armorshop(itemFolder):
-    armorFile = open(itemFolder + "armor.txt", "r", encoding="utf-8")
+def pri_10_armorshop(gameFiles):
+    armorFile = open(gameFiles + "armor.txt", "r", encoding="utf-8")
     armorDictionary = json.load(armorFile)
     armorFile.close()
     armorPrice = []

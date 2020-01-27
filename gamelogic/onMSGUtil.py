@@ -5,45 +5,42 @@ import time
 from pathlib import Path
 from threading import Timer
 
-# a script to handle all messages sent into a channel that is listening for said commands.
-
-def featDict():
-    # Open up the json object containing the list of feats.
-    path = os.getcwd()
-    charFolder = os.path.join(path + "/cogs/")
-    featFile = open(charFolder + "feats.txt", "r", encoding="utf-8")
-    featDictionary = json.load(featFile)
-    featFile.close()
-
-    # place all keys within a list for comparison later
-    featList = []
-    for keys in featDictionary[0]:
-        featList.append(keys)
-    return featDictionary, featList
-
-
-def traitDict():
-    # Open up a json object containing the list of traits.
-    path = os.getcwd()
-    traitFolder = os.path.join(path + "/cogs/")
-    traitFile = open(traitFolder + "trait.txt", "r", encoding="utf-8")
-    traitDictonary = json.load(traitFile)
-    traitfile.close()
-
-    # place all keys within a list for comparison later
-    traitList = []
-    for keys in traitDictonary[0]:
-        traitList.append(keys)
-    return traitDictonary, traitList
+# # a script to handle all messages sent into a channel that is listening for said commands.
+#
+# def featDict():
+#     # Open up the json object containing the list of feats.
+#     path = os.getcwd()
+#     gameFiles = os.path.join(path + "/cogs/")
+#     featFile = open(gameFiles + "feats.txt", "r", encoding="utf-8")
+#     featDictionary = json.load(featFile)
+#     featFile.close()
+#
+#     # place all keys within a list for comparison later
+#     featList = []
+#     for keys in featDictionary[0]:
+#         featList.append(keys)
+#     return featDictionary, featList
+#
+#
+# def traitDict():
+#     # Open up a json object containing the list of traits.
+#     path = os.getcwd()
+#     traitFolder = os.path.join(path + "/cogs/")
+#     traitFile = open(traitFolder + "trait.txt", "r", encoding="utf-8")
+#     traitDictonary = json.load(traitFile)
+#     traitfile.close()
+#
+#     # place all keys within a list for comparison later
+#     traitList = []
+#     for keys in traitDictonary[0]:
+#         traitList.append(keys)
+#     return traitDictonary, traitList
 
 # display top 5 in standings according to the following catagories: Wins, losses, percentage.
-def message_12_leaderboard(option):
-    path = os.getcwd()
-    charFolder = os.path.join(path + "/characters/")
-
+def message_12_leaderboard(option, gameFiles, charFiles):
     msg = []
     profile = []
-    with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
+    with open(gameFiles + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
         playerDatabase = json.loads(file2.read())
         file2.close()
     for item in playerDatabase.items():
@@ -53,7 +50,7 @@ def message_12_leaderboard(option):
 
     num = 1
     for player in profile:
-        with open(charFolder + player + ".txt", "r+", encoding="utf-8") as file:
+        with open(charFiles + player + ".txt", "r+", encoding="utf-8") as file:
             charData = json.load(file)
             file.close()
         name = charData['name']
@@ -91,19 +88,16 @@ def message_12_leaderboard(option):
         stringDict.append("\n" + sortedDict[num][1] + " (Level: " +
                           str(sortedDict[num][5]) + "): " + str(sortedDict[num][2]) +
                           " wins/" + str(sortedDict[num][3]) + " losses. ("
-                          + str(sortedDict[num][4]) + "%)")
+                          + str(int(sortedDict[num][4])) + "%)")
     seperator = " "
     completeMessage = seperator.join(stringDict)
     msg.append(completeMessage)
     return msg
 
 # display character and their current level.
-def message_4_who(player):
-    path = os.getcwd()
-    charFolder = os.path.join(path + "/characters/")
-
+def message_4_who(player, gameFiles, charFiles):
     msg = ""
-    with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
+    with open(gameFiles + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
         playerDatabase = json.loads(file2.read())
         file2.close()
 
@@ -115,12 +109,12 @@ def message_4_who(player):
         else:
             msg = player + " isn't a character name."
 
-    charFile = Path(charFolder + playerID + ".txt")
+    charFile = Path(gameFiles + playerID + ".txt")
 
     if not charFile.is_file():
         msg = "Either they don't have a character, or you fucked up typing. (type: !player <character name>)"
     try:
-        with open(charFolder + playerID + ".txt", "r+", encoding="utf-8") as file:
+        with open(charFiles + playerID + ".txt", "r+", encoding="utf-8") as file:
             charData = json.load(file)
             file.close()
         msg = player + ", is level: " + str(charData['level'])
@@ -131,11 +125,9 @@ def message_4_who(player):
     return msg
 
 # display character and their current win/loss ratio
-def message_7_player(player):
+def message_7_player(player, gameFiles, charFiles):
     msg = ""
-    path = os.getcwd()
-    charFolder = os.path.join(path + "/characters/")
-    with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file:
+    with open(gameFiles + "playerDatabase.txt", 'r', encoding="utf-8") as file:
         playerDatabase = json.loads(file.read())
         file.close()
 
@@ -147,12 +139,12 @@ def message_7_player(player):
         else:
             msg = player + " isn't a character name."
 
-    charFile = Path(charFolder + playerID + ".txt")
+    charFile = Path(charFiles + playerID + ".txt")
 
     if not charFile.is_file():
         msg = "Either they don't have a character, or you mistyped. (type: !player <character name>)"
     else:
-        charSheet = open(charFolder + playerID + ".txt", "r", encoding="utf-8")
+        charSheet = open(charFiles + playerID + ".txt", "r", encoding="utf-8")
         score = json.load(charSheet)
         charSheet.close()
         name = score['name']
@@ -168,7 +160,7 @@ def message_7_player(player):
     return msg
 
 # go through the process of creating a character
-def message_5_name(charFile, charFolder, name, player):
+def message_5_name(charFile, charFiles, gameFiles, name, player):
     msg = []
     if charFile.is_file():
         msg.append("You've already created a character.")
@@ -179,7 +171,7 @@ def message_5_name(charFile, charFolder, name, player):
         msg.append("Your character name is: " + name)
         msg.append("Your character sheet has been created.")
 
-        levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
+        levelFile = open(gameFiles + "levelchart.txt", "r", encoding="utf-8")
         levelDict = json.load(levelFile)
         numberOfDice = levelDict["1"][1]
         numberOfSides = levelDict["1"][2]
@@ -263,15 +255,15 @@ def message_5_name(charFile, charFolder, name, player):
         characterFile['traitac'] = 0
         characterFile['traitdr'] = 0
         characterFile['traithp'] = 0
-        file = open(charFolder + player + ".txt", "w", encoding="utf-8")
+        file = open(charFiles + player + ".txt", "w", encoding="utf-8")
         json.dump(characterFile, file, ensure_ascii=False, indent=2)
         file.close()
 
-        with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
+        with open(gameFiles + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
             playerDatabase = json.loads(file2.read())
             file2.close()
         playerDatabase[name] = player
-        with open(charFolder + "playerDatabase.txt", 'w') as file2:
+        with open(gameFiles + "playerDatabase.txt", 'w') as file2:
             file2.write(json.dumps(playerDatabase, sort_keys=True, indent=2))
             file2.close()
 
@@ -280,8 +272,8 @@ def message_5_name(charFile, charFolder, name, player):
     return msg
 
 # resets a game if it has been idle for more than 60 minutes
-def soft_reset(gameFolder,vwhichRoom):
-    with open(gameFolder + whichRoom + '.txt', 'r+') as file:
+def soft_reset(gameFiles,vwhichRoom):
+    with open(gameFfiles + whichRoom + '.txt', 'r+') as file:
         gameData = json.load(file)
         gameData["playerOneID"] = ""
         gameData["playerTwoID"] = ""
@@ -334,9 +326,9 @@ def soft_reset(gameFolder,vwhichRoom):
         file.close()
 
 # resets a game if an administrator as used the !reset command
-def message_6_reset(gameFolder, whichRoom):
+def message_6_reset(gameFiles, whichRoom):
     whichRoom = str(whichRoom)
-    with open(gameFolder + whichRoom + '.txt', 'r+') as file:
+    with open(gameFiles + whichRoom + '.txt', 'r+') as file:
         gameData = json.load(file)
         if gameData["game"] == 1:
             gameData["playerOneID"] = ""
@@ -394,13 +386,9 @@ def message_6_reset(gameFolder, whichRoom):
     return msg
 
 # gives the option to erase a player's character
-def message_7_erase(player):
+def message_7_erase(player, gameFiles, charFiles):
     msg = ""
-    path = os.getcwd()
-    charFolder = os.path.join(path + "/characters/")
-    charFile = Path(charFolder + player + ".txt")
-
-    with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file:
+    with open(gameFiles + "playerDatabase.txt", 'r', encoding="utf-8") as file:
         playerDatabase = json.loads(file.read())
         file.close()
 
@@ -413,32 +401,32 @@ def message_7_erase(player):
 
     playerDatabase.pop(name, None)
 
-    with open(charFolder + "playerDatabase.txt", "w", encoding="utf-8") as file:
+    with open(gameFiles + "playerDatabase.txt", "w", encoding="utf-8") as file:
         json.dump(playerDatabase, file, sort_keys=True, indent=2)
         file.close()
 
     try:
-        os.remove(charFile)
+        os.remove(charFiles + player + ".txt")
         msg = name + " has been erased."
     except FileNotFoundError:
         msg = "You don't have a character to delete."
     return msg
 
 # issues a challenge to another player
-def message_10_challenge(challenger, opponent, charFolder, game):
+def message_10_challenge(challenger, opponent, gameFiles, game):
     msg = ""
     pOneInfo = None
     bTimer = False
     new_game = 0
     playerOne = ""
 
-    charFile = Path(charFolder + challenger + ".txt")
+    charFile = Path(gameFiles + challenger + ".txt")
     # make sure the only people that can issue a challenge, is a person that has a character made.
     if not charFile.is_file():
         msg = "You don't even have a character made to fight."
     else:
         # find opponent's .json file, if one exists.
-        with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file:
+        with open(gameFiles + "playerDatabase.txt", 'r', encoding="utf-8") as file:
             playerDatabase = json.loads(file.read())
             file.close()
 
@@ -449,12 +437,12 @@ def message_10_challenge(challenger, opponent, charFolder, game):
                 opponentID = item[1]
             else:
                 msg = opponent + " doesn't have a character made for you to fight."
-        charFile = Path(charFolder + opponentID + ".txt")
+        charFile = Path(gameFiles + opponentID + ".txt")
         if opponentID == challenger:
             msg = "You can't fight yourself. No one is that special."
         else:
             # load in challenger's .json file, refered to from here on as 'pOneInfo'
-            charSheet = open(charFolder + challenger + ".txt", "r", encoding="utf-8")
+            charSheet = open(gameFiles + challenger + ".txt", "r", encoding="utf-8")
             pOneInfo = json.load(charSheet)
             charSheet.close()
 
@@ -467,16 +455,19 @@ def message_10_challenge(challenger, opponent, charFolder, game):
     return msg, opponentID, pOneInfo, new_game, bTimer, playerOne, opponent
 
 # allows a player to use a feat while in combat
-def message_8_usefeat(answer, charFolder, user, game, playerOne, playerTwo, token, featToken, pOneInfo, pOneSpentFeat,
+def message_8_usefeat(answer, gameFiles, user, game, playerOne, playerTwo, token, featToken, pOneInfo, pOneSpentFeat,
                       pTwoSpentFeat, pTwoInfo):
     msg = []
-    passiveFeats = ['power attack', 'pattack', 'defensive fighting', 'dfight', 'masochist', 'nerve strike', 'improved nerve strike',
-                    'greater nerve strike', 'nerve damage', 'evasion', 'improved evasion', 'greater evasion', 'hurt me',
-                    'improved hurt me', 'greater hurt me', 'hurt me more', 'deflect', 'improved deflect', 'greater deflect', 'cat grace',
-                    'improved cat grace', 'greater cat grace', 'bear endurance', 'improved bear endurance', 'greater bear endurance']
+    passiveFeats = ['power attack', 'pattack', 'defensive fighting', 'dfight', 'masochist', 'nerve strike',
+                    'improved nerve strike', 'greater nerve strike', 'nerve damage', 'evasion',
+                    'improved evasion', 'greater evasion', 'hurt me', 'improved hurt me', 'greater hurt me',
+                    'hurt me more', 'deflect', 'improved deflect', 'greater deflect', 'cat grace',
+                    'improved cat grace', 'greater cat grace', 'bear endurance', 'improved bear endurance',
+                    'greater bear endurance', 'deaths door', 'improved deaths door', 'greater deaths door']
     passiveStats = ['crushing blow', 'improved crushing blow', 'greater crushing blow', 'precision strike',
                     'improved precision strike', 'greater precision strike', 'lightning reflexes',
-                    'improved lightning reflexes', 'greater lightning reflexes']
+                    'improved lightning reflexes', 'greater lightning reflexes', 'centered self,',
+                    'improved centered self', 'greater centered self']
     featToken_new = None
     # pOneSpentFeat = None
     pOneFeatInfo = None
@@ -537,16 +528,10 @@ def message_8_usefeat(answer, charFolder, user, game, playerOne, playerTwo, toke
             if featToken == 0:
                 # if the feat is one of the listed below. Tell the player that those feats are used with a different
                 # command
-                if pTwoLastFeat in ('power attack', 'pattack', 'defensive fighting', 'dfight', 'masochist', 'nerve strike', 'improved nerve strike',
-                'greater nerve strike', 'nerve damage', 'evasion', 'improved evasion', 'greater evasion', 'hurt me',
-                'improved hurt me', 'greater hurt me', 'hurt me more', 'deflect', 'improved deflect', 'greater deflect'):
+                if pTwoLastFeat in passiveFeats:
                     msg.append(pTwoLastFeat + " will be determined elsewhere.")
 
-                elif pTwoLastFeat in (
-                'crushing blow', 'improved crushing blow', 'greater crushing blow', 'precision strike',
-                'improved precision strike', 'greater precision strike', 'lightning reflexes',
-                'improved lightning reflexes',
-                'greater lightning reflexes'):
+                elif pTwoLastFeat in passiveStats:
                     msg.append(pTwoLastFeat + " is already factored into your attack/defense.")
                 # make sure that a player can't reuse a feat already used.
                 elif pTwoLastFeat in pTwoSpentFeat:
@@ -1224,15 +1209,15 @@ def message_10_masochist(user, points, game, playerOne, playerTwo, pOneInfo, pTw
     return msg, game, playerOne, playerTwo, pOneInfo, pTwoInfo, token, pOnemMod, pTwomMod, pOneLevel, pTwoLevel
 
 # allows player to buy armor from market
-def message_9_buyarmor(player, armorslot, charFolder, itemFolder):
-    armorFile = open("armor.txt", "r", encoding="utf-8")
+def message_9_buyarmor(player, armorslot, gameFiles):
+    armorFile = open(gameFiles + "armor.txt", "r", encoding="utf-8")
     armorData = json.load(armorFile)
     armorFile.close()
     try:
-        charFile = open(charFolder + player.lower() + ".txt", "r", encoding="utf-8")
+        charFile = open(gameFiles + player.lower() + ".txt", "r", encoding="utf-8")
         charSheet = json.load(charFile)
         charFile.close()
-        isCharacter = Path(charFolder + player.lower() + ".txt")
+        isCharacter = Path(gameFiles + player.lower() + ".txt")
     except FileNotFoundError:
         msg = "You don't have a character made to use this function."
         return msg
@@ -1295,7 +1280,7 @@ def message_9_buyarmor(player, armorslot, charFolder, itemFolder):
         else:
             msg = "You do not have enough gold to purchase this."
 
-        file = open(charFolder + player + ".txt", "w", encoding="utf-8")
+        file = open(gameFiles + player + ".txt", "w", encoding="utf-8")
         json.dump(charSheet, file, ensure_ascii=False, indent=2)
         file.close()
 
@@ -1305,16 +1290,16 @@ def message_9_buyarmor(player, armorslot, charFolder, itemFolder):
     return msg
 
 # allows player to sell armor for half cost
-def message_10_sellarmor(player, armorname, charFolder, itemFolder):
-    armorFile = open(itemFolder + "armor.txt", "r", encoding="utf-8")
+def message_10_sellarmor(player, armorname, gameFiles):
+    armorFile = open(gameFiles + "armor.txt", "r", encoding="utf-8")
     armorDictionary = json.load(armorFile)
     armorFile.close()
 
     try:
-        sellerFile = open(charFolder + player + ".txt", "r", encoding="utf-8")
+        sellerFile = open(gameFiles + player + ".txt", "r", encoding="utf-8")
         sellerData = json.load(sellerFile)
         sellerFile.close()
-    # isCharacter = Path(charFolder + player + ".txt")
+    # isCharacter = Path(gameFiles + player + ".txt")
     except FileNotFoundError:
         msg = player + " does not have a character to use this command."
         return msg
@@ -1335,15 +1320,15 @@ def message_10_sellarmor(player, armorname, charFolder, itemFolder):
     else:
         msg = "You do not have that armor to sell."
 
-    file = open(charFolder + player + ".txt", "w", encoding="utf-8")
+    file = open(gameFiles + player + ".txt", "w", encoding="utf-8")
     json.dump(sellerData, file, ensure_ascii=False, indent=2)
     file.close()
     return msg
 
 # allows player to name their armor
-def message_10_namearmor(player, oldName, newName, charFolder):
+def message_10_namearmor(player, oldName, newName, gameFiles):
     try:
-        charFile = open(charFolder + player + ".txt", "r", encoding="utf-8")
+        charFile = open(gameFiles + player + ".txt", "r", encoding="utf-8")
         charSheet = json.load(charFile)
         charFile.close()
     except FileNotFoundError:
@@ -1359,19 +1344,19 @@ def message_10_namearmor(player, oldName, newName, charFolder):
         msg = charSheet['name'] + " renamed " + armorRemove + " to " + armorName + "."
     else:
         msg = "There is no armor in that slot to rename."
-    file = open(charFolder + player + ".txt", "w", encoding="utf-8")
+    file = open(gameFiles + player + ".txt", "w", encoding="utf-8")
     json.dump(charSheet, file, ensure_ascii=False, indent=2)
     file.close()
 
     return msg
 
 # allows player to equip their armor
-def message_6_equip(armor, player, charFolder):
+def message_6_equip(armor, player, gameFiles):
     try:
-        charFile = open(charFolder + player + ".txt", "r", encoding="utf-8")
+        charFile = open(gameFiles + player + ".txt", "r", encoding="utf-8")
         charSheet = json.load(charFile)
         charFile.close()
-        isCharacter = Path(charFolder + player + ".txt")
+        isCharacter = Path(gameFiles + player + ".txt")
     except FileNotFoundError:
         msg = "You don't have a character made to use this command."
         return msg
@@ -1447,18 +1432,18 @@ def message_6_equip(armor, player, charFolder):
     else:
         msg = armor + " doesn't exist in your inventory."
 
-    file = open(charFolder + player + ".txt", "w", encoding="utf-8")
+    file = open(gameFiles + player + ".txt", "w", encoding="utf-8")
     json.dump(charSheet, file, ensure_ascii=False, indent=2)
     file.close()
     return msg
 
 # allows player to unequip their armor
-def message_8_unequip(armor, player, charFolder):
+def message_8_unequip(armor, player, gameFiles):
     try:
-        charFile = open(charFolder + player + ".txt", "r", encoding="utf-8")
+        charFile = open(gameFiles + player + ".txt", "r", encoding="utf-8")
         charSheet = json.load(charFile)
         charFile.close()
-        isCharacter = Path(charFolder + player + ".txt")
+        isCharacter = Path(gameFiles + player + ".txt")
     except FileNotFoundError:
         msg = "You don't have a character made to use this function."
         return msg
@@ -1476,20 +1461,24 @@ def message_8_unequip(armor, player, charFolder):
     charSheet["armorconstitution"] = 0
     charSheet["armorblur"] = 0
 
-    file = open(charFolder + player + ".txt", "w", encoding="utf-8")
+    file = open(gameFiles + player + ".txt", "w", encoding="utf-8")
     json.dump(charSheet, file, ensure_ascii=False, indent=2)
     file.close()
     return msg
 
 # allows player to buy potions from the market
-def message_10_buypotion(player, potion, charFolder, itemFolder):
+def message_10_buypotion(player, potion, gameFiles, charFiles):
     try:
-        charFile = open(charFolder + player + ".txt", "r", encoding="utf-8")
+        charFile = open(charFiles + player + ".txt", "r", encoding="utf-8")
         charSheet = json.load(charFile)
         charFile.close()
-        isCharacter = Path(charFolder + player + ".txt")
+        isCharacter = Path(charFiles + player + ".txt")
     except FileNotFoundError:
         msg = "You don't have a character made to use this function."
+
+    potionFile = open(gameFiles + "potions.txt", "r", encoding="utf-8")
+    potionData = json.load(potionFile)
+    potionFile.close()
 
     potionList = potionData[0]['shoplist']
     if isCharacter.is_file():
@@ -1517,19 +1506,19 @@ def message_10_buypotion(player, potion, charFolder, itemFolder):
         else:
             msg = "You do not have enough gold to purchase this."
 
-    file = open(charFolder + player + ".txt", "w", encoding="utf-8")
+    file = open(charFiles + player + ".txt", "w", encoding="utf-8")
     json.dump(charSheet, file, ensure_ascii=False, indent=2)
     file.close()
 
-    file = open("potions.txt", "w", encoding="utf-8")
+    file = open(gameFiles + "potions.txt", "w", encoding="utf-8")
     json.dump(potionData, file, ensure_ascii=False, indent=2)
     file.close()
     return msg
 
 # allows player to give a potion to another player
-def message_11_givepotion(potion, gifter,  gifted, charFolder):
+def message_11_givepotion(potion, gifter,  gifted, gameFiles):
     msg = ""
-    with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
+    with open(gameFiles + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
         playerDatabase = json.loads(file2.read())
         file2.close()
 
@@ -1539,11 +1528,11 @@ def message_11_givepotion(potion, gifter,  gifted, charFolder):
         else:
             msg = gifted + " isn't a character name."
 
-    file = open(charFolder + gifter + ".txt", "r", encoding="utf-8")
+    file = open(gameFiles + gifter + ".txt", "r", encoding="utf-8")
     gifterData = json.load(file)
     file.close()
 
-    file = open(charFolder + gifted + ".txt", "r", encoding="utf-8")
+    file = open(gameFiles + gifted + ".txt", "r", encoding="utf-8")
     giftedData = json.load(file)
     file.close()
 
@@ -1559,27 +1548,27 @@ def message_11_givepotion(potion, gifter,  gifted, charFolder):
     #         msg = gifted + " does not have a character to use this command."
     # else:
     #
-    file = open(charFolder + gifter + ".txt", "w", encoding="utf-8")
+    file = open(gameFiles + gifter + ".txt", "w", encoding="utf-8")
     json.dump(gifterData, file, ensure_ascii=False, indent=2)
     file.close()
 
-    file = open(charFolder + gifted + ".txt", "w", encoding="utf-8")
+    file = open(gameFiles + gifted + ".txt", "w", encoding="utf-8")
     json.dump(giftedData, file, ensure_ascii=False, indent=2)
     file.close()
 
     return msg
 
 # allows player to sell a potion for half cost
-def message_11_sellpotion(player, potion, charFolder):
-    potionFile = open("potions.txt", "r", encoding="utf-8")
+def message_11_sellpotion(player, potion, gameFiles):
+    potionFile = open(gameFiles + "potions.txt", "r", encoding="utf-8")
     potionDictionary = json.load(potionFile)
     potionFile.close()
 
     try:
-        sellerFile = open(charFolder + player + ".txt", "r", encoding="utf-8")
+        sellerFile = open(gameFiles + player + ".txt", "r", encoding="utf-8")
         sellerData = json.load(sellerFile)
         sellerFile.close()
-    # isCharacter = Path(charFolder + player + ".txt")
+    # isCharacter = Path(gameFiles + player + ".txt")
     except FileNotFoundError:
         msg = player + " does not have a character to use this command."
 
@@ -1621,21 +1610,21 @@ def message_11_sellpotion(player, potion, charFolder):
                 str(halfPrice) + "gold ."
         else:
             msg = "You do not have that potion to sell."
-    file = open(charFolder + player + ".txt", "w", encoding="utf-8")
+    file = open(gameFiles + player + ".txt", "w", encoding="utf-8")
     json.dump(sellerData, file, ensure_ascii=False, indent=2)
     file.close()
     return msg
 
 # allows a player to use a potion before combat
-def message_10_usepotion(potion, player, commonList, uncommonList, rareList, vrareList, relicList, charFolder):
-        potionFile = open(charFolder + "potions.txt", "r", encoding="utf-8")
+def message_10_usepotion(potion, player, commonList, uncommonList, rareList, vrareList, relicList, gameFiles, charFiles):
+        potionFile = open(gameFiles + "potions.txt", "r", encoding="utf-8")
         potionData = json.load(potionFile)
         potionFile.close()
         try:
-            charFile = open(charFolder + player + ".txt", "r", encoding="utf-8")
+            charFile = open(charFiles + player + ".txt", "r", encoding="utf-8")
             charSheet = json.load(charFile)
             charFile.close()
-            isCharacter = Path(charFolder + player + ".txt")
+            isCharacter = Path(charFiles + player + ".txt")
         except FileNotFoundError:
             msg = "You don't have a character made to use these potions."
             return msg
@@ -1755,7 +1744,7 @@ def message_10_usepotion(potion, player, commonList, uncommonList, rareList, vra
                 elif potion[:6] == "damage":
                     charSheet['potiondamage'] = potionEffect
                     charSheet['potioneffect'] = potionDescription
-                    msg = charSheet['name'] + "drank a " + potion + " potion, " + potionDescription +\
+                    msg = charSheet['name'] + " drank a " + potion + " potion, " + potionDescription +\
                         " for next match."
                     charSheet['potions'].remove(potion)
                 elif potion[:2] == "ac":
@@ -1787,16 +1776,16 @@ def message_10_usepotion(potion, player, commonList, uncommonList, rareList, vra
         else:
             msg = "You do not have a potion of " + potion
 
-        file = open(charFolder + player + ".txt", "w", encoding="utf-8")
+        file = open(charFiles + player + ".txt", "w", encoding="utf-8")
         json.dump(charSheet, file, ensure_ascii=False, indent=2)
         file.close()
 
         return msg
 
 # allows a player to give gold to another player
-def message_11_givegold(amount, gifter, gifted, charFolder):
+def message_11_givegold(amount, gifter, gifted, gameFiles):
     msg = ""
-    with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
+    with open(gameFiles + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
         playerDatabase = json.loads(file2.read())
         file2.close()
 
@@ -1806,11 +1795,11 @@ def message_11_givegold(amount, gifter, gifted, charFolder):
         else:
             msg = gifted + " isn't a character name."
 
-    file = open(charFolder + gifter + ".txt", "r", encoding="utf-8")
+    file = open(gameFiles + gifter + ".txt", "r", encoding="utf-8")
     gifterData = json.load(file)
     file.close()
 
-    file = open(charFolder + gifted + ".txt", "r", encoding="utf-8")
+    file = open(gameFiles + gifted + ".txt", "r", encoding="utf-8")
     giftedData = json.load(file)
     file.close()
     # if isCharacter.is_file():
@@ -1823,11 +1812,11 @@ def message_11_givegold(amount, gifter, gifted, charFolder):
         msg = gifterData['name'] + " has given " + giftedData['name'] + " " + str(gold) +\
             " gold"
 
-    file = open(charFolder + gifter + ".txt", "w", encoding="utf-8")
+    file = open(gameFiles + gifter + ".txt", "w", encoding="utf-8")
     json.dump(gifterData, file, ensure_ascii=False, indent=2)
     file.close()
 
-    file = open(charFolder + gifted + ".txt", "w", encoding="utf-8")
+    file = open(gameFiles + gifted + ".txt", "w", encoding="utf-8")
     json.dump(giftedData, file, ensure_ascii=False, indent=2)
     file.close()
     return msg
