@@ -11,39 +11,22 @@ from gamelogic import onMSGAccept, onMSGRoll, onMSGUtil, onPRIUtil
 
 
 # A function to call access to the .txt files inside the characters folder
+def gamefiles():
+    path = os.getcwd()
+    gameFiles = os.path.join(path + "/gamefiles/")
+    return gameFiles
+
 def characters():
     path = os.getcwd()
-    charFolder = os.path.join(path + "/characters/")
-    return charFolder
-
-# A function to call access to the .txt files inside the cogs folder
-def items():
-    path = os.getcwd()
-    itemFolder = os.path.join(path + "/cogs/")
-    return itemFolder
-
-# A function to call access to the .txt files inside of the gamelogic folder
-def gamelogic():
-    path = os.getcwd()
-    gameLogic = os.path.join(path + "/gamelogic/")
-    return gameLogic
-
-# A function to call access to token.txt
-def roomID():
-    file = open("token.txt", "r", encoding="utf-8")
-    stuff = json.load(file)
-    file.close()
-    arena = stuff["arena"]
-    devroom = stuff["devroom"]
-    gamemaster = stuff["gamemaster"]
-    return arena, devroom, gameamaster
+    charFiles = os.path.join(path + "/characters/")
+    return charFiles
 
 # A function to handle feat information within feat.txt
 def featDict():
     # Open up the json object containing the list of feats.
     path = os.getcwd()
-    charFolder = os.path.join(path + "/cogs/")
-    featFile = open(charFolder + "feats.txt", "r", encoding="utf-8")
+    gameFiles = os.path.join(path + "/gamefiles/")
+    featFile = open(gameFiles + "feats.txt", "r", encoding="utf-8")
     featDictionary = json.load(featFile)
     featFile.close()
 
@@ -57,7 +40,7 @@ def featDict():
 def traitDict():
     # Open up a json object containing the list of traits.
     path = os.getcwd()
-    traitFolder = os.path.join(path + "/cogs/")
+    traitFolder = os.path.join(path + "/gamefiles/")
     traitFile = open(traitFolder + "trait.txt", "r", encoding="utf-8")
     traitDictionary = json.load(traitFile)
     traitFile.close()
@@ -72,8 +55,8 @@ def traitDict():
 def potionShop():
     # Open up a json object containing the list of potions
     path = os.getcwd()
-    charFolder = os.path.join(path + "/cogs/")
-    potionFile = open(charFolder + "potions.txt", "r", encoding="utf-8")
+    gameFiles = os.path.join(path + "/gamefiles/")
+    potionFile = open(gameFiles + "potions.txt", "r", encoding="utf-8")
     potionDictionary = json.load(potionFile)
     potionFile.close()
 
@@ -110,8 +93,8 @@ def potionShop():
 # A function to handle feat information within armor.txt
 def armorShop():
     path = os.getcwd()
-    charFolder = os.path.join(path + "/cogs/")
-    armorFile = open(charFolder + "armor.txt", "r", encoding="utf-8")
+    gameFiles = os.path.join(path + "/gamefiles/")
+    armorFile = open(gameFiles + "armor.txt", "r", encoding="utf-8")
     armorDictionary = json.load(armorFile)
     armorFile.close()
 
@@ -177,9 +160,8 @@ def armorShop():
 # A function to load in relevant game data for a specific room from that roomID's text file
 def gameStatLoad(channel):
     channel = str(channel)
-    path = os.getcwd()
-    gameFolder = os.path.join(path + "/gamelogic/")
-    with open(gameFolder + channel + '.txt', 'r+') as file:
+    gameFiles = gamefiles() 
+    with open(gameFiles + channel + '.txt', 'r+') as file:
         gameData = json.load(file)
         file.close()
     playerOneID = gameData["playerOneID"]
@@ -240,8 +222,6 @@ def gameStatLoad(channel):
            pTwoDeflect, pTwoRiposte, pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, pTwoLevel, xp,\
            currentPlayerXP, nextLevel, levelUp, iddqd, bEvasion, bDeflect
 
-
-
 # A function to update the relevant roomID's .txt file with new game data
 def gameStatDump(playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count, token,
                  critical, bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP, pOneCurrentHP,
@@ -251,9 +231,8 @@ def gameStatDump(playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, 
                  pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, pTwoLevel, xp, currentPlayerXP,
                  nextLevel, levelUp, iddqd, bEvasion, bDeflect, channel):
     channel = str(channel)
-    path = os.getcwd()
-    gameFolder = os.path.join(path + "/gamelogic/")
-    with open(gameFolder + channel + '.txt', 'r+') as file:
+    gameFiles = gamefiles()
+    with open(gameFiles + channel + '.txt', 'r+') as file:
         gameData = json.load(file)
         gameData["playerOneID"] = playerOneID
         gameData["playerTwoID"] = playerTwoID
@@ -385,28 +364,31 @@ class Combat(commands.Cog):
     # Timeout a challenge if it is left unanswered for more than 60 seconds
     async def challengeTimeout(self, ctx):
         await asyncio.sleep(60)
-        gameFolder = gamelogic()
+        gameFiles = gamefiles()
         whichRoom = ctx.channel.id
-        msg = onMSGUtil.message_6_reset(gameFolder, whichRoom)
+        msg = onMSGUtil.message_6_reset(gameFiles, whichRoom)
         await ctx.send(msg)
 
     # Time out a game if it is left unanswered for more than 60 minutes
     async def gameTimeout(self, ctx):
         await asyncio.sleep(3600)
         self.gameTimer.cancel()
-        gameFolder = gamelogic()
+        gameFiles = gamefiles()
         whichRoom = ctx.channel.id
-        msg = onMSGUtil.message_6_reset(gameFolder, whichRoom)
+        msg = onMSGUtil.message_6_reset(gameFiles, whichRoom)
         await ctx.send(msg)
 
 #---------------------------------------------CHATROOM COMMANDS---------------------------------------------------------
     #!leaderboard <win> <loss> <percent>
+    #Status: Working
     @commands.command()
     @commands.guild_only()
     async def leaderboard(self, ctx, option=None):
+        gameFiles = gamefiles()
+        charFiles = characters()
         if option is None:
             option = "win"
-        msg = onMSGUtil.message_12_leaderboard(option)
+        msg = onMSGUtil.message_12_leaderboard(option, gameFiles, charFiles)
         # await ctx.send("This is working.")
         for msg_item in msg:
             await ctx.send(msg_item)
@@ -418,16 +400,18 @@ class Combat(commands.Cog):
         raise error
 
     #!name <name>
+    #Status: Working
     @commands.command()
     @commands.guild_only()
     async def name(self, ctx, name):
 
         name.capitalize()
         player = str(ctx.message.author.id)
-        charFolder = characters()
-        charFile = Path(charFolder + player + ".txt")
+        gameFiles = gamefiles()
+        charFiles = characters()
+        charFile = Path(gameFiles + player + ".txt")
 
-        msg = onMSGUtil.message_5_name(charFile, charFolder, name, player)
+        msg = onMSGUtil.message_5_name(charFile, charFiles, gameFiles, name, player)
         for msg_item in msg:
             await ctx.send(msg_item)
 
@@ -443,18 +427,22 @@ class Combat(commands.Cog):
         else:
             raise error
 
-     #!erase
+    #!erase
+    #Status: Working
     @commands.command()
     @commands.guild_only()
     async def erase(self, ctx):
         self.quitter = str(ctx.message.author.id)
-        charFolder = characters()
-
-        charSheet = open(charFolder + self.quitter + ".txt", "r", encoding="utf-8")
-        pInfo = json.load(charSheet)
-        charSheet.close()
-        await ctx.send("Are you sure you want to delete " + pInfo['name'] + "? (Type **!confirm**"
-                       " to do the deed, or **!deny** to save a life.)")
+        charFiles = characters()
+        charFile = Path(charFiles + self.quitter + ".txt")
+        if not charFile.is_file():
+            await ctx.send("You do not have a character to delete.")
+        else:
+            charSheet = open(charFiles + self.quitter + ".txt", "r", encoding="utf-8")
+            pInfo = json.load(charSheet)
+            charSheet.close()
+            await ctx.send("Are you sure you want to delete " + pInfo['name'] + "? (Type **!confirm**"
+                           " to do the deed, or **!deny** to save a life.)")
 
     @erase.error
     async def erase_error(self, ctx, error):
@@ -464,14 +452,17 @@ class Combat(commands.Cog):
             raise error
 
     #!confirm erase
+    #Status: Working
     @commands.command()
     @commands.guild_only()
     async def confirm(self, ctx):
+        charFiles = characters()
+        gameFiles = gamefiles()
         player = str(ctx.message.author.id)
         if player == self.quitter:
-            msg = onMSGUtil.message_7_erase(player)
+            msg = onMSGUtil.message_7_erase(player, gameFiles, charFiles)
             await ctx.send(msg)
-            self.quitter = ""
+            self.quitter = 0
         else:
             await ctx.send("You aren't the one asking for the erase, not cool.")
 
@@ -483,6 +474,7 @@ class Combat(commands.Cog):
             raise error
 
     #!deny erase
+    #Status: Working
     @commands.command()
     @commands.guild_only()
     async def deny(self, ctx):
@@ -501,15 +493,18 @@ class Combat(commands.Cog):
             raise error
 
     #!reset
+    #Status: Untested
     @commands.command()
     @commands.guild_only()
     @commands.has_role("Admin")
     async def reset(self, ctx):
-        gameFolder = gamelogic()
-        channelID = [gameFolder[1], gameFolder[2]]
+        gameFiles = gamefiles()
+        with open(gameFiles + 'token.txt', 'r+') as file:
+            channelID = json.load(file)
+        channelID = [gameFiles[1], gameFiles[2]]
         if ctx.channel.id in channelID:
             whichRoom = ctx.channel.id
-            msg = onMSGUtil.message_6_reset(gameFolder, whichRoom)
+            msg = onMSGUtil.message_6_reset(gameFiles, whichRoom)
             await ctx.send(msg)
         else:
             await ctx.send("This command can not be used here.")
@@ -522,10 +517,13 @@ class Combat(commands.Cog):
             raise error
 
     #!player <name>
+    #Status: Working
     @commands.command()
     @commands.guild_only()
     async def player(self, ctx, player):
-        msg = onMSGUtil.message_7_player(player)
+        gameFiles = gamefiles()
+        charFiles = characters()
+        msg = onMSGUtil.message_7_player(player, gameFiles, charFiles)
         await ctx.send(msg)
 
     @player.error
@@ -538,10 +536,13 @@ class Combat(commands.Cog):
             raise error
 
     #!who <name>
+    #Status: Working
     @commands.command()
     @commands.guild_only()
     async def who(self, ctx, player):
-        msg = onMSGUtil.message_4_who(player)
+        gameFiles = gamefiles()
+        charFiles = characters()
+        msg = onMSGUtil.message_4_who(player, gameFiles, charFiles)
         await ctx.send(msg)
 
     @who.error
@@ -554,14 +555,16 @@ class Combat(commands.Cog):
             raise error
 
     #!usepotion <potion>
+    #Status: Working
     @commands.command()
     @commands.guild_only()
     async def usepotion(self, ctx, potion):
         player = str(ctx.message.author.id)
-        charFolder = characters()
+        gameFiles = gamefiles()
+        charFiles = characters()
         commonList, uncommonList, rareList, vrareList, relicList = potionShop()
         msg = onMSGUtil.message_10_usepotion(potion, player, commonList, uncommonList, rareList, vrareList,
-                                             relicList, charFolder)
+                                             relicList, gameFiles, charFiles)
         await ctx.send(msg)
 
     @usepotion.error
@@ -578,9 +581,9 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def buyarmor(self, ctx, armorslot):
         player = str(ctx.message.author.id)
-        charFolder = characters()
+        gameFiles = gamefiles()
         armorFolder = items()
-        msg = onMSGUtil.message_9_buyarmor(player, armorslot, charFolder, armorFolder)
+        msg = onMSGUtil.message_9_buyarmor(player, armorslot, gameFiles, armorFolder)
         await ctx.send(msg)
 
     @buyarmor.error
@@ -597,9 +600,9 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def sellarmor(self, ctx, armorname):
         player = str(ctx.message.author.id)
-        charFolder = characters()
-        itemFolder = items()
-        msg = onMSGUtil.message_10_sellarmor(player, armorname, charFolder, itemFolder)
+        gameFiles = gamefiles()
+        gameFiles = items()
+        msg = onMSGUtil.message_10_sellarmor(player, armorname, gameFiles)
         await ctx.send(msg)
 
     @sellarmor.error
@@ -616,8 +619,8 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def armorname(self, ctx, oldName, newName):
         player = str(ctx.message.author.id)
-        charFolder = characters()
-        msg = onMSGUtil.message_10_namearmor(player, oldName, newName, charFolder)
+        gameFiles = gamefiles()
+        msg = onMSGUtil.message_10_namearmor(player, oldName, newName, gameFiles)
         await ctx.send(msg)
 
     @armorname.error
@@ -634,8 +637,8 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def equip(self, ctx, armor):
         player = str(ctx.message.author.id)
-        charFolder = characters()
-        msg = onMSGUtil.message_6_equip(armor, player, charFolder)
+        gameFiles = gamefiles()
+        msg = onMSGUtil.message_6_equip(armor, player, gameFiles)
         await ctx.send(msg)
 
     @equip.error
@@ -651,9 +654,9 @@ class Combat(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def unequip(self, ctx, armor):
-        charFolder = characters()
+        gameFiles = gamefiles()
         player = str(ctx.message.author.id)
-        msg = onMSGUtil.message_8_unequip(armor, player, charFolder)
+        msg = onMSGUtil.message_8_unequip(armor, player, gameFiles)
         await ctx.send(msg)
 
     @unequip.error
@@ -666,13 +669,14 @@ class Combat(commands.Cog):
             raise error
 
     #!buypotion <potion>
+    #Status: Working
     @commands.command()
     @commands.guild_only()
     async def buypotion(self, ctx, potion):
         player = str(ctx.message.author.id)
-        charFolder = characters()
-        itemFolder = items()
-        msg = onMSGUtil.message_10_buypotion(player, potion, charFolder, itemFolder)
+        gameFiles = gamefiles()
+        charFiles = characters()
+        msg = onMSGUtil.message_10_buypotion(player, potion, gameFiles, charFiles)
         await ctx.send(msg)
 
     @buypotion.error
@@ -684,16 +688,19 @@ class Combat(commands.Cog):
         else:
             raise error
 
+    #!sellpotion <potion>
+    #Status: Untested
     @commands.command()
     @commands.guild_only()
-    async def buypotion(self, ctx, potion):
+    async def sellpotion(self, ctx, potion):
         player = str(ctx.message.author.id)
-        charFolder = characters()
-        msg = onMSGUtil.message_11_sellpotion(player, potion, charFolder)
+        gameFiles = gamefiles()
+        charFiles = characters()
+        msg = onMSGUtil.message_10_sellpotion(player, potion, gameFiles, charFiles)
         await ctx.send(msg)
 
     @buypotion.error
-    async def buypotion_error(self, ctx, error):
+    async def sellpotion_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send("The command !sellpotion may not be used in PMs")
         if isinstance(error, commands.MissingRequiredArgument):
@@ -702,12 +709,13 @@ class Combat(commands.Cog):
             raise error
 
     #!givepotion <character> <potion>
+    #Status: Untested
     @commands.command()
     @commands.guild_only()
     async def givepotion(self, ctx, gifted, potion):
-        charFolder = characters()
+        gameFiles = gamefiles()
         gifter = str(ctx.message.author.id)
-        msg = onMSGUtil.message_11_givepotion(potion, gifter,  gifted, charFolder)
+        msg = onMSGUtil.message_11_givepotion(potion, gifter,  gifted, gameFiles)
         await ctx.send(msg)
 
     @buypotion.error
@@ -721,12 +729,13 @@ class Combat(commands.Cog):
             raise error
 
     #!givegold <character> <amount>
+    #Status: Untested
     @commands.command()
     @commands.guild_only()
     async def givegold(self, ctx, gifted, amount):
-        charFolder = characters()
+        gameFiles = gamefiles()
         gifter = str(ctx.message.author.id)
-        msg = onMSGUtil.message_11_givegold(amount, gifter, gifted, charFolder)
+        msg = onMSGUtil.message_11_givegold(amount, gifter, gifted, gameFiles)
         await ctx.send(msg)
 
     @givegold.error
@@ -747,7 +756,7 @@ class Combat(commands.Cog):
         challenger = str(ctx.message.author.id)
 
         path = os.getcwd()
-        charFolder = os.path.join(path + "/characters/")
+        gameFiles = os.path.join(path + "/characters/")
 
         arena, devroom = roomID()
         channelID = [arena, devroom]
@@ -762,7 +771,7 @@ class Combat(commands.Cog):
             levelUp, iddqd, bEvasion, bDeflect = gameStatLoad(channel)
 
             msg, playerTwoID, pOneInfo, new_game, bTimer, playerOneID, opponent\
-                = onMSGUtil.message_10_challenge(challenger, opponent, charFolder, game)
+                = onMSGUtil.message_10_challenge(challenger, opponent, gameFiles, game)
             playerOneID = challenger
             print(playerTwoID)
             if game == 0:
@@ -808,7 +817,7 @@ class Combat(commands.Cog):
     async def accept(self, ctx):
         accepted = str(ctx.message.author.id)
         path = os.getcwd()
-        charFolder = os.path.join(path + "/characters/")
+        gameFiles = os.path.join(path + "/characters/")
 
         arena, devroom = roomID()
         channelID = [arena, devroom]
@@ -824,7 +833,7 @@ class Combat(commands.Cog):
             bEvasion, bDeflect = gameStatLoad(channel)
 
             msg, pTwoInfo, new_game, playerTwoID, bTimer, bGameTimer, new_oppenent, token \
-                = onMSGAccept.message_accept(charFolder, accepted, game, playerTwoID, pOneInfo)
+                = onMSGAccept.message_accept(gameFiles, accepted, game, playerTwoID, pOneInfo)
 
             if new_game is not None:
                 game = new_game
@@ -868,7 +877,7 @@ class Combat(commands.Cog):
     @commands.guild_only()
     async def usefeat(self, ctx, *, answer):
         path = os.getcwd()
-        charFolder = os.path.join(path + "/characters/")
+        gameFiles = os.path.join(path + "/characters/")
 
         user = str(ctx.message.author.id)
         arena, devroom = roomID()
@@ -885,7 +894,7 @@ class Combat(commands.Cog):
             bEvasion, bDeflect = gameStatLoad(channel)
 
             msg, featToken_new, pOneSpentFeat, pOneFeatInfo, pTwoSpentFeat, pTwoFeatInfo =\
-                onMSGUtil.message_8_usefeat(answer, charFolder, user, game, playerOneID, playerTwoID, token, featToken,
+                onMSGUtil.message_8_usefeat(answer, gameFiles, user, game, playerOneID, playerTwoID, token, featToken,
                                             pOneInfo, pOneSpentFeat, pTwoSpentFeat, pTwoInfo)
             for msg_item in msg:
                 await ctx.send(msg_item)
@@ -925,7 +934,7 @@ class Combat(commands.Cog):
         user = str(ctx.message.author.id)
 
         path = os.getcwd()
-        charFolder = os.path.join(path + "/characters/")
+        gameFiles = os.path.join(path + "/characters/")
 
         arena, devroom = roomID()
         channelID = [arena, devroom]
@@ -947,7 +956,7 @@ class Combat(commands.Cog):
                 pTwocMod, pTwodMod, pTwomMod, pTwoEvade, pTwoDeflect, pTwoRiposte, pTwoTempDR, pTwoDeathsDoor,\
                 pTwoQuickDamage, pTwoFeatInfo, pTwoSpentFeat, pOneLevel, pTwoLevel, xp, currentPlayerXP,\
                 nextLevel, levelUp, iddqd =\
-                    onMSGRoll.message_roll(user, charFolder, playerOneID, playerTwoID, winner, pOneInfo, pTwoInfo,
+                    onMSGRoll.message_roll(user, gameFiles, playerOneID, playerTwoID, winner, pOneInfo, pTwoInfo,
                                            featToken, game, count, token, critical, bonusHurt, totalDamage,
                                            pOneTotalHP, pTwoTotalHP, pOneCurrentHP, pTwoCurrentHP, pOnepMod, pOnecMod,
                                            pOnedMod, pOnemMod, pOneEvade, pOneDeflect, pOneRiposte, pOneTempDR,
@@ -963,9 +972,9 @@ class Combat(commands.Cog):
                     else:
                         self.gameTimer.cancel()
                         path = os.getcwd()
-                        gameFolder = os.path.join(path + "/gamelogic/")
+                        gameFiles = os.path.join(path + "/gamelogic/")
                         whichRoom = ctx.channel.id
-                        onMSGUtil.soft_reset(gameFolder, whichRoom)
+                        onMSGUtil.soft_reset(gameFiles, whichRoom)
 
                 gameStatDump(playerOneID, playerTwoID, winner, quitter, pOneInfo, pTwoInfo, featToken, game, count,
                              token, critical, bonusHurt, nerveDamage, totalDamage, pOneTotalHP, pTwoTotalHP,
@@ -1140,7 +1149,8 @@ class Combat(commands.Cog):
         else:
             raise error
 
-    #!forfeit still testing
+    #!forfeit
+    #Status: Still testing
     # @commands.command()
     # @commands.guild_only()
     # async def forfeit(self, ctx):
@@ -1152,7 +1162,7 @@ class Combat(commands.Cog):
     #                 xpCap = self.pOneInfo['nextlevel'] - 10
     #                 if self.pOneInfo['currentxp'] < xpCap:
     #                     await ctx.send(self.pOneInfo['name'] + " has earned 10xp")
-    #                     with open(charFolder + user + '.txt', 'r+') as file:
+    #                     with open(gameFiles + user + '.txt', 'r+') as file:
     #                         charData = json.load(file)
     #                         self.pOneInfo['currentxp'] = self.pOneInfo['currentxp'] + 10
     #                         file.seek(0)
@@ -1166,7 +1176,7 @@ class Combat(commands.Cog):
     #                 xpCap = self.pTwoInfo['nextlevel'] - 10
     #                 if self.pTwoInfo['currentxp'] < xpCap:
     #                     await ctx.send(self.pTwoInfo['name'] + " has earned 10xp")
-    #                     with open(charFolder + user + '.txt', 'r+') as file:
+    #                     with open(gameFiles + user + '.txt', 'r+') as file:
     #                         charData = json.load(file)
     #                         self.pTwoInfo['currentxp'] = self.pTwoInfo['currentxp'] + 10
     #                         file.seek(0)
@@ -1329,7 +1339,8 @@ class Combat(commands.Cog):
         else:
             raise error
 
-    #!cexpert - Removed from Game
+    #!cexpert
+    #Status: Removed from game
     # @commands.command()
     # @commands.guild_only()
     # async def cexpert(self, ctx, *, message):
@@ -1427,13 +1438,15 @@ class Combat(commands.Cog):
 
 #------------------------------------------PM COMMANDS------------------------------------------------------------------
    #!stats <str> <dex> <con>
+    #Status: Working
     @commands.command()
     @commands.dm_only()
     async def stats(self, ctx, strength, dexterity, constitution):
         player = str(ctx.message.author.id)
-        charFolder = characters()
+        gameFiles = gamefiles()
+        charFiles = characters()
         try:
-            msg = onPRIUtil.pri_6_stats(charFolder, player, strength, dexterity, constitution)
+            msg = onPRIUtil.pri_6_stats(charFiles, gameFiles, player, strength, dexterity, constitution)
             for msg_item in msg:
                 await ctx.send(msg_item)
         except IndexError:
@@ -1460,7 +1473,8 @@ class Combat(commands.Cog):
         else:
             raise error
 
-    #!trait <trait name>
+    #!traitpick <trait name>
+    #Status: Working
     @commands.command()
     @commands.dm_only()
     async def traitpick(self, ctx, trait):
@@ -1468,8 +1482,9 @@ class Combat(commands.Cog):
         traitList = traitDict()[1]
         trait = trait.lower()
         player = str(ctx.message.author.id)
-        charFolder = characters()
-        msg = onPRIUtil.pri_6_trait(charFolder, player, traitList, traitDictionary, trait)
+        gameFiles = gamefiles()
+        charFiles = characters()
+        msg = onPRIUtil.pri_6_trait(gameFiles, charFiles, player, traitList, traitDictionary, trait)
         await ctx.send(msg)
 
     @traitpick.error
@@ -1483,6 +1498,7 @@ class Combat(commands.Cog):
             raise error
 
     #!traitlist
+    #Status: Working
     @commands.command()
     @commands.dm_only()
     async def traitlist(self, ctx):
@@ -1500,6 +1516,7 @@ class Combat(commands.Cog):
             raise error
 
     #!traithelp <trait name>
+    #Status: Working
     @commands.command()
     @commands.dm_only()
     async def traithelp(self, ctx, answer):
@@ -1520,18 +1537,14 @@ class Combat(commands.Cog):
             raise error
 
     #!respec
+    #Status: Working
     @commands.command()
     @commands.dm_only()
     async def respec(self, ctx):
         print("Am I here?")
         player = str(ctx.message.author.id)
-        path = os.getcwd()
-        charFolder = os.path.join(path + "/characters/")
-        charFile = Path(charFolder + player + ".txt")
-        file = open(charFolder + player + ".txt", "r", encoding="utf-8")
-        charData = json.load(file)
-        file.close()
-        msg = onPRIUtil.pri_7_respec(charData, charFolder, charFile, player)
+        charFiles = characters()
+        msg = onPRIUtil.pri_7_respec(charFiles, player)
         await ctx.send(msg)
 
     @respec.error
@@ -1542,14 +1555,14 @@ class Combat(commands.Cog):
             raise error
 
     #!add
+    #Status: Working
     @commands.command()
     @commands.dm_only()
     async def add(self, ctx, ability):
         ability.lower()
         player = str(ctx.message.author.id)
-        path = os.getcwd()
-        charFolder = os.path.join(path + "/characters/")
-        msg = onPRIUtil.pri_4_add(player, ability, path, charFolder)
+        charFiles = characters()
+        msg = onPRIUtil.pri_4_add(player, ability, charFiles)
         for msg_item in msg:
             await ctx.send(msg_item)
 
@@ -1566,22 +1579,15 @@ class Combat(commands.Cog):
             raise error
 
     #!viewchar
+    #Status: Working
     @commands.command()
     @commands.dm_only()
     async def viewchar(self, ctx):
-
-        private = ctx.author.send
         player = str(ctx.message.author.id)
-
-        path = os.getcwd()
-        charFolder = os.path.join(path + "/characters/")
-        charFile = Path(charFolder + player + ".txt")
-        file = open(charFolder + player + ".txt", "r", encoding="utf-8")
-        charStats = json.load(file)
-        file.close()
-
+        gameFiles = gamefiles()
+        charFiles = characters()
         # Find out if player even has a character created yet. If not. Tell them they are an idiot.
-        msg = onPRIUtil.pri_viewchar(player)
+        msg = onPRIUtil.pri_viewchar(player, gameFiles, charFiles)
         for msg_item in msg:
             await ctx.send(msg_item)
 
@@ -1594,6 +1600,7 @@ class Combat(commands.Cog):
             raise error
 
     #!featlist
+    #Status: Working
     @commands.command()
     @commands.dm_only()
     async def featlist(self, ctx):
@@ -1612,6 +1619,7 @@ class Combat(commands.Cog):
             raise error
 
     #!feathelp
+    #Status: Working
     @commands.command()
     @commands.dm_only()
     async def feathelp(self, ctx, *, answer):
@@ -1646,19 +1654,19 @@ class Combat(commands.Cog):
         raise error
 
     #!featpick
+    #Status: Working
     @commands.command()
     @commands.dm_only()
     async def featpick(self, ctx, *, answer):
-
         private = ctx.author.send
         player = str(ctx.message.author.id)
-        charFolder = characters()
-
+        gameFiles = gamefiles()
+        charFiles = characters()
         featDictionary = featDict()[0]
         featList = featDict()[1]
 
         answer = answer.lower()
-        msg = onPRIUtil.pri_10_feat_pick(answer, player, featList, featDictionary, charFolder)
+        msg = onPRIUtil.pri_10_feat_pick(answer, player, featList, featDictionary, gameFiles, charFiles)
         for msg_item in msg:
             await ctx.send(msg_item)
 
@@ -1672,6 +1680,7 @@ class Combat(commands.Cog):
             raise error
 
     #!stockarmor
+    #Status: Working
     @commands.command()
     @commands.dm_only()
     #@commands.has_role("Admin")
@@ -1679,11 +1688,11 @@ class Combat(commands.Cog):
         catOneCommonList, catOneUncommonList, catOneRareList, catTwoCommonList, catTwoUncommonList,\
         catTwoRareList, catThreeCommonList, catThreeUncommonList, catThreeRareList = armorShop()
 
-        itemFolder = items()
+        gameFiles = gamefiles()
 
         msg = onPRIUtil.pri_11_stockarmor(catOneCommonList, catOneUncommonList, catOneRareList, catTwoCommonList,
                                 catTwoUncommonList, catTwoRareList, catThreeCommonList,
-                                catThreeUncommonList, catThreeRareList, itemFolder)
+                                catThreeUncommonList, catThreeRareList, gameFiles)
         await ctx.send(msg)
 
     @stockarmor.error
@@ -1694,11 +1703,12 @@ class Combat(commands.Cog):
             raise error
 
     #!armorshop
+    #Status: Testing
     @commands.command()
     @commands.dm_only()
     async def armorshop(self, ctx):
-        itemFolder = items()
-        msg = onPRIUtil.pri_10_armorshop(itemFolder)
+        gameFiles = gamefiles()
+        msg = onPRIUtil.pri_10_armorshop(gameFiles)
         await ctx.send("```" + msg + "```")
 
     @armorshop.error
@@ -1706,14 +1716,16 @@ class Combat(commands.Cog):
         if isinstance(error, commands.PrivateMessageOnly):
             await ctx.send("The command !armorshop may only be used in PMs")
 
+    #!stockpotion
+    #Status: Working
     @commands.command()
     @commands.dm_only()
     #@commands.has_role("Admin")
     async def stockpotion(self, ctx):
         commonList, uncommonList, rareList, vrareList, relicList = potionShop()
-        itemFolder = items()
+        gameFiles = gamefiles()
         msg = onPRIUtil.pri_10_stockpotion(commonList, uncommonList, rareList, vrareList, relicList,
-                                          itemFolder)
+                                          gameFiles)
         await ctx.send("```" + msg + "```")
 
     @stockpotion.error
@@ -1724,10 +1736,11 @@ class Combat(commands.Cog):
             raise error
 
     #!potionshop
+    #Status: Working
     @commands.command()
     async def potionshop(self, ctx):
-        itemFolder = items()
-        potionFile = open(itemFolder + "potions.txt", "r", encoding="utf-8")
+        gameFiles = gamefiles()
+        potionFile = open(gameFiles + "potions.txt", "r", encoding="utf-8")
         potionDictionary = json.load(potionFile)
         potionFile.close()
         shopList = potionDictionary[0]['shoplist']
@@ -1760,16 +1773,17 @@ class Combat(commands.Cog):
             raise error
 
     #!rewardgold <gold> <player> <reason> (If no reason, default to: "Not Specified")
+    #!Status: Working
     @commands.command()
     @commands.dm_only()
     async def rewardgold(self, ctx, gold, player, reason="Not Specified"):
         msg = ""
-        charFolder = characters()
-        stuffFolder = roomID()
-        with open(charFolder + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
+        gameFiles = gamefiles()
+        charFiles = characters()
+        with open(gameFiles + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
             playerDatabase = json.loads(file2.read())
             file2.close()
-        with open(roomID, + "token.txt", 'r', encoding="utf-8") as file:
+        with open(gameFiles + "token.txt", 'r', encoding="utf-8") as file:
             stuff = json.loads(file.read())
             file.close()
         try:
@@ -1777,14 +1791,16 @@ class Combat(commands.Cog):
             for item in playerDatabase.items():
                 if item[0].lower() == player.lower():
                     gifted = item[1]
-            giftedFile = open(charFolder + gifted + ".txt", "r", encoding="utf-8")
+            giftedFile = open(charFiles + gifted + ".txt", "r", encoding="utf-8")
             giftedData = json.load(giftedFile)
             giftedFile.close()
             giftedData['gold'] += int(gold)
-            file = open(charFolder + gifted + ".txt", "w", encoding="utf-8")
+            file = open(charFiles + gifted + ".txt", "w", encoding="utf-8")
             json.dump(giftedData, file, ensure_ascii=False, indent=2)
             file.close()
             gifted = int(gifted)
+            await ctx.send("You awarded " + player + " with " + str(gold) + "(Reason: " +
+                           reason + ")")
             user = ctx.bot.get_user(gifted)
             await user.send(player + " has been awarded  " + str(gold) +
                                       " gold. (Reason: " + reason + ")")
@@ -1803,11 +1819,64 @@ class Combat(commands.Cog):
         else:
             raise error
 
+    #!removegold <gold> <player> <reason> (If no reason, default to: "Not Specified")
+    #Status: Working
+    @commands.command()
+    @commands.dm_only()
+    async def removegold(self, ctx, gold, player, reason="Not Specified"):
+        msg = ""
+        gameFiles = gamefiles()
+        charFiles = characters()
+        with open(gameFiles + "playerDatabase.txt", 'r', encoding="utf-8") as file2:
+            playerDatabase = json.loads(file2.read())
+            file2.close()
+        with open(gameFiles + "token.txt", 'r', encoding="utf-8") as file:
+            stuff = json.loads(file.read())
+            file.close()
+        try:
+            gifted = ""
+            for item in playerDatabase.items():
+                if item[0].lower() == player.lower():
+                    gifted = item[1]
+            giftedFile = open(charFiles + gifted + ".txt", "r", encoding="utf-8")
+            giftedData = json.load(giftedFile)
+            giftedFile.close()
+            if giftedData['gold'] < int(gold):
+                giftedData['gold'] = 0
+            else:
+                giftedData['gold'] -= int(gold)
+            file = open(charFiles + gifted + ".txt", "w", encoding="utf-8")
+            json.dump(giftedData, file, ensure_ascii=False, indent=2)
+            file.close()
+            gifted = int(gifted)
+            await ctx.send("You took away " + str(gold) + " gold from " + player + "(Reason: " +
+                           reason + ")")
+            user = ctx.bot.get_user(gifted)
+            await user.send(str(gold) + "gold has been taken away from  " + player +
+                                      " (Reason: " + reason + ")")
+            gameMaster = stuff["gamemaster"]
+            user = ctx.bot.get_user(gameMaster)
+            await user.send(str(gold) + " gold has been taken away from " + player +
+                            " (Reason: " + reason + ")")
+        except FileNotFoundError:
+            await ctx.send(player + " does not have a character.")
+
+
+    @rewardgold.error
+    async def removegold_error(self, ctx, error):
+        if isinstance(error, commands.PrivateMessageOnly):
+            await ctx.send("The command !removegold may only be used in PMs")
+        else:
+            raise error
+
     #!wholevel <level>
+    #Status: Working
     @commands.command()
     @commands.dm_only()
     async def wholevel(self, ctx, level):
-        msg = onPRIUtil.pri_9_wholevel(level)
+        gameFiles = gamefiles()
+        charFiles = characters()
+        msg = onPRIUtil.pri_9_wholevel(level, gameFiles, charFiles)
         for msg_item in msg:
             await ctx.send(msg_item)
 

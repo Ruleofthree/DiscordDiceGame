@@ -4,13 +4,13 @@ import json
 
 from discord.ext import commands
 
-with open('token.txt', 'r+') as file:
+with open('gamefiles/token.txt', 'r+') as file:
     stuff = json.load(file)
     file.close()
 token = stuff["token"]
 
 client = commands.Bot(command_prefix = '!')
-client.remove_command('help')
+#client.remove_command('help')
 
 @client.command()
 async def load(ctx, extension):
