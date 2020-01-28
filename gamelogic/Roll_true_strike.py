@@ -12,7 +12,7 @@ def True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod,
                 pOneCurrentHP, pTwoCurrentHP, pOneTotalHP, pTwoTotalHP, pOneEvade, pTwoEvade, pOneDeflect, pTwoDeflect,
                 pOneQuickDamage, pTwoQuickDamage, critical, count, featToken, bGameTimer, token,
                 totalDamage, pOneDeathsDoor, pTwoDeathsDoor, new_token):
-    msg.append(pOneInfo['name'] + " used the feat [color=yellow]'True Strike.'[/color] And forgoes the need to"
+    msg.append(pOneInfo['name'] + " used the feat 'True Strike.' And forgoes the need to"
                " determine if hit was success.")
 
     # Susanna Added , for ask prompt !evasion or !pass
@@ -34,13 +34,13 @@ def True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod,
         critical = 0
     # if Player One used feat 'titan blow', apply 50% bonus damage.
     if pOneFeatUsed[0] == "titan blow":
-        msg.append(pOneInfo['name'] + " used the feat [color=yellow]'titan blow'[/color]. Applying a "
-                   "[color=red]50%[/color] bonus to damage rolled.")
+        msg.append(pOneInfo['name'] + " used the feat 'titan blow'. Applying a "
+                   "50% bonus to damage rolled.")
         damage = damage * float(pOneFeatUsed[1])
 
     # if Player Two use 'staggering blow' half damage done.
     if pTwoFeatUsed[0] == "staggering blow":
-        msg.append(pTwoInfo['name'] + " used the feat [color=yellow]'staggering blow'[/color], halving " +
+        msg.append(pTwoInfo['name'] + " used the feat 'staggering blow', halving " +
                    pOneInfo['name'] + "'s damage roll")
         damage = damage * float(pTwoFeatUsed[1])
 
@@ -51,50 +51,50 @@ def True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod,
     if 'hurt me' in pOneInfo['feats taken']:
         if 33 < percentage <= 66:
             bonusHurt = 1
-            msg.append(pOneInfo['name'] + " has become enraged because of [color=yellow]'hurt me'[/color], "
-                       "and are getting a [color=red]+" + str(bonusHurt) + " [/color] bonus to their damage.")
+            msg.append(pOneInfo['name'] + " has become enraged because of 'hurt me', "
+                       "and are getting a +" + str(bonusHurt) + "  bonus to their damage.")
         elif percentage <= 33:
             bonusHurt = 2
-            msg.append(pOneInfo['name'] + " has become further enraged because of [color=yellow]'hurt me',[/color], "
-                       " and are getting a [color=red]+" + str(bonusHurt) + " [/color] bonus to their damage.")
+            msg.append(pOneInfo['name'] + " has become further enraged because of 'hurt me',, "
+                       " and are getting a +" + str(bonusHurt) + "  bonus to their damage.")
     elif 'improved hurt me' in pOneInfo['feats taken']:
         if 33 < percentage <= 66:
             bonusHurt = 2
-            msg.append(pOneInfo['name'] + " has become enraged because of [color=yellow]'hurt me'[/color], "
-                       "and are getting a [color=red]+" + str(bonusHurt) + " [/color] bonus to their damage.")
+            msg.append(pOneInfo['name'] + " has become enraged because of 'hurt me', "
+                       "and are getting a +" + str(bonusHurt) + "  bonus to their damage.")
         elif percentage <= 33:
             bonusHurt = 3
-            msg.append(pOneInfo['name'] + " has become enraged because of [color=yellow]'hurt me'[/color], "
-                       " and are getting a [color=red]+" + str(bonusHurt) + " [/color] bonus to their damage.")
+            msg.append(pOneInfo['name'] + " has become enraged because of 'hurt me', "
+                       " and are getting a +" + str(bonusHurt) + "  bonus to their damage.")
     elif 'greater hurt me' in pOneInfo['feats taken']:
         if 33 < percentage <= 66:
             bonusHurt = 2
-            msg.append(pOneInfo['name'] + " has become enraged because of [color=yellow]'hurt me'[/color], "
-                       "and are getting a [color=red]+" + str(bonusHurt) + " [/color] bonus to their damage.")
+            msg.append(pOneInfo['name'] + " has become enraged because of 'hurt me', "
+                       "and are getting a +" + str(bonusHurt) + "  bonus to their damage.")
         elif percentage <= 33:
             bonusHurt = 4
-            msg.append(pOneInfo['name'] + " has become further enraged because of [color=yellow]'hurt me'[/color], "
-                       "and are getting a [color=red]+" + str(bonusHurt) + " [/color] bonus to their damage.")
+            msg.append(pOneInfo['name'] + " has become further enraged because of 'hurt me', "
+                       "and are getting a +" + str(bonusHurt) + "  bonus to their damage.")
     elif 'hurt me more' in pOneInfo['feats taken']:
         if 50 < percentage <= 75:
             bonusHurt = 2
-            msg.append(pOneInfo['name'] + " has become enraged because of [color=yellow]'hurt me'[/color], "
-                       "and are getting a [color=red]+" + str(bonusHurt) + " [/color] bonus to their damage.")
+            msg.append(pOneInfo['name'] + " has become enraged because of 'hurt me', "
+                       "and are getting a +" + str(bonusHurt) + "  bonus to their damage.")
         elif 25 < percentage <= 50:
             bonusHurt = 4
-            msg.append(pOneInfo['name'] + " has become further enraged because of [color=yellow]'hurt me'[/color], "
-                       "and are getting a [color=red]+" + str(bonusHurt) + " [/color] bonus to their damage.")
+            msg.append(pOneInfo['name'] + " has become further enraged because of 'hurt me', "
+                       "and are getting a +" + str(bonusHurt) + "  bonus to their damage.")
         elif percentage <= 25:
             bonusHurt = 6
-            msg.append(pOneInfo['name'] + " has become further enraged because of [color=yellow]'hurt me'[/color], "
-                       " and are getting a [color=red]+" + str(bonusHurt) + " [/color] bonus to their damage.")
+            msg.append(pOneInfo['name'] + " has become further enraged because of 'hurt me', "
+                       " and are getting a +" + str(bonusHurt) + "  bonus to their damage.")
     # ensure that no matter what, raw damage can not fall below 1, then assign total damage to variable, and in turn
     # assign it to variable to be accessed for scoreboard.
     if damage < 1:
         damage = 1
     total = int(damage + pOneModifier + pMod - cMod - pTwoInfo['tdr'] + bonusHurt + pOneInfo['potiondamage'])
     if pTwoInfo['tdr'] != 0:
-        msg.append(pTwoInfo['name'] + " has [color=yellow]thick skin[/color], and has absorbed " +
+        msg.append(pTwoInfo['name'] + " has thick skin, and has absorbed " +
                    str(pTwoInfo['tdr']) + " hp of damage from opponent's roll.")
 
     # if Player One has 'reckless abandon' apply bonus damage
@@ -103,27 +103,27 @@ def True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod,
         damageToPOne = random.randint(1, 2)
         pOneCurrentHP = pOneCurrentHP - damageToPOne
         total = total + damageToPTwo
-        msg.append(pOneInfo['name'] + " did [color=red]" + str(damageToPOne) + "[/color]"
-                   " damage to themself, to deal an additional [color=red]" + str(damageToPTwo) +
-                   "[/color] damage to their opponent.")
+        msg.append(pOneInfo['name'] + " did " + str(damageToPOne) + 
+                   " damage to themself, to deal an additional " + str(damageToPTwo) +
+                   " damage to their opponent.")
 
     elif pOneFeatUsed[0] == "improved reckless abandon":
         damageToPTwo = random.randint(1, 8)
         damageToPOne = random.randint(1, 4)
         pOneCurrentHP = pOneCurrentHP - damageToPOne
         total = total + damageToPTwo
-        msg.append(pOneInfo['name'] + " did [color=red]" + str(damageToPOne) + "[/color]"
-                   " damage to themself, to deal an additional [color=red]" + str(damageToPTwo) +
-                   "[/color] damage to their opponent.")
+        msg.append(pOneInfo['name'] + " did " + str(damageToPOne) + 
+                   " damage to themself, to deal an additional " + str(damageToPTwo) +
+                   " damage to their opponent.")
 
     elif pOneFeatUsed[0] == "greater reckless abandon":
         damageToPTwo = random.randint(1, 6)
         damageToPOne = random.randint(1, 12)
         pOneCurrentHP = pOneCurrentHP - damageToPOne
         total = total + damageToPTwo
-        msg.append(pOneInfo['name'] + " did [color=red]" + str(damageToPOne) + "[/color]"
-                   " damage to themself, to deal an additional [color=red]" + str(damageToPTwo) +
-                   "[/color] damage to their opponent.")
+        msg.append(pOneInfo['name'] + " did " + str(damageToPOne) + 
+                   " damage to themself, to deal an additional " + str(damageToPTwo) +
+                   " damage to their opponent.")
 
     # if Player Two used 'quick strike', 'improved quick strike', or 'greater quick strike', apply the return
     # damage here
@@ -144,8 +144,8 @@ def True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod,
             quickDamage = 1
         pTwoQuickDamage = quickDamage
         pOneCurrentHP = pOneCurrentHP - pTwoQuickDamage
-        msg.append(pTwoInfo['name'] + " used [color=yellow]'quick strike,'[/color] managing to do an additional "
-                   "[color=red]" + str(pTwoQuickDamage) + "[/color] hp of damage.")
+        msg.append(pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
+                    + str(pTwoQuickDamage) + " hp of damage.")
 
     elif pTwoFeatUsed[0] == "improved quick strike":
         # Roll damage for Player one, and multiply it by desired amount.
@@ -157,8 +157,8 @@ def True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod,
             quickDamage = 1
         pTwoQuickDamage = quickDamage
         pOneCurrentHP = pOneCurrentHP - pTwoQuickDamage
-        msg.append(pTwoInfo['name'] + " used [color=yellow]'quick strike,'[/color] managing to do an additional "
-                   "[color=red]" + str(pTwoQuickDamage) + "[/color] hp of damage.")
+        msg.append(pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
+                    + str(pTwoQuickDamage) + " hp of damage.")
 
     elif pTwoFeatUsed[0] == "greater quick strike":
         # roll damage for player One, and multiply it by desired amount
@@ -170,8 +170,8 @@ def True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod,
             quickDamage = 1
         pTwoQuickDamage = quickDamage
         pOneCurrentHP = pOneCurrentHP - pTwoQuickDamage
-        msg.append(pTwoInfo['name'] + " used [color=yellow]'quick strike,'[/color] managing to do an additional "
-                   "[color=red]" + str(pTwoQuickDamage) + "[/color] hp of damage.")
+        msg.append(pTwoInfo['name'] + " used 'quick strike,' managing to do an additional "
+                    + str(pTwoQuickDamage) + " hp of damage.")
 
     elif pTwoFeatUsed[0] == "riposte":
         # roll damage for player One, and multiply it by desired amount
@@ -183,8 +183,8 @@ def True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod,
             quickDamage = 1
         pTwoQuickDamage = quickDamage
         pOneCurrentHP = pOneCurrentHP - pTwoQuickDamage
-        msg.append(pTwoInfo['name'] + " used [color=yellow]'riposte,'[/color] managing to do an additional "
-                   "[color=red]" + str(pTwoQuickDamage) + "[/color] hp of damage.")
+        msg.append(pTwoInfo['name'] + " used 'riposte,' managing to do an additional "
+                   + str(pTwoQuickDamage) + " hp of damage.")
         pTwoRiposte = 1
 
     if total < 1:
@@ -195,36 +195,36 @@ def True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod,
     # # testing data to see that modifiers are carrying over correctly. Delete this when project is finished.
     # msg.append("Roll: " + str(base) + " Modifier: " + str(pOneModifier) + " PA: " + str(pMod) + " CE: " + str(cMod))
     # # display total damage done, and reset passive feat counters (power attack and combat defense)
-    msg.append(pOneInfo['name'] + " did [color=red]" + str(totalDamage) + "[/color]"
-               " points of damage." + "(Base Roll: [color=blue]" + str(base) + ")[/color]")
+    msg.append(pOneInfo['name'] + " did " + str(totalDamage) +
+               " points of damage." + "(Base Roll: " + str(base) + ")")
 
     # check to see if player has evasion.
     if "evasion" in pTwoInfo['feats taken'] and pTwoEvade == 1:
         bEvasion = True
-        msg.append(pTwoInfo['name'] + " has an evasion available for use. Type [color=pink]!evasion[/color] to "
-                   "use, or type [color=pink]!pass[/color]")
+        msg.append(pTwoInfo['name'] + " has an evasion available for use. Type !evasion to "
+                   "use, or type !pass")
     elif "improved evasion" in pTwoInfo['feats taken'] and pTwoEvade == 1:
         bEvasion = True
-        msg.append(pTwoInfo['name'] + " has an evasion available for use. Type [color=pink]!evasion[/color] to "
-                   "use, or type [color=pink]!pass[/color]")
+        msg.append(pTwoInfo['name'] + " has an evasion available for use. Type !evasion to "
+                   "use, or type !pass")
     elif "greater evasion" in pTwoInfo['feats taken'] and pTwoEvade == 1:
         bEvasion = True
-        msg.append(pTwoInfo['name'] + " has an evasion available for use. Type [color=pink]!evasion[/color] to "
-                   "use, or type [color=pink]!pass[/color]")
+        msg.append(pTwoInfo['name'] + " has an evasion available for use. Type !evasion to "
+                   "use, or type !pass")
 
     # check to see if player has deflect.
     if "deflect" in pTwoInfo['feats taken'] and pTwoDeflect == 1:
         bDeflect = True
-        msg.append(pTwoInfo['name'] + " has deflect available for use. Type [color=pink]!deflect[/color] to "
-                   "use, or type [color=pink]!pass[/color]")
+        msg.append(pTwoInfo['name'] + " has deflect available for use. Type !deflect to "
+                   "use, or type !pass")
     elif "improved deflect" in pTwoInfo['feats taken'] and pTwoDeflect == 1:
         bDeflect = True
-        msg.append(pTwoInfo['name'] + " has deflect available for use. Type [color=pink]!deflect[/color] to "
-                   "use, or type [color=pink]!pass[/color]")
+        msg.append(pTwoInfo['name'] + " has deflect available for use. Type !deflect to "
+                   "use, or type !pass")
     elif "greater evasion" in pTwoInfo['feats taken'] and pTwoDeflect == 1:
         bDeflect = True
-        msg.append(pTwoInfo['name'] + " has deflect available for use. Type [color=pink]!deflect[/color] to "
-                   "use, or type [color=pink]!pass[/color]")
+        msg.append(pTwoInfo['name'] + " has deflect available for use. Type !deflect to "
+                   "use, or type !pass")
 
     if bEvasion and bDeflect is False:
         # Determine if Quick Strike was used by Player Two and apply damage
@@ -242,24 +242,24 @@ def True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod,
             pTwoCurrentHP += returnHeal
             pTwoDeathsDoor = 1
             msg.append(
-                pTwoInfo['name'] + " has returned from death's door, regaining [color=red]" + str(returnHeal) +
-                "[/color] hit points.")
+                pTwoInfo['name'] + " has returned from death's door, regaining " + str(returnHeal) +
+                " hit points.")
         elif "improved deaths door" in pTwoInfo['feats taken'] and pTwoCurrentHP <= 0 \
                 and revive <= 75 and pTwoDeathsDoor == 0:
             returnHeal = random.randint(5, 15) + int(pTwoInfo['constitution'] / 2)
             pTwoCurrentHP += returnHeal
             pTwoDeathsDoor = 1
             msg.append(
-                pTwoInfo['name'] + " has returned from death's door, regaining [color=red]" + str(returnHeal) +
-                "[/color] hit points.")
+                pTwoInfo['name'] + " has returned from death's door, regaining " + str(returnHeal) +
+                " hit points.")
         elif "greater deaths door" in pTwoInfo['feats taken'] and pTwoCurrentHP <= 0 \
                 and revive <= 100 and pTwoDeathsDoor == 1:
             returnHeal = random.randint(5, 20) + int(pTwoInfo['constitution'] / 2)
             pTwoCurrentHP += returnHeal
             pTwoDeathsDoor = 0
             msg.append(
-                pTwoInfo['name'] + " has returned from death's door, regaining [color=red]" + str(returnHeal) +
-                "[/color] hit points.")
+                pTwoInfo['name'] + " has returned from death's door, regaining " + str(returnHeal) +
+                " hit points.")
 
         # If it is the end of Player One's turn, and they have regeneration:
         if token == 1 and pOneInfo['regeneration'] != 0 and pOneCurrentHP < pOneTotalHP:
@@ -272,10 +272,10 @@ def True_Strike(msg, pOneInfo, pTwoInfo, pOnepMod, pTwopMod, pOnecMod, pTwocMod,
             pOneCurrentHP += pOneInfo['regeneration']
 
         # Print the scoreboard
-        msg.append(pOneInfo['name'] + ": [color=red]" + str(pOneCurrentHP) + "[/color]/" +
-                   str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": [color=red]" +
-                   str(pTwoCurrentHP) + "[/color]/" + str(pTwoTotalHP) + " \n" +
-                   pTwoInfo['name'] + "'s turn. Type: [color=pink]!usefeat <feat>[/color]"
+        msg.append(pOneInfo['name'] + ": " + str(pOneCurrentHP) + "/" +
+                   str(pOneTotalHP) + "  ||  " + pTwoInfo['name'] + ": " +
+                   str(pTwoCurrentHP) + "/" + str(pTwoTotalHP) + " \n" +
+                   pTwoInfo['name'] + "'s turn. Type: !usefeat <feat>"
                    " if you wish to use a feat.")
         count += 1
         featToken = 0

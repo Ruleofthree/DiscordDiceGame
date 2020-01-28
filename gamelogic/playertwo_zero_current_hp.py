@@ -16,8 +16,8 @@ def playertwo_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne, playerTwo,
     # pOneInfo = json.load(charSheet)
     # charSheet = open(charFolder + playerTwo.lower() + ".txt", "r", encoding="utf-8")
     # pTwoInfo = json.load(charSheet)
-    msg.append(pOneInfo['name'] + " won in [color=red]"
-               + str(int(rounds)) + "[/color] rounds")
+    msg.append(pOneInfo['name'] + " won in "
+               + str(int(rounds)) + " rounds")
     base = 100
     level = abs(pOneLevel - pTwoLevel)
     if level == 0:
@@ -27,7 +27,7 @@ def playertwo_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne, playerTwo,
         if differHP > 10:
             differHP = 10
         xp = int((base * level) + (differHP * rounds))
-        renown = int((((base * level) ** 1.06) + ((rounds * 2) + base)))
+        gold = int((((base * level) ** 1.06) + ((rounds * 2) + base)))
 
     elif 5 > level <= 10:
         msg.append("As the level difference between opponents is between 5 and 10, total reward is reduced by half.")
@@ -35,7 +35,7 @@ def playertwo_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne, playerTwo,
         if differHP > 20:
             differHP = 20
         xp = int((base * level) + (differHP * rounds) / 2)
-        renown = int((((base * level) ** 1.06) + ((rounds * 2) + base)) / 2)
+        gold = int((((base * level) ** 1.06) + ((rounds * 2) + base)) / 2)
 
     elif 10 > level:
         msg.append("As the level difference between opponents is is between 11 and 15, total reward is divided "
@@ -44,17 +44,17 @@ def playertwo_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne, playerTwo,
         if differHP > 20:
             differHP = 20
         xp = int((base * level) + (differHP * rounds) / 4)
-        renown = int((((base * level) ** 1.06) + ((rounds * 2) + base)) / 2)
+        gold = int((((base * level) ** 1.06) + ((rounds * 2) + base)) / 2)
 
-    msg.append(pOneInfo['name'] + " has earned: [color=red]" + str(xp) +
-               "[/color] experience points. and [color=yellow]" +
-               str(renown) + "[/color] renown.\n" +
-               pTwoInfo['name'] + " has earned: [color=red]" + str(int(xp / 2)) + "[/color] and [color=yellow]" +
-               str(int(renown / 2)) + "[/color] renown.")
+    msg.append(pOneInfo['name'] + " has earned: " + str(xp) +
+               " experience points. and ]" +
+               str(gold) + " gold.\n" +
+               pTwoInfo['name'] + " has earned: " + str(int(xp / 2)) + " and ]" +
+               str(int(gold / 2)) + " gold.")
     pOneXP = int(pOneInfo['currentxp'] + xp)
-    pOneRenown = int(pOneInfo['renown'] + renown)
+    pOneRenown = int(pOneInfo['gold'] + gold)
     pTwoXP = int(pTwoInfo['currentxp'] + (xp / 2))
-    pTwoRenown = int(pTwoInfo['renown'] + (renown / 2))
+    pTwoRenown = int(pTwoInfo['gold'] + (gold / 2))
     nextLevel = pOneInfo['nextlevel']
     winner = playerOne
     loser = playerTwo
@@ -64,7 +64,7 @@ def playertwo_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne, playerTwo,
     with open(charFolder + winner + '.txt', 'r+') as file:
         pOneInfo = json.load(file)
         pOneInfo['currentxp'] = pOneXP
-        pOneInfo['renown'] = pOneRenown
+        pOneInfo['gold'] = pOneRenown
         pOneInfo['wins'] += 1
         pOneInfo["potioneffect"] = ""
         pOneInfo["potionhit"] = 0
@@ -82,7 +82,7 @@ def playertwo_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne, playerTwo,
     with open(charFolder + loser + '.txt', 'r+') as file:
         pTwoInfo = json.load(file)
         pTwoInfo['currentxp'] = pTwoXP
-        pTwoInfo['renown'] = pTwoRenown
+        pTwoInfo['gold'] = pTwoRenown
         pTwoInfo['losses'] += 1
         pTwoInfo["potioneffect"] = ""
         pTwoInfo["potionhit"] = 0
@@ -100,8 +100,8 @@ def playertwo_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne, playerTwo,
         newLevel = levelUp + 1
         newLevel = str(newLevel)
         levels = [5, 10, 15, 20]
-        msg.append("[color=red][b]" + pOneInfo['name'].capitalize() + " has reached level "
-                   + newLevel + "![/b][/color]")
+        msg.append("[b]" + pOneInfo['name'].capitalize() + " has reached level "
+                   + newLevel + "![/b]")
         levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
         levelDict = json.load(levelFile)
         levelFile.close()
@@ -125,21 +125,21 @@ def playertwo_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne, playerTwo,
             if charData['total feats'] == levelDict[newLevel][4]:
                 charData['total feats'] = levelDict[newLevel][4]
             else:
-                msg.append(pOneInfo['name'] + " has a new feat slot to fill. Use the [color=pink]!feat[/color] "
+                msg.append(pOneInfo['name'] + " has a new feat slot to fill. Use the !feat "
                            "command to select new feat.")
                 charData['total feats'] = levelDict[newLevel][4]
                 charData['remaining feats'] = 1
             if charData['ap'] == levelDict[newLevel][3]:
                 charData['ap'] = levelDict[newLevel][3]
             else:
-                msg.append(pOneInfo['name'] + " has a new ability point to spend. PM the [color=pink]!add[/color] "
+                msg.append(pOneInfo['name'] + " has a new ability point to spend. PM the !add "
                            "command to Unspoiled Desire, to spend it.")
                 charData['ap'] = levelDict[newLevel][3]
             charData['hit'] = int(levelDict[newLevel][5])
             charData['damage'] = int(levelDict[newLevel][5])
             charData['ac'] = int(levelDict[newLevel][6])
             charData['currentxp'] = pOneXP
-            charData['renown'] = pOneRenown
+            charData['gold'] = pOneRenown
             charData['nextlevel'] = int(levelDict[newLevel][7])
             file.seek(0)
             file.write(json.dumps(charData, ensure_ascii=False, indent=2))
@@ -150,8 +150,8 @@ def playertwo_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne, playerTwo,
         pTwoInfo['level'] = pTwoInfo['level'] + 1
         newLevel = str(pTwoInfo['level'])
         levels = [5, 10, 15, 20]
-        msg.append("[color=red][b]" + pTwoInfo['name'].capitalize() + " has reached level " + newLevel +
-                   "![/b][/color]")
+        msg.append("[b]" + pTwoInfo['name'].capitalize() + " has reached level " + newLevel +
+                   "![/b]")
         levelFile = open(charFolder + "levelchart.txt", "r", encoding="utf-8")
         levelDict = json.load(levelFile)
         levelFile.close()
@@ -181,21 +181,21 @@ def playertwo_currentHP_less_zero(msg, pOneInfo, pTwoInfo, playerOne, playerTwo,
             if charData['total feats'] == levelDict[newLevel][4]:
                 charData['total feats'] = levelDict[newLevel][4]
             else:
-                msg.append(pTwoInfo['name'] + " has a new feat slot to fill. Use the [color=pink]!feat[/color] "
+                msg.append(pTwoInfo['name'] + " has a new feat slot to fill. Use the !feat "
                            "command to select new feat.")
                 charData['total feats'] = levelDict[newLevel][4]
                 charData['remaining feats'] = 1
             if charData['ap'] == levelDict[newLevel][3]:
                 charData['ap'] = levelDict[newLevel][3]
             else:
-                msg.append(pTwoInfo['name'] + " has a new ability point to spend. PM the [color=pink]!add[/color] "
+                msg.append(pTwoInfo['name'] + " has a new ability point to spend. PM the !add "
                            "command to Unspoiled Desire, to spend it.")
                 charData['ap'] = levelDict[newLevel][3]
             charData['hit'] = int(levelDict[newLevel][5])
             charData['damage'] = int(levelDict[newLevel][5])
             charData['ac'] = int(levelDict[newLevel][6])
             charData['currentxp'] = pTwoXP
-            charData['renown'] = pTwoRenown
+            charData['gold'] = pTwoRenown
             charData['nextlevel'] = int(levelDict[newLevel][7])
             file.seek(0)
             file.write(json.dumps(charData, ensure_ascii=False, indent=2))
