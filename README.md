@@ -52,7 +52,7 @@ v1.1.4 (9/5/19)
 - Decreased Deflection Multiplies from 1.5x/2x/2.5x to 1x/1.5x/2x
 - Fixed a bug that interfered with the ability to have both the Evasion Tree, and Deflect Tree as feats.
 - Fixed a bug that allowed Player One (the person that used !challenge) to use deflect an unlimited amount of times.
-- **finally added in a feature that asks if you are sure you want to delete your character, instead of just...doing it. I know, right? This is the seventh version update! And this just now was added in? WTF (wo)man...**
+- **finally added in a feature that asks if you are sure you want to delete your character, instead of just...doing it. I know, right? This is the seventh version update! And this just now was added in? WTF man...**
 - Adjusted hp scaling per level
 - Adjusted xp formula
 
